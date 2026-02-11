@@ -1,3 +1,7 @@
 extends ../layouts/default.pug 
 block main 
-    h1 Danh sách tour
+    h1 #{pageTitle}
+
+    ul 
+        each item in tourList 
+            li #{item.name} (Phuowng tien #{item.vehicle});
