@@ -1,15 +1,14 @@
 require('dotenv').config();
 const express = require('express')
 const path=require('path');
-const mongoose=require('mongoose');
-
-mongoose.connect(process.env.DATABASE)
+const connect=require('./config/database');
 
 const clientRoutes=require('./routes/client/index.route');
 
 const app = express()
 
 const port = 3000
+connect.connect();
 
 app.set('views', path.join(__dirname, "views"));
 
