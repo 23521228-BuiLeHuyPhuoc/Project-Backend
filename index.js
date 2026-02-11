@@ -7,28 +7,15 @@ mongoose.connect(process.env.DATABASE)
 const app = express()
 
 const port = 3000
-
-const Tour = require("./models/tour.model");
-
-
-app.get('/', (req, res) => {
-  res.render('client/pages/home',{
-    pageTitle:"Trang chủ"
-  })
-})
-app.get('/tours', async(req,res)=>{
-  const tourList=await Tour.find({});
-  console.log(tourList);
-  res.render("client/pages/tour-list",{
-    pageTitle:"Danh sách tour",
-    tourList: tourList
-  })
-})
-
+const tourController=require('./controllers/client/tour.controller');
+const homeController=require('./controllers/client/home.controller');
 app.set('views', path.join(__dirname, "views"));
 
 app.set('view engine','pug');
 
+
+app.get('/', homeController.home );
+app.get('/tours', tourController.list );
 
 app.use(express.static(path.join(__dirname,'public')));
 
