@@ -1,10 +1,9 @@
 const express = require('express')
 const path=require('path');
 const mongoose=require('mongoose');
-mongoose.connect('mongodb+srv://admin:123@cluster0.o3r6tac.mongodb.net/tour-management')
-.then(() => console.log("✅ CONNECTED MONGODB"))
-.catch(err => console.log("❌ CONNECT ERROR:", err));
 
+// Nối cơ sở dữ liệu MongoDB (dùng direct connection thay SRV)
+mongoose.connect('mongodb://admin:123@ac-r3mct8m-shard-00-00.o3r6tac.mongodb.net:27017,ac-r3mct8m-shard-00-01.o3r6tac.mongodb.net:27017,ac-r3mct8m-shard-00-02.o3r6tac.mongodb.net:27017/tour-management?ssl=true&replicaSet=atlas-7hog99-shard-0&authSource=admin&retryWrites=true&w=majority');
 const app = express()
 
 const port = 3000
@@ -39,5 +38,3 @@ app.use(express.static(path.join(__dirname,'public')));
 app.listen(port, () => {
   console.log(`Website đang chạy trên cổng ${port}`)
 })
-
-// mongodb+srv://admin:123@cluster0.o3r6tac.mongodb.net/?appName=tour-management
