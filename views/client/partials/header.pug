@@ -1,1 +1,71 @@
-div Header
+// Top Header
+.top-header
+  .container
+    .inner-wrap
+      .inner-item
+        i.fa-solid.fa-phone
+        | 0123.456.789
+      .inner-item
+        i.fa-solid.fa-envelope
+        | contact@28travel.com
+      .inner-item
+        i.fa-solid.fa-building
+        | Số 123, đường ABC, thành phố XYZ
+// End Top Header
+// Header
+header.header
+  .container
+    .inner-wrap
+      // Menu Mobile
+      button.inner-menu-mobile
+        i.fa-solid.fa-bars
+      // Logo
+      .inner-logo
+        a(href="index.html")
+          img(
+            alt="28.TRAVEL" 
+            src="/assets/images/logo.png"
+            )
+      // Menu
+      nav.inner-menu
+        ul
+          li
+            a.active(href="index.html") Trang chủ
+          li
+            a(href="#") Tour trong nước
+            i.fa-solid.fa-caret-down
+            ul
+              li
+                a(href="#") Tour Miền Bắc
+              li
+                a(href="#") Tour Miền Trung
+              li
+                a(href="#") Tour Miền Nam
+              li
+                a(href="#") Tour Xuyên Việt
+          li
+            a(href="#") Tour nước ngoài
+            i.fa-solid.fa-caret-down
+            ul
+              li
+                a(href="#") Tour Châu Á
+              li
+                a(href="#") Tour Châu Âu
+              li
+                a(href="#") Tour Châu Mỹ
+              li
+                a(href="#") Tour Châu Úc
+          li
+            a(href="#") Tin tức
+          li
+            a(href="#") Liên hệ
+        .inner-overlay
+      // Cart
+      .inner-cart
+        a(href="#")
+          img(
+            alt="Cart" 
+            src="/assets/images/icon-cart.svg"
+            )
+          span 1
+// End Header
