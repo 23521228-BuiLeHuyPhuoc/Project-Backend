@@ -1,3 +1,99 @@
 extends ../layouts/default.pug
 block main 
-    h1 Trang chủ
+    .section-1
+        .container
+            .inner-wrap
+                h1.inner-title(
+                    data-aos-duration="800" 
+                    data-aos="fade-up"
+                    )
+                    | Du lịch Châu Á - Khám phá Mỹ, Úc, Âu
+                    br
+                    | Đi nơi đâu bạn muốn
+                p.inner-desc(
+                    data-aos-delay="150" 
+                    data-aos-duration="800" 
+                    data-aos="fade-up"
+                    )
+                    | Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+                form.inner-form(
+                    data-aos-delay="300" 
+                    data-aos-duration="800" 
+                    data-aos="fade-up" 
+                    action="#"
+                    )
+                    .inner-box.inner-address
+                        .inner-input-group
+                            img.inner-icon(src="/assets/images/icon-address.svg")
+                            input.inner-input(
+                                placeholder="Bạn muốn đi đâu?" 
+                                type="text"
+                                )
+                            i.fa-solid.fa-angle-down.inner-down
+                        .inner-suggest
+                            .inner-suggest-title
+                                i.fa-solid.fa-location-dot
+                                | Địa Điểm Hot
+                            .inner-suggest-list
+                                .inner-item
+                                    .inner-item-image
+                                        img(
+                                            alt="" 
+                                            src="/assets/images/product-1.jpg"
+                                            )
+                                    .inner-item-content
+                                        .inner-item-title Nhật Bản
+                                        .inner-item-desc 50 tours
+                                .inner-item
+                                    .inner-item-image
+                                        img(
+                                            alt="" 
+                                            src="/assets/images/product-2.jpg"
+                                            )
+                                    .inner-item-content
+                                        .inner-item-title Phú Quốc
+                                        .inner-item-desc 50 tours
+                                .inner-item
+                                    .inner-item-image
+                                        img(
+                                            alt="" 
+                                            src="/assets/images/product-3.jpg"
+                                            )
+                                    .inner-item-content
+                                        .inner-item-title Singapore
+                                        .inner-item-desc 50 tours
+                    .inner-box.inner-user
+                        .inner-input-group
+                            img.inner-icon(src="/assets/images/icon-user.svg")
+                            input.inner-input(
+                                placeholder="Số lượng" 
+                                type="text"
+                                )
+                            i.fa-solid.fa-angle-down.inner-down
+                        .inner-quantity
+                            .inner-item
+                                .inner-label Người lớn
+                                .inner-count
+                                    span.inner-down -
+                                    span.inner-number 1
+                                    span.inner-up +
+                            .inner-item
+                                .inner-label Trẻ em
+                                .inner-count
+                                    span.inner-down -
+                                    span.inner-number 0
+                                    span.inner-up +
+                            .inner-item
+                                .inner-label Em bé
+                                .inner-count
+                                    span.inner-down -
+                                    span.inner-number 0
+                                    span.inner-up +
+                    .inner-box.inner-calendar
+                        .inner-input-group
+                            img.inner-icon(src="/assets/images/icon-calendar.svg")
+                            input.inner-input(type="date")
+                    button.inner-button(type="submit")
+                        i.fa-solid.fa-magnifying-glass
+                        | Tìm Kiếm
+    // End Section 1
