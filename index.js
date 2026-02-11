@@ -16,6 +16,7 @@ app.get('/', (req, res) => {
   })
 })
 
+app.use(express.static(path.join(__dirname,'public')));
 
 app.get('/tours', (req, res) => {
   res.render('client/pages/tour-list',{
