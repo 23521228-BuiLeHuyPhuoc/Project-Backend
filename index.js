@@ -1,9 +1,9 @@
+require('dotenv').config();
 const express = require('express')
 const path=require('path');
 const mongoose=require('mongoose');
 
-// Nối cơ sở dữ liệu MongoDB (dùng direct connection thay SRV)
-mongoose.connect('mongodb://admin:123@ac-r3mct8m-shard-00-00.o3r6tac.mongodb.net:27017,ac-r3mct8m-shard-00-01.o3r6tac.mongodb.net:27017,ac-r3mct8m-shard-00-02.o3r6tac.mongodb.net:27017/tour-management?ssl=true&replicaSet=atlas-7hog99-shard-0&authSource=admin&retryWrites=true&w=majority');
+mongoose.connect(process.env.DATABASE)
 const app = express()
 
 const port = 3000
