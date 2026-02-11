@@ -8,10 +8,8 @@ const app = express()
 
 const port = 3000
 
-const Tour=mongoose.model('Tour',{
-  name: String,
-  vehicle : String
-});
+const Tour = require("./models/tour.model");
+
 
 app.get('/', (req, res) => {
   res.render('client/pages/home',{
