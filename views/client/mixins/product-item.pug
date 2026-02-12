@@ -1,0 +1,43 @@
+mixin product-item(item)
+    .product-item
+        .inner-image
+            a(href=item.slug)
+                img(
+                    alt=item.name
+                    src=item.avatar
+                    )
+        .inner-discount
+            i.fa-solid.fa-bolt
+            | Giảm -#{item.discount}%
+        .inner-content
+            h3.inner-title
+                a(href=item.slug) #{item.name}
+            .inner-prices
+                if(item.discount>0)
+                    .inner-price-old
+                        | #{item.priceOld.toLocaleString("vi-VN")}
+                        span.inner-unit đ
+                .inner-price-new
+                    | #{item.priceNew.toLocaleString("vi-VN")}
+                    span.inner-unit đ
+            .inner-desc
+                .inner-desc-item
+                    | Mã Tour:
+                    b #{item.code}
+                .inner-desc-item
+                    | Ngày Khởi Hành:
+                    b #{item.departureDate}
+                .inner-desc-item
+                    | Thời Gian:
+                    b #{item.time}
+            .inner-meta
+                .inner-rating
+                    .inner-stars
+                        - for(let i=1;i<=item.ratingStars;i++)
+                            i.fa-solid.fa-star
+                        - for(let j=item.ratingStars+1;j<=5;j++)
+                            i.fa-regular.fa-star
+                    .inner-number (#{item.ratingTotal})
+                .inner-stock
+                    .inner-label Số chỗ còn:
+                    .inner-number #{item.stock}
