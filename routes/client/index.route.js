@@ -4,7 +4,8 @@ const tourRoutes=require('./tour.route');
 
 const homeRoutes=require('./home.route');
 
-router.use('/', homeRoutes );
+
 router.use('/tours', tourRoutes );
+router.use('/', homeRoutes );
 
 module.exports=router;
