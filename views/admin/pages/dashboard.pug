@@ -1,0 +1,94 @@
+extends ../layouts/default.pug
+
+block title
+  title Tổng quan
+
+block main
+  h1.box-title Tổng quan
+
+  //- Section 1
+  .section-1
+    .inner-item
+      .inner-icon
+        img(src="assets/images/section-1-icon-1.svg")
+      .inner-content
+        .inner-title Người dùng
+        .inner-number 1.200
+    .inner-item
+      .inner-icon
+        img(src="assets/images/section-1-icon-2.svg")
+      .inner-content
+        .inner-title Đơn hàng
+        .inner-number 3.600
+    .inner-item
+      .inner-icon
+        img(src="assets/images/section-1-icon-3.svg")
+      .inner-content
+        .inner-title Doanh thu
+        .inner-number 300.000.000đ
+  //- End Section 1
+
+  //- Section 2
+  .section-2
+    .inner-head
+      h2.inner-title Biểu đồ doanh thu
+      .inner-filter
+        input(
+          type="month"
+          name=""
+        )
+    .inner-chart
+      canvas(id="revenue-chart")
+  //- End Section 2
+
+  //- Section 3
+  .section-3
+    h2.inner-title Đơn hàng mới
+    .table-1
+      table
+        thead
+          tr
+            th Mã
+            th Thông tin khách
+            th Danh sách tour
+            th Thanh toán
+            th Trạng thái
+            th.inner-text-right Ngày đặt
+        tbody
+          tr
+            td
+              .inner-code OD000001
+            td
+              .inner-text Họ tên: Lê Văn A
+              .inner-text SĐT: 0123456789
+              .inner-text Ghi chú: Test...
+            td
+              .inner-item
+                .inner-image
+                  img(src="assets/images/tour-1.jpg", alt="Tour Hạ Long")
+                .inner-content
+                  .inner-name Tour Hạ Long
+                  .inner-quantity Người lớn: 3 x 1.500.000đ
+                  .inner-quantity Trẻ em: 2 x 1.300.000đ
+                  .inner-quantity Em bé: 2 x 1.000.000đ
+              .inner-item
+                .inner-image
+                  img(src="assets/images/tour-1.jpg", alt="Tour Hạ Long")
+                .inner-content
+                  .inner-name Tour Hạ Long
+                  .inner-quantity Người lớn: 3 x 1.500.000đ
+                  .inner-quantity Trẻ em: 2 x 1.300.000đ
+                  .inner-quantity Em bé: 2 x 1.000.000đ
+            td
+              .inner-text Tổng tiền: 10.000.000đ
+              .inner-text Giảm: 400.000đ
+              .inner-text Mã giảm: TOURMUAHE2024
+              .inner-text Thanh toán: 9.600.000đ
+              .inner-text PTTT: Ví Momo
+              .inner-text TTTT: Đã thanh toán
+            td
+              .badge.badge-orange Khởi tạo
+            td.inner-text-right
+              .inner-text 16:20
+              .inner-text 01/01/2024
+  //- End Section 3
