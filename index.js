@@ -6,7 +6,7 @@ const connect=require('./config/database');
 const clientRoutes=require('./routes/client/index.route');
 const adminRoutes=require('./routes/admin/index.route');
 const app = express()
-
+const variableconfig=require('./config/variable');
 const port = 3000
 connect.connect();
 
@@ -16,8 +16,10 @@ app.set('view engine','pug');
 
 app.use(express.static(path.join(__dirname,'public')));
 
+app.locals.pathAdmin=variableconfig.pathAdmin;
+
 app.use('/',clientRoutes);
-app.use('/admin', adminRoutes);
+app.use(`/${variableconfig.pathAdmin}`, adminRoutes);
 
 app.listen(port, () => {
   console.log(`Website đang chạy trên cổng ${port}`)
