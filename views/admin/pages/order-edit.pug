@@ -1,7 +1,5 @@
 extends ../layouts/default.pug
 
-block title
-  title Đơn hàng: OD000001
 
 block main
   h1.box-title Đơn hàng: OD000001
@@ -42,7 +40,7 @@ block main
         .inner-order-list
           .inner-order-item
             .inner-order-image
-              img(src="assets/images/tour-1.jpg", alt="Tour Hạ Long")
+              img(src="/admin/assets/images/tour-1.jpg", alt="Tour Hạ Long")
             .inner-order-content
               .inner-order-name Tour Hạ Long
               .inner-order-text Người lớn: 3 x 1.500.000đ
@@ -52,7 +50,7 @@ block main
               .inner-order-text Khởi hành tại: Hà Nội
           .inner-order-item
             .inner-order-image
-              img(src="assets/images/tour-1.jpg", alt="Tour Hạ Long")
+              img(src="/admin/assets/images/tour-1.jpg", alt="Tour Hạ Long")
             .inner-order-content
               .inner-order-name Tour Hạ Long
               .inner-order-text Người lớn: 3 x 1.500.000đ
@@ -70,4 +68,4 @@ block main
       .inner-button.inner-two-col
         button Cập nhật
     .inner-back
-      a(href="#") Quay lại danh sách
+      a(href=`/${pathAdmin}/order/list`) Quay lại danh sách

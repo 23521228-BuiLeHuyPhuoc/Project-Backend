@@ -1,7 +1,5 @@
 extends ../layouts/default.pug
 
-block title
-  title Quản lý đơn hàng
 
 block main
   h1.box-title Quản lý đơn hàng
@@ -68,7 +66,7 @@ block main
             td
               .inner-item
                 .inner-image
-                  img(src="assets/images/tour-1.jpg", alt="Tour Hạ Long")
+                  img(src="/admin/assets/images/tour-1.jpg", alt="Tour Hạ Long")
                 .inner-content
                   .inner-name Tour Hạ Long
                   .inner-quantity Người lớn: 3 x 1.500.000đ
@@ -76,7 +74,7 @@ block main
                   .inner-quantity Em bé: 2 x 1.000.000đ
               .inner-item
                 .inner-image
-                  img(src="assets/images/tour-1.jpg", alt="Tour Hạ Long")
+                  img(src="/admin/assets/images/tour-1.jpg", alt="Tour Hạ Long")
                 .inner-content
                   .inner-name Tour Hạ Long
                   .inner-quantity Người lớn: 3 x 1.500.000đ
@@ -96,7 +94,8 @@ block main
               div 01/01/2024
             td
               .inner-buttons
-                button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
+                a(href=`/${pathAdmin}/order/edit`) 
+                  button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
                 button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
   //- End Section 6
 
