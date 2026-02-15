@@ -1,7 +1,5 @@
 extends ../layouts/default.pug
 
-block title
-  title Nhóm quyền
 
 block main
   h1.box-title Nhóm quyền
@@ -20,7 +18,7 @@ block main
         <i class="fa-solid fa-magnifying-glass"></i>
         input(type="text" placeholder="Tìm kiếm")
       .inner-button-create
-        button + Tạo mới
+        a(href=`/${pathAdmin}/setting/role/create`) + Tạo mới
   //- End Section 5
 
   //- Section 6
