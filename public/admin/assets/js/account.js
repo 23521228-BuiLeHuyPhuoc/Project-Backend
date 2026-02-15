@@ -44,7 +44,7 @@ if(loginForm) {
       const email = event.target.email.value;
       const password = event.target.password.value;
       const rememberPassword = event.target.rememberPassword.checked;
-
+      
       console.log(email);
       console.log(password);
       console.log(rememberPassword);
@@ -121,12 +121,28 @@ if(registerForm) {
       const fullName = event.target.fullName.value;
       const email = event.target.email.value;
       const password = event.target.password.value;
-
-      console.log(fullName);
-      console.log(email);
-      console.log(password);
+      const dataFinal={
+        fullName : fullName,
+        email : email,
+        password : password
+      }
+      fetch(`/${pathAdmin}/account/register`,{
+        method:'POST',
+        headers: {
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify(dataFinal)
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        alert(data.message);
+      
+      if(data.code=="success"){
+        window.location.href="/admin/account/register-initial";
+      }
+      })
     })
-  ;
+  
 }
 // End Register Form
 

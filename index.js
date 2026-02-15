@@ -17,6 +17,9 @@ app.set('view engine','pug');
 app.use(express.static(path.join(__dirname,'public')));
 
 app.locals.pathAdmin=variableconfig.pathAdmin;
+//Cho phép gửi data lên dạng json
+app.use(express.json());
+
 
 app.use('/',clientRoutes);
 app.use(`/${variableconfig.pathAdmin}`, adminRoutes);
