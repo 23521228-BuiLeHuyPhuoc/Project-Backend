@@ -8,6 +8,8 @@ const orderRoutes=require('./order.route');
 const userRoutes=require('./user.route');
 const contactRoutes=require('./contact.route');
 const settingRoutes=require('./setting.route');
+const profileRoutes=require('./profile.route');
+router.use('/profile', profileRoutes);
 router.use('/setting',settingRoutes);
 router.use('/contact',contactRoutes);
 router.use('/user',userRoutes);
