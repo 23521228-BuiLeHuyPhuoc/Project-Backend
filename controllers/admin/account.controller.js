@@ -13,3 +13,13 @@ module.exports.forgotPassword=(req,res)=>{
         pageTitle:"Quên mật khẩu"
     })
 }
+module.exports.otpPassword=(req,res)=>{
+    res.render("admin/pages/otp-password.pug",{
+        pageTitle:"Xác thực OTP"
+    })
+}
+module.exports.resetPassword=(req,res)=>{
+    res.render("admin/pages/reset-password.pug",{
+        pageTitle:"Đổi mật khẩu"
+    })
+}
