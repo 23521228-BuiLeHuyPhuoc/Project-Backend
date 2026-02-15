@@ -18,4 +18,9 @@ router.use('/tour',tourRoutes);
 router.use('/account', accountRoutes);
 router.use('/dashboard',dashboardRoutes);
 router.use('/category',categoryRoutes);
+router.use((req,res)=>{
+    res.render("admin/pages/error-404",{
+        pageTitle:"Không tìm thấy trang"
+    })
+})
 module.exports=router;
