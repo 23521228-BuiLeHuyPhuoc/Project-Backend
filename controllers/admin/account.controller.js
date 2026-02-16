@@ -27,9 +27,6 @@ module.exports.registerPost=async(req,res)=>{
 
     const hashPassword=await bcrypt.hash(password,salt);
 
-
-
-
     const newAccount=new AccountAdmin({
         fullName:fullName,
         email:email,
