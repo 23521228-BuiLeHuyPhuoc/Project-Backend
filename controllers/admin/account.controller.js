@@ -1,4 +1,5 @@
 const AccountAdmin=require('../../models/account-admin.model');
+const bcrypt=require('bcrypt');
 module.exports.login= async(req,res)=>{
     res.render("admin/pages/login.pug",{
         pageTitle:"Đăng nhập"
@@ -21,10 +22,18 @@ module.exports.registerPost=async(req,res)=>{
         });
         return;
     }
+    
+    const salt=await bcrypt.genSalt(10);
+
+    const hashPassword=await bcrypt.hash(password,salt);
+
+
+
+
     const newAccount=new AccountAdmin({
         fullName:fullName,
         email:email,
-        password:password,
+        password:hashPassword,
         status:"initial"
     });
     await newAccount.save();
