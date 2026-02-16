@@ -59,64 +59,64 @@ if(registerForm) {
   const validation = new JustValidate('#register-form');
 
   validation
-    .addField('#fullName', [
-      {
-        rule: 'required',
-        errorMessage: 'Vui lòng nhập họ tên!'
-      },
-      {
-        rule: 'minLength',
-        value: 5,
-        errorMessage: 'Họ tên phải có ít nhất 5 ký tự!',
-      },
-      {
-        rule: 'maxLength',
-        value: 50,
-        errorMessage: 'Họ tên không được vượt quá 50 ký tự!',
-      },
-    ])
-    .addField('#email', [
-      {
-        rule: 'required',
-        errorMessage: 'Vui lòng nhập email của bạn!',
-      },
-      {
-        rule: 'email',
-        errorMessage: 'Email không đúng định dạng!',
-      },
-    ])
-    .addField('#password', [
-      {
-        rule: 'required',
-        errorMessage: 'Vui lòng nhập mật khẩu!',
-      },
-      {
-        validator: (value) => value.length >= 8,
-        errorMessage: 'Mật khẩu phải chứa ít nhất 8 ký tự!',
-      },
-      {
-        validator: (value) => /[A-Z]/.test(value),
-        errorMessage: 'Mật khẩu phải chứa ít nhất một chữ cái in hoa!',
-      },
-      {
-        validator: (value) => /[a-z]/.test(value),
-        errorMessage: 'Mật khẩu phải chứa ít nhất một chữ cái thường!',
-      },
-      {
-        validator: (value) => /\d/.test(value),
-        errorMessage: 'Mật khẩu phải chứa ít nhất một chữ số!',
-      },
-      {
-        validator: (value) => /[@$!%*?&]/.test(value),
-        errorMessage: 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt!',
-      },
-    ])
-    .addField('#agree', [
-      {
-        rule: 'required',
-        errorMessage: 'Bạn phải đồng ý với các điều khoản và điều kiện!',
-      },
-    ])
+//     .addField('#fullName', [
+//       {
+//         rule: 'required',
+//         errorMessage: 'Vui lòng nhập họ tên!'
+//       },
+//       {
+//         rule: 'minLength',
+//         value: 5,
+//         errorMessage: 'Họ tên phải có ít nhất 5 ký tự!',
+//       },
+//       {
+//         rule: 'maxLength',
+//         value: 50,
+//         errorMessage: 'Họ tên không được vượt quá 50 ký tự!',
+//       },
+//     ])
+//     .addField('#email', [
+//       {
+//         rule: 'required',
+//         errorMessage: 'Vui lòng nhập email của bạn!',
+//       },
+//       {
+//         rule: 'email',
+//         errorMessage: 'Email không đúng định dạng!',
+//       },
+//     ])
+//     .addField('#password', [
+//       {
+//         rule: 'required',
+//         errorMessage: 'Vui lòng nhập mật khẩu!',
+//       },
+//       {
+//         validator: (value) => value.length >= 8,
+//         errorMessage: 'Mật khẩu phải chứa ít nhất 8 ký tự!',
+//       },
+//       {
+//         validator: (value) => /[A-Z]/.test(value),
+//         errorMessage: 'Mật khẩu phải chứa ít nhất một chữ cái in hoa!',
+//       },
+//       {
+//         validator: (value) => /[a-z]/.test(value),
+//         errorMessage: 'Mật khẩu phải chứa ít nhất một chữ cái thường!',
+//       },
+//       {
+//         validator: (value) => /\d/.test(value),
+//         errorMessage: 'Mật khẩu phải chứa ít nhất một chữ số!',
+//       },
+//       {
+//         validator: (value) => /[@$!%*?&]/.test(value),
+//         errorMessage: 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt!',
+//       },
+//     ])
+//     .addField('#agree', [
+//       {
+//         rule: 'required',
+//         errorMessage: 'Bạn phải đồng ý với các điều khoản và điều kiện!',
+//       },
+//     ])
     .onSuccess((event) => {
       const fullName = event.target.fullName.value;
       const email = event.target.email.value;
@@ -143,7 +143,7 @@ if(registerForm) {
       })
     })
   
-}
+ }
 // End Register Form
 
 // Forgot Password Form
