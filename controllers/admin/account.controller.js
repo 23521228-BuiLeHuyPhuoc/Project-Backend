@@ -1,5 +1,6 @@
 const AccountAdmin=require('../../models/account-admin.model');
 const bcrypt=require('bcrypt');
+const jwt=require('jsonwebtoken');
 module.exports.login= async(req,res)=>{
     res.render("admin/pages/login.pug",{
         pageTitle:"Đăng nhập"
@@ -69,8 +70,19 @@ module.exports.loginPost=async(req,res)=>{
         });
         return;
     }
+    const token=jwt.sign({
+        id:existAccount.id,
+        email:existAccount.email
+    },process.env.JWT_SECRET,{expiresIn:"5m"});
+    //token có thời hạn 5 phút
+    //LƯU TOKEN VÀO COOKIE hiệu lực 5 phút
+    res.cookie("token",token,{
+        maxAge:5*60*1000,
+        httpOnly:true,
+        sameSite:"strict"
+    })
     res.json({
-        code:"success",
+        code:"success", 
         message : "Đăng nhập tài khoản thành công"
     });
 }
