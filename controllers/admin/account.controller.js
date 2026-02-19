@@ -1,5 +1,6 @@
 const AccountAdmin=require('../../models/account-admin.model');
 const bcrypt=require('bcrypt');
+require('dotenv').config();
 const jwt=require('jsonwebtoken');
 module.exports.login= async(req,res)=>{
     res.render("admin/pages/login.pug",{
@@ -86,7 +87,16 @@ module.exports.loginPost=async(req,res)=>{
         message : "Đăng nhập tài khoản thành công"
     });
 }
+module.exports.logout=(req,res)=>{
+    res.clearCookie("token");
+    res.json({
+        code:"success",
+        message:"Dang xuat thanh cong"
+    })
 
+
+
+}
 module.exports.forgotPassword=async(req,res)=>{
     res.render("admin/pages/forgot-password.pug",{
         pageTitle:"Quên mật khẩu"

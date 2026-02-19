@@ -8,8 +8,9 @@ const adminRoutes=require('./routes/admin/index.route');
 const app = express()
 const variableconfig=require('./config/variable');
 const port = 3000
+const cookieParser=require('cookie-parser');
 connect.connect();
-
+app.use(cookieParser());
 app.set('views', path.join(__dirname, "views"));
 
 app.set('view engine','pug');
@@ -17,6 +18,8 @@ app.set('view engine','pug');
 app.use(express.static(path.join(__dirname,'public')));
 
 app.locals.pathAdmin=variableconfig.pathAdmin;
+
+global.pathAdmin=variableconfig.pathAdmin;
 //Cho phép gửi data lên dạng json
 app.use(express.json());
 

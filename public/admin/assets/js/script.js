@@ -621,3 +621,26 @@ if(sider) {
   })
 }
 // End Sider
+//Logout
+const buttonLogout=document.querySelector(".sider .inner-logout");
+if(buttonLogout){
+  buttonLogout.addEventListener("click",()=>{
+    fetch(`/${pathAdmin}/account/logout`,{
+      method:"POST",
+
+    })
+    .then(res=>res.json())
+    .then(data=>{
+      if(data.code=="success")
+      {
+        window.location.href=`/${pathAdmin}/account/login`
+      }
+    })
+
+  })
+}
+
+
+
+
+//End Logout
