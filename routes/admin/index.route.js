@@ -9,6 +9,10 @@ const userRoutes=require('./user.route');
 const contactRoutes=require('./contact.route');
 const settingRoutes=require('./setting.route');
 const profileRoutes=require('./profile.route');
+router.use((req,res,next)=>{
+    res.setHeader("Cache-Control","no-store");
+    next();
+})
 router.use('/profile',authMiddleware.verifyToken, profileRoutes);
 router.use('/setting',authMiddleware.verifyToken,settingRoutes);
 router.use('/contact',authMiddleware.verifyToken,contactRoutes);

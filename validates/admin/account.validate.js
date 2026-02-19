@@ -40,7 +40,7 @@ module.exports.registerPost=async(req,res,next)=>{
         "password.digit":"Mật khẩu phải chứa ít nhất một chữ số!",
         "password.special":"Mật khẩu phải chứa ít nhất một ký tự đặc biệt!"        
         }),
-
+        rememberPassword: joi.boolean(),
     })
     const {error}=schema.validate(req.body,{abortEarly:false});
     console.log(error);
@@ -92,7 +92,7 @@ module.exports.loginPost=async(req,res,next)=>{
         "password.digit":"Mật khẩu phải chứa ít nhất một chữ số!",
         "password.special":"Mật khẩu phải chứa ít nhất một ký tự đặc biệt!"        
         }),
-
+        rememberPassword: joi.boolean(),
     })
     const {error}=schema.validate(req.body,{abortEarly:false});
     console.log(error);

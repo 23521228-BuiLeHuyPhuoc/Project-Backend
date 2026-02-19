@@ -42,9 +42,10 @@ module.exports.registerPost=async(req,res)=>{
     });
 }
 module.exports.loginPost=async(req,res)=>{
-    const {email,password}=req.body;
+    const {email,password,rememberPassword}=req.body;
     console.log(email);
     console.log(password);
+    console.log(rememberPassword);
     const existAccount=await AccountAdmin.findOne({
         email:email
         
@@ -74,11 +75,11 @@ module.exports.loginPost=async(req,res)=>{
     const token=jwt.sign({
         id:existAccount.id,
         email:existAccount.email
-    },process.env.JWT_SECRET,{expiresIn:"5m"});
+    },process.env.JWT_SECRET,{expiresIn: rememberPassword ?'30d':"5m"});
     //token có thời hạn 5 phút
     //LƯU TOKEN VÀO COOKIE hiệu lực 5 phút
     res.cookie("token",token,{
-        maxAge:5*60*1000,
+        maxAge: rememberPassword? 30*24*60*60*1000: 5*60*1000,
         httpOnly:true,
         sameSite:"strict"
     })
