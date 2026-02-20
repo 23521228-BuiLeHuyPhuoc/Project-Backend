@@ -2,6 +2,9 @@ const AccountAdmin=require('../../models/account-admin.model');
 const bcrypt=require('bcrypt');
 require('dotenv').config();
 const jwt=require('jsonwebtoken');
+const sendMail=require('../../helpers/mail.helper');
+const generateRandomNumber = require('../../helpers/generate.helper');
+const ForgotPassword = require('../../models/forgot-password.model');
 module.exports.login= async(req,res)=>{
     res.render("admin/pages/login.pug",{
         pageTitle:"Đăng nhập"
@@ -101,6 +104,51 @@ module.exports.logout=(req,res)=>{
 module.exports.forgotPassword=async(req,res)=>{
     res.render("admin/pages/forgot-password.pug",{
         pageTitle:"Quên mật khẩu"
+    })
+}
+module.exports.forgotPasswordPost=async(req,res)=>{
+    const {email}=req.body;
+    
+    //Kiểm tra email tồn tại không
+    const existAccount =await AccountAdmin.findOne({
+        email:email 
+        
+    });
+    if(!existAccount){
+        res.json({
+            code:"error",
+            message:"Email không tồn tại trong hệ thống"
+        })
+        return;
+    }
+    //Tạo mã OTP
+    const otp=generateRandomNumber.generateRandomNumber(6);
+    console.log(otp);
+    //Kiểm tra email đã tồn tại trong ForgotPassword chưa:
+    const existEmailInForgotPassword=await ForgotPassword.findOne({
+        email:email
+    })
+    if(existEmailInForgotPassword){
+        res.json({
+            code:"error",
+            message:"Vui lòng gửi lại yêu cầu sau 5 phút"
+        })
+        return;
+    }
+    //Lưu vào database email,otp, sau 5 phút xoá bản ghi
+    const newRecord=new ForgotPassword({
+        email:email,
+        otp:otp,
+        expireAt:new Date(Date.now()+5*60*1000)
+    })
+    await newRecord.save();
+    //Gửi OTP qua email cho người dùng:
+    const subject="Mã OTP đặt lại mật khẩu";
+    const content=`<p>Mã OTP của bạn là:<b style="color:red;">${otp}</b>. Mã OTP có hiệu lực trong 5 phút.</p>`;
+    sendMail.sendMail(email,subject,content);
+    res.json({
+        code:"success",
+        message:"Đã gửi mã OTP thành công"
     })
 }
 module.exports.otpPassword=async(req,res)=>{

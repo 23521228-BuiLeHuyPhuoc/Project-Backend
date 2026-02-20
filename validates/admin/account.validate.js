@@ -110,3 +110,9 @@ module.exports.loginPost=async(req,res,next)=>{
 
     next();
 }
+module.exports.forgotPasswordPost=async(req,res,next)=>{
+    
+    
+    
+    next();
+}

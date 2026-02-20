@@ -9,6 +9,7 @@ router.get('/register', accountController.register );
 router.post('/register',accountValidate.registerPost ,accountController.registerPost );
 router.get('/register-initial', accountController.registerInitial );
 router.get('/forgot-password', accountController.forgotPassword );
+router.post('/forgot-password', accountController.forgotPasswordPost);
 router.get('/otp-password', accountController.otpPassword );
 router.get('/reset-password', accountController.resetPassword );
 router.post('/logout',accountController.logout);
