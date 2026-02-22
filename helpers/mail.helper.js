@@ -3,7 +3,7 @@ module.exports.sendMail=async(email,subject,content)=>{
     const transporter=nodemailer.createTransport({
         host:'smtp.gmail.com',
         port:587,
-        secure:false,
+        secure:process.env.EMAIL_SECURE =='true'?true :false,
         auth:{
             user:process.env.EMAIL_USERNAME,
             pass:process.env.EMAIL_PASSWORD 

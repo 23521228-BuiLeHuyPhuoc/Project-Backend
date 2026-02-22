@@ -156,13 +156,65 @@ module.exports.otpPassword=async(req,res)=>{
         pageTitle:"Xác thực OTP"
     })
 }
+module.exports.otpPasswordPost=async(req,res)=>{
+    const {email,otp}=req.body;
+    const existRecord=await ForgotPassword.findOne({
+        email:email,
+        otp:otp
+    });
+    if(!existRecord){
+        res.json({
+            code:"error",
+            message:"Mã OTP nhập không chính xác"
+        })
+        return;
+    }
+    const existAccount=await AccountAdmin.findOne({
+        email:email
+    });
+    const token=jwt.sign({
+        id:existAccount.id,
+        email:existAccount.email
+    },process.env.JWT_SECRET,{expiresIn: "5m"});
+    //token có thời hạn 5 phút
+    //LƯU TOKEN VÀO COOKIE hiệu lực 5 phút
+    res.cookie("token",token,{
+        maxAge: 5*60*1000,
+        httpOnly:true,
+        sameSite:"strict"
+    })
+    
+    res.json({
+        code:"success",
+        message:"Xác thực OTP thành công"
+    })
+}
 module.exports.registerInitial=async(req,res)=>{
     res.render("admin/pages/register-initial.pug",{
         pageTitle:"Tài khoản đã được khởi tạo"
     })
 }
+
 module.exports.resetPassword=async(req,res)=>{
     res.render("admin/pages/reset-password.pug",{
         pageTitle:"Đổi mật khẩu"
     })
+}
+module.exports.resetPasswordPost=async(req,res)=>{
+    const {password}=req.body;
+    const salt=await bcrypt.genSalt(10);
+    const hashPassword=await bcrypt.hash(password,salt);
+    await AccountAdmin.updateOne({
+        _id:req.account.id
+    },
+    {
+        password:hashPassword
+    }
+)
+    res.json({
+        code:"success",
+        message:"Đổi mật khẩu thành công"
+    })
+
+
 }

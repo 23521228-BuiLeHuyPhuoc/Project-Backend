@@ -200,7 +200,7 @@ if(forgotPasswordForm) {
       .then(data=>{
         alert(data.message);
         if(data.code=="success"){
-          window.location.href=`/${pathAdmin}/account/otp-password`;
+          window.location.href=`/${pathAdmin}/account/otp-password?email=${email}`;
         }
       })
     })
@@ -222,7 +222,31 @@ if(otpPasswordForm) {
     ])
     .onSuccess((event) => {
       const otp = event.target.otp.value;
-      console.log(otp);
+      const urlParams=new URLSearchParams(window.location.search);
+      const email=urlParams.get("email");
+      const dataFinal={
+        
+        email:email,
+        otp:otp
+      }
+      fetch(`/${pathAdmin}/account/otp-password`,{
+        method:"POST",
+        headers: {
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify(dataFinal)
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.code=="error")
+        {
+          alert(data.message);
+        }
+        if(data.code=="success"){
+          alert(data.message);
+        window.location.href=`/${pathAdmin}/account/reset-password`
+        }
+      })
     })
   ;
 }
@@ -274,8 +298,27 @@ if(resetPasswordForm) {
       }
     ])
     .onSuccess((event) => {
-      const password = event.target.password.value;
-      console.log(password);
+      const dataFinal={
+        password: event.target.password.value
+      }
+      fetch(`/${pathAdmin}/account/reset-password`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify(dataFinal)
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.code=="error"){
+          alert(data.message);
+        }
+        if(data.code=="success"){
+          alert(data.message);
+          window.location.href=`/${pathAdmin}/account/login`;
+        }
+      })
+
     })
   ;
 }
