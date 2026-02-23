@@ -202,6 +202,18 @@ module.exports.resetPassword=async(req,res)=>{
 }
 module.exports.resetPasswordPost=async(req,res)=>{
     const {password}=req.body;
+    const tktimduoc=await AccountAdmin.findOne({
+        _id:req.account.id
+    })
+    const isSamePassword=await bcrypt.compare(password,tktimduoc.password);
+    if(isSamePassword){
+        res.json({
+            code:"error",
+            message:"Mật khẩu mới không được trùng với mật khẩu cũ"
+        })
+        return;
+    }
+
     const salt=await bcrypt.genSalt(10);
     const hashPassword=await bcrypt.hash(password,salt);
     await AccountAdmin.updateOne({
@@ -209,8 +221,7 @@ module.exports.resetPasswordPost=async(req,res)=>{
     },
     {
         password:hashPassword
-    }
-)
+    })
     res.json({
         code:"success",
         message:"Đổi mật khẩu thành công"
