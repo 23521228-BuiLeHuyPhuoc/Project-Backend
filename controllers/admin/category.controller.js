@@ -22,8 +22,13 @@ module.exports.createPost=async(req,res)=>{
     }
     req.body.createdBy=req.account.id;
     req.body.updatedBy=req.account.id;
-    const newRecord=new Category(req.body);
-    await newRecord.save();
+    if(req.file)
+    {
+    req.body.avatar=req.file.path;
+    }
+    console.log(req.file);
+     const newRecord=new Category(req.body);
+     await newRecord.save();
 
     console.log(req.body);
     res.json({

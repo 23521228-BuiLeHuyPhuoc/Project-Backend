@@ -213,7 +213,7 @@ module.exports.resetPasswordPost=async(req,res)=>{
         })
         return;
     }
-
+    
     const salt=await bcrypt.genSalt(10);
     const hashPassword=await bcrypt.hash(password,salt);
     await AccountAdmin.updateOne({
