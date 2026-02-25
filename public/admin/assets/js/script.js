@@ -654,10 +654,6 @@ if(buttonLogout){
 
   })
 }
-
-
-
-
 //End Logout
 // Alert
 const alertTime = document.querySelector("[alert-time]");

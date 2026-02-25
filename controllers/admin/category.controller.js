@@ -1,7 +1,33 @@
 const Category=require('../../models/category.model');
+const AccountAdmin=require('../../models/account-admin.model');
 const CategoryTreeHelper=require('../../helpers/category.helper');
-module.exports.list=(req,res)=>{
+const moment=require('moment');
+module.exports.list=async (req,res)=>{
+    const categoryList=await Category.find({
+        deleted:false
+    }).sort({
+        position: "asc"
+    })
+    for (const item of categoryList) {
+        if(item.createdBy){
+            const accountCreated=await AccountAdmin.findOne({
+                _id:item.createdBy
+            })
+            item.createdByFullName=accountCreated.fullName;
+        }
+        if(item.updatedBy){
+            const accountUpdated=await AccountAdmin.findOne({
+                _id:item.updatedBy
+            })
+            item.updatedByFullName=accountUpdated.fullName;
+        }
+    item.createdAtFormat=moment(item.createdAt).format("HH:mm - DD/MM/YYYY");
+    item.updatedAtFormat=moment(item.updatedAt).format("HH:mm - DD/MM/YYYY");
+    }
+    
+
     res.render("admin/pages/category-list",{
+        categoryList:categoryList,
         pageTitle:"Quản lý danh mục"
     })
 }
