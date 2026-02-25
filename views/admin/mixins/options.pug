@@ -1,0 +1,5 @@
+mixin options(list,level=0)
+    each item in list 
+        option(value=item._id) #{"--".repeat(level)}#{item.name}
+        if(item.children&&item.children.length>0)
+            +options(item.children,level+1)
