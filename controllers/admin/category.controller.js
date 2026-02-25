@@ -71,3 +71,62 @@ module.exports.createPost=async(req,res)=>{
     })
 
 }
+module.exports.edit=async(req,res)=>{
+    try{
+    const categoryList=await Category.find({
+        deleted:false
+    })
+    const id=req.params.id;
+    const category=await Category.findOne({
+        _id:id,
+        deleted:false
+    })
+    console.log(CategoryTreeHelper.buildCategoryTree(categoryList));
+    res.render("admin/pages/category-edit",{
+        pageTitle:"Chỉnh sửa danh mục",
+        category:category,
+        categoryList:CategoryTreeHelper.buildCategoryTree(categoryList)
+    })
+}
+catch(error){
+    res.render("admin/pages/error-404",{
+        pageTitle:"Không tìm thấy trang"
+    })
+}
+}
+module.exports.editPatch=async(req,res)=>{
+    try{ 
+    const id=req.params.id;
+    
+    const category=await Category.findOne({
+        _id:id,
+        deleted:false
+    })
+    let avt=category.avatar;
+    if(req.file){
+        avt=req.file.path;
+    }
+    if(category){
+       await Category.updateOne(category,{
+            name:req.body.name,
+            parent:req.body.parent,
+            position:parseInt(req.body.position),
+            status:req.body.status,
+            description:req.body.description,
+            updatedBy:req.account.id,
+            avatar:avt
+        })
+    }
+
+    req.flash("success","Cập nhật danh mục thành công!");
+    res.json({
+        code:"success"
+    })
+}
+catch(error){
+    res.json({
+        code:"error",
+        message:"Có lỗi xảy ra khi cập nhật danh mục!"
+    })
+}
+}

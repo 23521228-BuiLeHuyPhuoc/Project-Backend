@@ -1,0 +1,42 @@
+extends ../layouts/default.pug
+include ../mixins/options.pug
+block main
+  h1.box-title Chỉnh sửa danh mục
+
+  .section-8
+    form#category-edit-form
+      .inner-group(style="display: none;")
+        label(class="inner-label" for="id") Id
+        input(type="text" id="id" name="id" value=category.id)
+      .inner-group
+        label(class="inner-label" for="name") Tên danh mục
+        input(type="text" id="name" name="name" value=category.name)
+      .inner-group
+        label(class="inner-label" for="parent") Danh mục cha
+        select(id="parent" name="parent")
+          option(value="") -- Chọn danh mục --
+          +options(categoryList,0,category.parent)
+                  
+      .inner-group
+        label(class="inner-label" for="position") Vị trí
+        input(type="number" id="position" name="position" value=category.position)
+      .inner-group
+        label(class="inner-label" for="status") Trạng thái
+        select(id="status" name="status")
+          if (category.status=="active")
+            option(value="active" selected) Hoạt động
+            option(value="inactive") Tạm dừng
+          else
+            option(value="active") Hoạt động
+            option(value="inactive" selected) Tạm dừng
+      .inner-group.inner-two-col
+        label(class="inner-label" for="avatar") Ảnh đại diện
+        div(class="inner-upload-image" image-default=category.avatar?category.avatar:"")
+          input(type="file" id="avatar" accept="image/*" filepond-image name="avatar" )
+      .inner-group.inner-two-col
+        label(class="inner-label" for="description") Mô tả
+        textarea(id="description" textarea-mce name="description") #{category.description}
+      .inner-button.inner-two-col
+        button Cập nhật
+    .inner-back
+      a(href=`/${pathAdmin}/category/list`) Quay lại danh sách

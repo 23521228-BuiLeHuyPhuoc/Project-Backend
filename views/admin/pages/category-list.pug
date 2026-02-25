@@ -82,8 +82,8 @@ block main
                 div.inner-time #{item.updatedAtFormat}
               td
                 .inner-buttons
-                  button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
-                  button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
+                  a(class="inner-edit" href=`/${pathAdmin}/category/edit/${item.id}`) <i class="fa-regular fa-pen-to-square"></i>
+                  a(class="inner-delete" href=`/${pathAdmin}/category/delete/${item.slug}`) <i class="fa-regular fa-trash-can"></i>
 
   //- End Section 6
 
