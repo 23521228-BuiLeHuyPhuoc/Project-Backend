@@ -175,11 +175,11 @@ module.exports.otpPasswordPost=async(req,res)=>{
     const token=jwt.sign({
         id:existAccount.id,
         email:existAccount.email
-    },process.env.JWT_SECRET,{expiresIn: "5m"});
+    },process.env.JWT_SECRET,{expiresIn: "30m"});
     //token có thời hạn 5 phút
     //LƯU TOKEN VÀO COOKIE hiệu lực 5 phút
     res.cookie("token",token,{
-        maxAge: 5*60*1000,
+        maxAge: 30*60*1000,
         httpOnly:true,
         sameSite:"strict"
     })
