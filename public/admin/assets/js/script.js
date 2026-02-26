@@ -763,7 +763,7 @@ if(listButtonDelete.length > 0) {
 }
 // End Button Delete
 //Filter Status
-const filterStatus=document.querySelector("[filter-status");
+const filterStatus=document.querySelector("[filter-status]");
 if(filterStatus){
   const url=new URL(window.location.href);
 
@@ -853,3 +853,13 @@ if(filterEndDate){
   }
 }
 //End Filter EndDate
+//Xoá bộ lọc
+const buttonClearFilter=document.querySelector("[delete-filter]");
+if(buttonClearFilter){
+  const url=new URL(window.location.href);
+  buttonClearFilter.addEventListener("click",()=>{
+    url.search="";
+    window.location.href=url.href;
+  })
+}
+//Hết xoá bộ lọc
