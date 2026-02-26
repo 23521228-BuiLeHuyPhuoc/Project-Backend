@@ -926,3 +926,29 @@ if(search){
     }
 }
 //End Search
+//Phân trang
+const pagination=document.querySelector("[pagination]");
+if(pagination){
+  const pageCurrent=pagination.getAttribute("pagination");
+  const url=new URL(window.location.href);
+  pagination.addEventListener("change",()=>{
+    const value=pagination.value;
+    if(value){
+      url.searchParams.set("page",value);
+    }else{
+      url.searchParams.delete("page");
+    }
+    window.location.href=url.href;
+  })
+  // Hiển thị lựa chọn phân trang mặc định
+  const pageCurrentUrl=url.searchParams.get("page");
+  if(pageCurrentUrl){
+    pagination.value=pageCurrentUrl;
+  }
+}
+
+
+
+
+
+//End Phân trang

@@ -91,9 +91,8 @@ block main
 
   //- Section 7
   .section-7
-    span(class="inner-label") Hiển thị 1 - 9 của 78
-    select(class="inner-pagination")
-      option Trang 1
-      option Trang 2
-      option Trang 3
+    span(class="inner-label") Hiển thị #{1+(pagination.currentPage-1)*pagination.limitItem} - #{pagination.limitItem * pagination.currentPage > pagination.totalRecord ? pagination.totalRecord : pagination.limitItem * pagination.currentPage} của #{pagination.totalRecord}
+    select(class="inner-pagination" pagination)
+      - for(var i=1;i<=pagination.totalPage;i++)
+        option(value=i) Trang #{i}
   //- End Section 7

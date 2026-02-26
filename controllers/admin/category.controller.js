@@ -34,14 +34,37 @@ module.exports.list=async (req,res)=>{
     if(req.query.search){
         const keyword=slugify(req.query.search,{
             lower:true,
-            replacement:"-"
+            replacement:"-",
+            trim:true
         });
 
         const regex=new RegExp(keyword,"i");
         find.slug=regex;
         console.log(regex);
     }
-    const categoryList=await Category.find(find).sort({
+    //Phân trang
+    const limitItem=3;
+    let page=1;
+    const currentPage=parseInt(req.query.page);
+    if(currentPage && currentPage>0){
+        page=currentPage;
+    }
+    const totalRecord=await Category.countDocuments(find);
+    const totalPage=Math.ceil(totalRecord/limitItem);
+    if(page>totalPage )
+    {        page=totalPage;
+    }
+    const pagination={
+        totalRecord:totalRecord,
+        limitItem:limitItem,
+        totalPage:totalPage,
+        currentPage:page
+    };
+    res.locals.pagination=pagination;
+
+    //Hết phân trang
+    const categoryList=await Category.find(find)
+    .limit(limitItem).skip((page-1)*limitItem).sort({
         position: "asc"
     })
     const creator=await AccountAdmin.find({
