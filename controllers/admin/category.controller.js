@@ -14,10 +14,28 @@ module.exports.list=async (req,res)=>{
     {
         find.createdBy=req.query.creator;
     }
+    const dateFilter={};
+    if(req.query.startDate)
+    {
+    const startDate=moment(req.query.startDate).startOf("date").toDate();
+    dateFilter.$gte=startDate;
+    }
+    if(req.query.endDate)
+    {
+        const endDate=moment(req.query.endDate).endOf("date").toDate();
+        dateFilter.$lte=endDate;
+
+    }
+    if(Object.keys(dateFilter).length>0)
+    {
+        find.createdAt=dateFilter;
+    }
     const categoryList=await Category.find(find).sort({
         position: "asc"
     })
-    const creator=await AccountAdmin.find({});
+    const creator=await AccountAdmin.find({
+
+    }).select("id fullName");
     for (const item of categoryList) {
         if(item.createdBy){
             const accountCreated=await AccountAdmin.findOne({
