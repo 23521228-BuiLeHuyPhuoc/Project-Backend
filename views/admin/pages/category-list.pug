@@ -32,13 +32,13 @@ block main
     .inner-wrap
       .inner-change-status
         .inner-item
-          select
+          select(change-status)
             option(value="") -- Hành động --
-            option(value="") Hoạt động
-            option(value="") Dừng hoạt động
-            option(value="") Xóa
+            option(value="active") Hoạt động
+            option(value="inactive") Dừng hoạt động
+            option(value="delete") Xóa
         .inner-item
-          button Áp dụng
+          button(apply-checkbox) Áp dụng
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
         input(type="text" placeholder="Tìm kiếm")
@@ -53,7 +53,7 @@ block main
         thead
           tr
             th(class="inner-center")
-              input(type="checkbox" class="inner-check")
+              input(type="checkbox" class="inner-check" checkall-checkbox)
             th Tên danh mục
             th Ảnh đại diện
             th(class="inner-center") Vị trí
@@ -65,7 +65,7 @@ block main
           each item in categoryList
             tr
               td(class="inner-center")
-                input(type="checkbox" class="inner-check")
+                input(type="checkbox" class="inner-check" inner-checkbox=item._id)
               td #{item.name}
               td
                 img(src=item.avatar class="inner-avatar")

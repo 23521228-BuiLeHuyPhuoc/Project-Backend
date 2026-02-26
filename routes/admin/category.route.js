@@ -12,4 +12,5 @@ router.post('/create',upload.single('avatar'),categoryValidate.createPost,catego
 router.get('/edit/:id',categoryController.edit);
 router.patch('/edit/:id',upload.single('avatar'),categoryValidate.editPatch,categoryController.editPatch);
 router.patch('/delete/:id',categoryController.deletePatch);
+router.patch('/change-status',categoryController.changeStatusPatch);
 module.exports=router;

@@ -863,3 +863,42 @@ if(buttonClearFilter){
   })
 }
 //Hết xoá bộ lọc
+//Check All
+const checkAllCheckbox=document.querySelector("[checkall-checkbox]");
+if(checkAllCheckbox){
+  checkAllCheckbox.addEventListener("click",()=>{
+    const innerCheckBox=document.querySelectorAll("[inner-checkbox]");
+    innerCheckBox.forEach(checkbox=>{
+      checkbox.checked=checkAllCheckbox.checked;
+    })
+  })
+}
+//End Check All
+//Áp dụng với checkbox
+const applyCheckbox=document.querySelector("[apply-checkbox]");
+if(applyCheckbox){
+  applyCheckbox.addEventListener("click",()=>{
+    const selectChangeStatus=document.querySelector("[change-status]");
+    const arraycheckbox=document.querySelectorAll("[inner-checkbox]:checked");
+    fetch(`/${pathAdmin}/category/change-status`,{
+      method:"PATCH",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        status:selectChangeStatus.value,
+        updateList:[...arraycheckbox].map(checkbox => checkbox.getAttribute("inner-checkbox"))
+      })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+      if(data.code=="error"){
+        alert(data.message);
+      }
+      if(data.code=="success"){
+        window.location.reload();
+      }
+    })
+  })
+}
+//Hết áp dụng checkbox

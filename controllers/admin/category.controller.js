@@ -185,3 +185,41 @@ module.exports.deletePatch=async(req,res)=>{
         })
     }
 }
+module.exports.changeStatusPatch=async(req,res)=>{
+    try{ 
+    const status=req.body.status;
+    const idList=req.body.updateList;
+    if(status=="active" || status=="inactive"){
+        await Category.updateMany({
+            _id:{$in:idList}
+        },{
+            status:status,
+            updatedBy:req.account._id,
+            updatedAt:Date.now()
+        })
+        req.flash("success",`Cập nhật trạng thái thành công!`);
+        res.json({
+            code:"success"
+        })
+    }
+    if(status=="delete"){
+        await Category.updateMany({
+            _id:{$in:idList}
+        },{
+            deleted:true,
+            deletedBy:req.account._id,
+            deletedAt:Date.now()
+        })
+        req.flash("success",`Xóa danh mục thành công!`);
+        res.json({
+            code:"success"
+        })
+    }
+}
+catch(error){
+    res.json({
+        code:"error",
+        message:"Có lỗi xảy ra khi cập nhật trạng thái danh mục!"
+    })
+}
+}
