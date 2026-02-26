@@ -738,3 +738,73 @@ if(categoryEditForm) {
 }
 // End Category Edit Form
 
+// Button Delete
+const listButtonDelete = document.querySelectorAll("[button-delete]");
+if(listButtonDelete.length > 0) {
+  listButtonDelete.forEach(button => {
+    button.addEventListener("click", () => {
+      const dataApi = button.getAttribute("data-api");
+      
+      fetch(dataApi, {
+        method: "PATCH"
+      })
+        .then(res => res.json())
+        .then(data => {
+          if(data.code == "error") {
+            alert(data.message);
+          }
+
+          if(data.code == "success") {
+            window.location.reload();
+          }
+        })
+    })
+  })
+}
+// End Button Delete
+//Filter Status
+const filterStatus=document.querySelector("[filter-status");
+if(filterStatus){
+  const url=new URL(window.location.href);
+
+  filterStatus.addEventListener("change",()=>{
+    const value=filterStatus.value;
+    if(value){
+      url.searchParams.set("status",value);
+    }else{
+      url.searchParams.delete("status");
+    }
+    window.location.href=url.href;
+
+  })
+  // Hiển thị lựa chọn mặc định 
+  const valueCurrent=url.searchParams.get("status");
+  if(valueCurrent){
+    filterStatus.value=valueCurrent;
+  }
+}
+//End Filter Status
+//Filter Creator
+const filterCreator=document.querySelector("[filter-creator]");
+if(filterCreator){
+  const url=new URL(window.location.href);
+
+  filterCreator.addEventListener("change",()=>{
+    const value=filterCreator.value;
+    if(value){
+      url.searchParams.set("creator",value);
+    }else{
+      url.searchParams.delete("creator");
+    }
+    window.location.href=url.href;
+
+  })
+  // Hiển thị lựa chọn mặc định 
+  const valueCurrent=url.searchParams.get("creator");
+  if(valueCurrent){
+    filterCreator.value=valueCurrent;
+  }
+}
+
+
+//End Filter Creator

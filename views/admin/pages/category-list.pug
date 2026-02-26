@@ -9,15 +9,16 @@ block main
       .inner-item.inner-label
         <i class="fa-solid fa-filter"></i> Bộ lọc
       .inner-item
-        select
+        select(filter-status)
           option(value="") Trạng thái
-          option(value="") Hoạt động
-          option(value="") Tạm dừng
+          option(value="active") Hoạt động
+          option(value="inactive") Tạm dừng
       .inner-item
-        select
+        select(filter-creator)
           option(value="") Người tạo
-          option(value="") Lê Văn A
-          option(value="") Lê Văn B
+          each item of creator
+            -if(item.fullName) 
+             option(value=item._id) #{item.fullName}
       .inner-item.inner-date
         input(type="date")
         span -
@@ -83,7 +84,8 @@ block main
               td
                 .inner-buttons
                   a(class="inner-edit" href=`/${pathAdmin}/category/edit/${item.id}`) <i class="fa-regular fa-pen-to-square"></i>
-                  a(class="inner-delete" href=`/${pathAdmin}/category/delete/${item.slug}`) <i class="fa-regular fa-trash-can"></i>
+                  a(class="inner-delete" button-delete data-api=`/${pathAdmin}/category/delete/${item.id}`
+                  ) <i class="fa-regular fa-trash-can"></i>
 
   //- End Section 6
 

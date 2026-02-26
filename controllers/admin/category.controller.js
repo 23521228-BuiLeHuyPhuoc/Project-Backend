@@ -3,11 +3,21 @@ const AccountAdmin=require('../../models/account-admin.model');
 const CategoryTreeHelper=require('../../helpers/category.helper');
 const moment=require('moment');
 module.exports.list=async (req,res)=>{
-    const categoryList=await Category.find({
-        deleted:false
-    }).sort({
+    
+    let find={
+        deleted:false,
+    }
+    if(req.query.status){
+        find.status=req.query.status;
+    }
+    if(req.query.creator)
+    {
+        find.createdBy=req.query.creator;
+    }
+    const categoryList=await Category.find(find).sort({
         position: "asc"
     })
+    const creator=await AccountAdmin.find({});
     for (const item of categoryList) {
         if(item.createdBy){
             const accountCreated=await AccountAdmin.findOne({
@@ -28,6 +38,7 @@ module.exports.list=async (req,res)=>{
 
     res.render("admin/pages/category-list",{
         categoryList:categoryList,
+        creator:creator,
         pageTitle:"Quản lý danh mục"
     })
 }
@@ -129,4 +140,30 @@ catch(error){
         message:"Có lỗi xảy ra khi cập nhật danh mục!"
     })
 }
+}
+module.exports.deletePatch=async(req,res)=>{
+    try{
+    const id=req.params.id;
+    const category=await Category.findOne({
+        _id:id,
+        deleted:false
+    })
+    if(category){
+        await Category.updateOne(category,{
+            deleted:true,
+            deletedBy:req.account.id,
+            deletedAt:Date.now()
+        })
+        req.flash("success","Xóa danh mục thành công!");
+        res.json({
+            code:"success"
+        })
+    }
+    }
+    catch(error){
+        res.json({
+            code:"error",
+            message:"Có lỗi xảy ra khi xóa danh mục!"
+        })
+    }
 }
