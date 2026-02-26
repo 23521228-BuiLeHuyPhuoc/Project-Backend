@@ -902,3 +902,27 @@ if(applyCheckbox){
   })
 }
 //Hết áp dụng checkbox
+//Search
+const search=document.querySelector("[search]");
+if(search){
+  const url=new URL(window.location.href);
+  search.addEventListener("keyup",(event)=>{
+    
+    if(event.key=="Enter"){
+      const value=search.value;
+      if(value){
+        url.searchParams.set("search",value);
+      }
+      else{
+        url.searchParams.delete("search");
+      }
+      window.location.href=url.href;
+    }
+  })
+    // Hiển thị giá trị tìm kiếm mặc định
+    const valueCurrent=url.searchParams.get("search");
+    if(valueCurrent){
+      search.value=valueCurrent;
+    }
+}
+//End Search
