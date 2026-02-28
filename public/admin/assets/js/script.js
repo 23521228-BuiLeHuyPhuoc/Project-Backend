@@ -307,6 +307,110 @@ if(tourCreateForm) {
   ;
 }
 // End Tour Create Form
+//Tour Edit 
+const tourEditForm = document.querySelector("#tour-edit-form");
+if(tourEditForm) {
+  const validation = new JustValidate('#tour-edit-form');
+
+  validation
+    .addField('#name', [
+      {
+        rule: 'required',
+        errorMessage: 'Vui lòng nhập tên tour!'
+      }
+    ])
+    .onSuccess((event) => {
+      const name = event.target.name.value;
+      const category = event.target.category.value;
+      const position = event.target.position.value;
+      const status = event.target.status.value;
+      const avatars = filePond.avatar.getFiles();
+      let avatar = null;
+      if(avatars.length > 0) {
+        avatar = avatars[0].file;
+      }
+      const priceAdult = event.target.priceAdult.value;
+      const priceChildren = event.target.priceChildren.value;
+      const priceBaby = event.target.priceBaby.value;
+      const priceNewAdult = event.target.priceNewAdult.value;
+      const priceNewChildren = event.target.priceNewChildren.value;
+      const priceNewBaby = event.target.priceNewBaby.value;
+      const stockAdult = event.target.stockAdult.value;
+      const stockChildren = event.target.stockChildren.value;
+      const stockBaby = event.target.stockBaby.value;
+      const locations = [];
+      const time = event.target.time.value;
+      const vehicle = event.target.vehicle.value;
+      const departureDate = event.target.departureDate.value;
+      const information = tinymce.get("information").getContent();
+      const schedules = [];
+
+      // locations
+      const listElementLocation = tourEditForm.querySelectorAll('input[name="locations"]:checked');
+      listElementLocation.forEach(input => {
+        locations.push(input.value);
+      });
+      // End locations
+      //
+      const idTour=document.querySelector("[data-id]").getAttribute("data-id");
+      // schedules
+      const listElementScheduleItem = tourEditForm.querySelectorAll('.inner-schedule-item');
+      listElementScheduleItem.forEach(scheduleItem => {
+        const input = scheduleItem.querySelector("input");
+        const title = input.value;
+
+        const textarea = scheduleItem.querySelector("textarea");
+        const idTextarea = textarea.id;
+        const description = tinymce.get(idTextarea).getContent();
+
+        schedules.push({
+          title: title,
+          description: description
+        });
+      });
+      // End schedules
+      const formData=new FormData();
+      formData.append("name",name);
+      formData.append("category",category);
+      formData.append("position",position);
+      formData.append("status",status);
+      formData.append("avatar",avatar);
+      formData.append("priceAdult",priceAdult);
+      formData.append("priceChildren",priceChildren);
+      formData.append("priceBaby",priceBaby);
+      formData.append("priceNewAdult",priceNewAdult);
+      formData.append("priceNewChildren",priceNewChildren);
+      formData.append("priceNewBaby",priceNewBaby);
+      formData.append("stockAdult",stockAdult);
+      formData.append("stockChildren",stockChildren);
+      formData.append("stockBaby",stockBaby);
+      formData.append("locations",JSON.stringify(locations));
+      formData.append("time",time);
+      formData.append("vehicle",vehicle);
+      formData.append("departureDate",departureDate);
+      formData.append("information",information);
+      formData.append("schedules",JSON.stringify(schedules));
+      fetch(`/${pathAdmin}/tour/edit/${idTour}`,{
+        method:"PATCH",
+        body:formData
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.code=="error")
+        {
+          alert(data.message);
+        }
+        if(data.code=="success")
+        {
+          window.location.reload();
+        }
+      })
+    })
+  ;
+}
+
+
+//End Tour Edit
 
 // Order Edit Form
 const orderEditForm = document.querySelector("#order-edit-form");
@@ -969,3 +1073,344 @@ if(pagination){
 
 
 //End Phân trang
+
+//Delete Tour
+const buttonDeleteTour=document.querySelectorAll("[delete-tour]");
+if(buttonDeleteTour){
+  buttonDeleteTour.forEach(button=>{
+    button.addEventListener("click",()=>{
+      const id=button.getAttribute("delete-tour");
+      fetch(`/${pathAdmin}/tour/trash/${id}`,{
+        method:"PATCH"
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.code=="success"){
+          window.location.href=`/${pathAdmin}/tour/list`;
+        }
+        if(data.code=="error"){
+          alert(data.message);
+        }
+      })
+    })
+  })
+}
+//End Delete Tour
+//Undo Delete Tour
+const undoTour=document.querySelectorAll("[undo-tour]");
+if(undoTour){
+  undoTour.forEach(button=>{
+    button.addEventListener("click",()=>{
+      const id=button.getAttribute("undo-tour");
+      fetch(`/${pathAdmin}/tour/trash/undo/${id}`,{
+        method:"PATCH",
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.code=="success"){
+          window.location.reload();
+        }
+        if(data.code=="error"){
+          alert(data.message);
+        }
+      })
+    })
+  })
+}
+//End Undo Delete Tour
+//Filter Tour
+//Filter status tour
+const FilterStatusTour=document.querySelector("[filter-status-tour]");
+if(FilterStatusTour){
+  const url=new URL(window.location.href);
+  FilterStatusTour.addEventListener("change",()=>{
+    const value=FilterStatusTour.value;
+    if(value){
+      url.searchParams.set("status",value);
+    }
+    else{
+      url.searchParams.delete("status");
+    }
+    window.location.href=url.href;
+  })
+  // Hiển thị lựa chọn mặc định
+  const valueCurrent=url.searchParams.get("status");
+  if(valueCurrent){
+    FilterStatusTour.value=valueCurrent;
+  }
+}
+//End FIlter Status Tour
+//Filter creator tour
+const creatorTour=document.querySelector("[filter-creator-tour]");
+if(creatorTour){
+  const url=new URL(window.location.href);
+  creatorTour.addEventListener("change",()=>{
+    const value=creatorTour.value;
+    if(value){
+      url.searchParams.set("creator",value);
+    }
+    else{
+      url.searchParams.delete("creator");
+    }
+    window.location.href=url.href;
+  })
+  // Hiển thị lựa chọn mặc định
+  const valueCurrent=url.searchParams.get("creator");
+  if(valueCurrent){
+    creatorTour.value=valueCurrent;
+  }
+}
+//End Filter creator tour
+//FilterStartDate
+const startDateTour=document.querySelector("[startDate-tour]");
+if(startDateTour){
+  const url=new URL(window.location.href);
+  startDateTour.addEventListener("change",()=>{
+    const value=startDateTour.value;
+    if(value){
+      url.searchParams.set("startDate",value);
+    }else{
+      url.searchParams.delete("startDate");
+    }
+    window.location.href=url.href;
+  })
+  // Hiển thị lựa chọn mặc định
+  const valueCurrent=url.searchParams.get("startDate");
+  if(valueCurrent){
+    startDateTour.value=valueCurrent;
+  }
+}
+//End Filter StartDate Tour
+//Filter EndDate
+const endDateTour=document.querySelector("[endDate-tour]");
+if(endDateTour){
+  const url=new URL(window.location.href);
+  endDateTour.addEventListener("change",()=>{
+    const value=endDateTour.value;
+    if(value){
+      url.searchParams.set("endDate",value);
+    }else{
+      url.searchParams.delete("endDate");
+    }
+    window.location.href=url.href;
+  })
+  // Hiển thị lựa chọn mặc định
+  const valueCurrent=url.searchParams.get("endDate");
+  if(valueCurrent){
+    endDateTour.value=valueCurrent;
+  }
+}
+
+
+//End Filter EndDate Tour
+//Filter category tour
+const categoryTour=document.querySelector("[filter-category-tour]");
+if(categoryTour){
+  const url=new URL(window.location.href);
+  categoryTour.addEventListener("change",()=>{
+    const value=categoryTour.value;
+    if(value){
+      url.searchParams.set("category",value);
+    }else{
+      url.searchParams.delete("category");
+    }
+    window.location.href=url.href;
+  })
+  // Hiển thị lựa chọn mặc định
+  const valueCurrent=url.searchParams.get("category");
+  if(valueCurrent){
+    categoryTour.value=valueCurrent;
+  }
+}
+//End Filter category tour
+//Filter price tour
+const priceTour=document.querySelector("[filter-price-tour]");
+if(priceTour){
+  const url=new URL(window.location.href);
+  priceTour.addEventListener("change",()=>{
+    const value=priceTour.value;
+    if(value){
+      url.searchParams.set("price",value);
+    }else{
+      url.searchParams.delete("price");
+    }
+    window.location.href=url.href;
+  })
+  // Hiển thị lựa chọn mặc định
+  const valueCurrent=url.searchParams.get("price");
+  if(valueCurrent){
+    priceTour.value=valueCurrent;
+  }
+}
+//Filter price tour
+//End Filter Tour
+//CHeck all tour
+const checkAllTour=document.querySelector("[check-all-tour]");
+if(checkAllTour){
+  checkAllTour.addEventListener("click",()=>{
+    const innerCheckBoxTour=document.querySelectorAll("[check-tour]");
+    innerCheckBoxTour.forEach((item)=>{
+      item.checked=checkAllTour.checked;
+    })
+  })
+}
+//Change status tour
+const applyStatusTour=document.querySelector("[apply-change-status-tour]");
+if(applyStatusTour){
+  applyStatusTour.addEventListener("click",()=>{
+    const changeStatusTour=document.querySelector("[change-status-tour]");
+    const checkTour=document.querySelectorAll("[check-tour]:checked");
+    fetch(`/${pathAdmin}/tour/change-status`,{
+      method:"PATCH",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        status:changeStatusTour.value,
+        idList: Array.from(checkTour).map(item => item.getAttribute("check-tour"))
+      })
+    }).then(res=>res.json()).then(data=>{
+      if(data.code=="success"){
+        window.location.reload();
+      }
+      if(data.code=="error"){
+        alert(data.message);
+      }
+    })
+
+  })
+}
+//End Change status tour
+//Pagination tour
+const paginationTour=document.querySelector("[pagination-tour]");
+if(paginationTour){
+  const url=new URL(window.location.href);
+  paginationTour.addEventListener("change",()=>{
+    const value=paginationTour.value;
+    if(value){
+      url.searchParams.set("page",value);
+    }
+    else{
+      url.searchParams.delete("page");
+    }
+    window.location.href=url.href;
+  })
+  // Hiển thị lựa chọn phân trang mặc định
+  const valueCurrent=url.searchParams.get("page");
+  if(valueCurrent){
+    paginationTour.value=valueCurrent;
+  }
+
+}
+
+
+
+
+
+//End pagination tour
+//Find tour
+const findTour=document.querySelector("[find-tour]");
+if(findTour){
+  const url=new URL(window.location.href);
+  findTour.addEventListener("keyup",(event)=>{
+    if(event.key=="Enter"){
+      const value=findTour.value;
+      if(value){
+        url.searchParams.set("search",value);
+      }
+      else{
+        url.searchParams.delete("search");
+      }
+      window.location.href=url.href;
+    }
+  })
+  // Hiển thị giá trị tìm kiếm mặc định
+  const valueCurrent=url.searchParams.get("search");
+  if(valueCurrent){
+    findTour.value=valueCurrent;
+  }
+}
+//End find tour
+//Find tour trash
+const findTourTrash=document.querySelector("[find-tour-trash]");
+if(findTourTrash){
+  const url=new URL(window.location.href);
+  findTourTrash.addEventListener("keyup",(event)=>{
+    if(event.key=="Enter"){
+      const value=findTourTrash.value;
+      if(value){
+        url.searchParams.set("search",value);
+      }
+      else{
+        url.searchParams.delete("search");
+      }
+      window.location.href=url.href;
+    }
+
+  })
+  // Hiển thị giá trị tìm kiếm mặc định
+  const valueCurrent=url.searchParams.get("search");
+  if(valueCurrent){
+    findTourTrash.value=valueCurrent;
+  }
+}
+//End find tour trash
+//Pagination tour trash
+const paginationTourTrash=document.querySelector("[pagination-tour-trash]");
+if(paginationTourTrash){
+  const url=new URL(window.location.href);
+  paginationTourTrash.addEventListener("change",()=>{
+    const value=paginationTourTrash.value;
+    if(value){
+      url.searchParams.set("page",value);
+    }
+    else{
+      url.searchParams.delete("page");
+    }
+    window.location.href=url.href;
+  })
+  // Hiển thị lựa chọn phân trang mặc định
+  const valueCurrent=url.searchParams.get("page");
+  if(valueCurrent){
+    paginationTourTrash.value=valueCurrent;
+  }
+
+}
+//End pagination tour trash
+//Check all tour trash
+const checkAllTourTrash=document.querySelector("[check-all-tour-trash]");
+if(checkAllTourTrash){
+  checkAllTourTrash.addEventListener("click",()=>{
+    const innerCheckBoxTourTrash=document.querySelectorAll("[check-tour-trash]");
+    innerCheckBoxTourTrash.forEach((item)=>{
+      item.checked=checkAllTourTrash.checked;
+    })
+  })}
+//End Check all tour trash
+//Change status tour trash
+const applyStatusTourTrash=document.querySelector("[apply-change-status-tour-trash]");
+if(applyStatusTourTrash){
+  applyStatusTourTrash.addEventListener("click",()=>{
+    const changeStatusTourTrash=document.querySelector("[change-status-tour-trash]");
+    const checkTourTrash=document.querySelectorAll("[check-tour-trash]:checked");
+    fetch(`/${pathAdmin}/tour/trash/change-status`,{
+      method:"PATCH",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        status:changeStatusTourTrash.value,
+        idList: Array.from(checkTourTrash).map(item => item.getAttribute("check-tour-trash"))
+      })
+    }).then(res=>res.json()).then(data=>{
+      if(data.code=="success"){
+        window.location.reload();
+      }
+      if(data.code=="error"){
+        alert(data.message);
+      }
+    })
+ 
+  })
+}
+//End Change status tour trash
