@@ -35,25 +35,25 @@ block main
                 .inner-input-list
                     .inner-input-item
                         label Người lớn
-                        input(type="number" name="priceAdult" value=tour.priceAdult.toLocaleString("vi-VN"))đ
+                        input(type="number" name="priceAdult" value=tour.priceAdult.toLocaleString("vi-VN"))
                     .inner-input-item
                         label Trẻ em
-                        input(type="number" name="priceChildren" value=tour.priceChildren.toLocaleString("vi-VN"))đ
+                        input(type="number" name="priceChildren" value=tour.priceChildren.toLocaleString("vi-VN"))
                     .inner-input-item
                         label Em bé
-                        input(type="number" name="priceBaby" value=tour.priceBaby.toLocaleString("vi-VN"))đ
+                        input(type="number" name="priceBaby" value=tour.priceBaby.toLocaleString("vi-VN"))
             .inner-group
                 label(class="inner-label") Giá mới
                 .inner-input-list
                     .inner-input-item
                         label Người lớn
-                        input(type="number" name="priceNewAdult" value=tour.priceNewAdult.toLocaleString("vi-VN"))đ
+                        input(type="number" name="priceNewAdult" value=tour.priceNewAdult.toLocaleString("vi-VN"))
                     .inner-input-item
                         label Trẻ em
-                        input(type="number" name="priceNewChildren" value=tour.priceNewChildren.toLocaleString("vi-VN"))đ
+                        input(type="number" name="priceNewChildren" value=tour.priceNewChildren.toLocaleString("vi-VN"))
                     .inner-input-item
                         label Em bé
-                        input(type="number" name="priceNewBaby" value=tour.priceNewBaby.toLocaleString("vi-VN"))đ
+                        input(type="number" name="priceNewBaby" value=tour.priceNewBaby.toLocaleString("vi-VN"))
             .inner-group
                 label(class="inner-label") Còn lại
                 .inner-input-list
@@ -86,21 +86,38 @@ block main
                 label(class="inner-label" for="information") Thông tin tour
                 textarea(id="information" textarea-mce name="information") #{tour.information}
             .inner-group.inner-two-col
+
                 label(class="inner-label") Lịch trình tour
-                .inner-schedule
-                    .inner-schedule-list
-                        .inner-schedule-item
-                            .inner-schedule-head
-                                span(class="inner-schedule-button inner-move")
-                                    <i class="fa-solid fa-up-down-left-right"></i>
-                                input(type="text")
-                                span(class="inner-schedule-button inner-remove")
-                                    <i class="fa-regular fa-trash-can"></i>
-                                span(class="inner-schedule-button inner-more")
-                                    <i class="fa-solid fa-angle-down"></i>
-                            .inner-schedule-body
-                                textarea(textarea-mce)
-                    .inner-schedule-create + Thêm lich trình
+                if(tour.schedules.length>0)
+                  each schedule in tour.schedules
+                    .inner-schedule
+                        .inner-schedule-list
+                            .inner-schedule-item
+                                .inner-schedule-head
+                                    span(class="inner-schedule-button inner-move")
+                                        <i class="fa-solid fa-up-down-left-right"></i>
+                                    input(type="text" name="scheduleTitle" value=schedule.title)
+                                    span(class="inner-schedule-button inner-remove")
+                                        <i class="fa-regular fa-trash-can"></i>
+                                    span(class="inner-schedule-button inner-more")
+                                        <i class="fa-solid fa-angle-down"></i>
+                                .inner-schedule-body
+                                    textarea(textarea-mce name="scheduleContent" value=schedule.description) #{schedule.description}
+                else
+                  .inner-schedule
+                      .inner-schedule-list
+                          .inner-schedule-item
+                              .inner-schedule-head
+                                  span(class="inner-schedule-button inner-move")
+                                      <i class="fa-solid fa-up-down-left-right"></i>
+                                  input(type="text")
+                                  span(class="inner-schedule-button inner-remove")
+                                      <i class="fa-regular fa-trash-can"></i>
+                                  span(class="inner-schedule-button inner-more")
+                                      <i class="fa-solid fa-angle-down"></i>
+                              .inner-schedule-body
+                                  textarea(textarea-mce)
+                      .inner-schedule-create + Thêm lich trình
             .inner-button.inner-two-col
                 button Chỉnh sửa
         .inner-back
