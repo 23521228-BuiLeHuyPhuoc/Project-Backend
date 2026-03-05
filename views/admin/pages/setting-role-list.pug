@@ -33,11 +33,12 @@ block main
             th Mô tả ngắn
             th Hành động
         tbody
+        each role in roleList
           tr
             td(class="inner-center")
               input(type="checkbox" class="inner-check")
-            td Quản trị viên
-            td Có đầy đủ các quyền
+            td= role.name
+            td= role.description
             td
               .inner-buttons
                 button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
