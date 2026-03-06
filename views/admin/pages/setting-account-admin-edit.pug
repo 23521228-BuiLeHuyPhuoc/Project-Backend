@@ -2,41 +2,42 @@ extends ../layouts/default.pug
 
 
 block main
-  h1.box-title Tạo tài khoản quản trị
+  h1.box-title Sửa tài khoản quản trị
 
   .section-8
-    form#setting-account-admin-create-form
+    form#setting-account-admin-edit-form
+      input(type="hidden" account-id=record._id)
       .inner-group
         label(class="inner-label" for="fullName") Họ tên
-        input(type="text" id="fullName" name="fullName")
+        input(type="text" id="fullName" name="fullName" value=record.fullName)
       .inner-group
         label(class="inner-label" for="email") Email
-        input(type="email" id="email" name="email")
+        input(type="email" id="email" name="email" value=record.email)
       .inner-group
         label(class="inner-label" for="phone") Số điện thoại
-        input(type="text" id="phone" name="phone")
+        input(type="text" id="phone" name="phone" value=record.phone)
       .inner-group
         label(class="inner-label" for="role") Nhóm quyền
         select(id="role" name="role")
           each role in roleList 
-            option(value=role._id)=role.name
+            option(value=role._id selected=record.role==role._id)=role.name
       .inner-group
         label(class="inner-label" for="positionCompany") Chức vụ
-        input(type="text" id="positionCompany" name="positionCompany")
+        input(type="text" id="positionCompany" name="positionCompany" value=record.positionCompany)
       .inner-group
         label(class="inner-label" for="status") Trạng thái
         select(id="status" name="status")
-          option(value="initial") Khởi tạo
-          option(value="active") Hoạt động
-          option(value="inactive") Dừng hoạt động
+          option(value="initial" selected=record.status=="initial") Khởi tạo
+          option(value="active" selected=record.status=="active") Hoạt động
+          option(value="inactive" selected=record.status=="inactive") Dừng hoạt động
       .inner-group
         label(class="inner-label" for="password") Mật khẩu
-        input(type="text" id="password" name="password")
+        input(type="text" id="password" name="password" value=record.password)
       .inner-group.inner-two-col
         label(class="inner-label" for="avatar") Ảnh đại diện
-        div(class="inner-upload-image")
+        div(class="inner-upload-image" image-default=record.avatar?record.avatar:"")
           input(type="file" id="avatar" accept="image/*" filepond-image name="avatar")
       .inner-button.inner-two-col
-        button Tạo mới
+        button Cập nhật
     .inner-back
       a(href=`/${pathAdmin}/setting/account-admin/list`) Quay lại danh sách

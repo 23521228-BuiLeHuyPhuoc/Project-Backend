@@ -11,8 +11,10 @@ block main
       .inner-item
         select
           option(value="") Trạng thái
-          option(value="") Hoạt động
-          option(value="") Tạm dừng
+          option(value="initial") Khởi tạo
+          option(value="active") Hoạt động
+          option(value="inactive") Dừng hoạt động
+
       .inner-item.inner-date
         input(type="date")
         span -
@@ -20,9 +22,8 @@ block main
       .inner-item
         select
           option(value="") Nhóm quyền
-          option(value="") Quản trị viên
-          option(value="") Quản lý tour
-          option(value="") Quản lý đơn hàng
+          each item in roleList
+            option(value=item._id)=item.name
       .inner-item.inner-reset
         <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
   //- End Section 4
@@ -34,9 +35,9 @@ block main
         .inner-item
           select
             option(value="") -- Hành động --
-            option(value="") Hoạt động
-            option(value="") Dừng hoạt động
-            option(value="") Xóa
+            option(value="active") Hoạt động
+            option(value="inactive") Dừng hoạt động
+            option(value="delete") Xóa
         .inner-item
           button Áp dụng
       .inner-search
@@ -63,22 +64,30 @@ block main
             th Trạng thái
             th Hành động
         tbody
-          tr
-            td(class="inner-center")
-              input(type="checkbox" class="inner-check")
-            td Lê Văn A
-            td(class="inner-center")
-              img(src="/admin/assets/images/avatar.jpg" class="inner-avatar")
-            td levana@gmail.com
-            td 01234567890
-            td Quản trị viên
-            td Giám đốc
-            td
-              .badge.badge-green Hoạt động
-            td
-              .inner-buttons
-                button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
-                button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
+          each account in dsAccount
+            tr
+              td(class="inner-center")
+                input(type="checkbox" class="inner-check")
+              td= account.fullName
+              td(class="inner-center")
+                img(src=account.avatar?account.avatar:"/admin/assets/images/avatar.jpg" class="inner-avatar")
+              td= account.email
+              td= account.phone
+              each role in roleList 
+                if(role._id==account.role)
+                  td= role.name
+              td= account.positionCompany
+              td
+                if(account.status==="initial")
+                  .badge.badge-orange Khởi tạo
+                else if(account.status==="active")
+                  .badge.badge-green Hoạt động
+                else
+                  .badge.badge-red Dừng hoạt động
+              td
+                .inner-buttons
+                  a(href=`/${pathAdmin}/setting/account-admin/edit/${account._id}` class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
+                  button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
   //- End Section 6
 
   //- Section 7

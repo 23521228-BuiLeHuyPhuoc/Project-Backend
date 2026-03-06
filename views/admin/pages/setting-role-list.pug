@@ -9,14 +9,14 @@ block main
     .inner-wrap
       .inner-change-status
         .inner-item
-          select
+          select(setting-role-list-change-status)
             option(value="") -- Hành động --
-            option(value="") Xóa
+            option(value="action-delete") Xóa
         .inner-item
-          button Áp dụng
+          button(setting-role-list-apply) Áp dụng
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
-        input(type="text" placeholder="Tìm kiếm")
+        input(type="text" placeholder="Tìm kiếm" setting-role-list-search)
       .inner-button-create
         a(href=`/${pathAdmin}/setting/role/create`) + Tạo mới
   //- End Section 5
@@ -28,7 +28,7 @@ block main
         thead
           tr
             th(class="inner-center")
-              input(type="checkbox" class="inner-check")
+              input(type="checkbox" class="inner-check" setting-role-list-checkall)
             th Tên nhóm quyền
             th Mô tả ngắn
             th Hành động
@@ -36,11 +36,11 @@ block main
         each role in roleList
           tr
             td(class="inner-center")
-              input(type="checkbox" class="inner-check")
+              input(type="checkbox" class="inner-check" setting-role-list-check=role._id)
             td= role.name
             td= role.description
             td
               .inner-buttons
-                button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
-                button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
+                a(href=`/${pathAdmin}/setting/role/edit/${role._id}` class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
+                button(class="inner-delete" btn-delete-role-list=role._id) <i class="fa-regular fa-trash-can"></i>
   //- End Section 6

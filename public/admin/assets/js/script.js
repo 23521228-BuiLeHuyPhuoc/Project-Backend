@@ -640,11 +640,154 @@ if(settingAccountAdminCreateForm) {
       console.log(status);
       console.log(password);
       console.log(avatar);
+      const formData=new FormData();
+      formData.append("fullName",fullName);
+      formData.append("email",email);
+      formData.append("phone",phone);
+      formData.append("role",role);
+      formData.append("positionCompany",positionCompany);
+      formData.append("status",status);
+      formData.append("password",password);
+      formData.append("avatar",avatar);
+      fetch(`/${pathAdmin}/setting/account-admin/create`,{
+        method:"POST",
+        body:formData
+      }).then(res=>res.json())
+      .then(data=>{
+        if(data.code=="error")        {
+          alert(data.message);
+        }
+        if(data.code=="success")        {
+          window.location.href=`/${pathAdmin}/setting/account-admin/list`;
+        }
+      })
     })
   ;
 }
 // End Setting Account Admin Create Form
+// Setting Account Admin Edit Form
+const settingAccountAdminEditForm = document.querySelector("#setting-account-admin-edit-form");
+if(settingAccountAdminEditForm) {
+  const validation = new JustValidate('#setting-account-admin-edit-form');
 
+  validation
+    .addField('#fullName', [
+      {
+        rule: 'required',
+        errorMessage: 'Vui lòng nhập họ tên!'
+      },
+      {
+        rule: 'minLength',
+        value: 5,
+        errorMessage: 'Họ tên phải có ít nhất 5 ký tự!',
+      },
+      {
+        rule: 'maxLength',
+        value: 50,
+        errorMessage: 'Họ tên không được vượt quá 50 ký tự!',
+      },
+    ])
+    .addField('#email', [
+      {
+        rule: 'required',
+        errorMessage: 'Vui lòng nhập email!'
+      },
+      {
+        rule: 'email',
+        errorMessage: 'Email không đúng định dạng!',
+      },
+    ])
+    .addField('#phone', [
+      {
+        rule: 'required',
+        errorMessage: 'Vui lòng nhập số điện thoại!'
+      },
+      {
+        rule: 'customRegexp',
+        value: /(84|0[3|5|7|8|9])+([0-9]{8})\b/g,
+        errorMessage: 'Số điện thoại không đúng định dạng!'
+      },
+    ])
+    .addField('#positionCompany', [
+      {
+        rule: 'required',
+        errorMessage: 'Vui lòng nhập chức vụ!'
+      },
+    ])
+    .addField('#password', [
+      {
+        rule: 'required',
+        errorMessage: 'Vui lòng nhập mật khẩu!',
+      },
+      {
+        validator: (value) => value.length >= 8,
+        errorMessage: 'Mật khẩu phải chứa ít nhất 8 ký tự!',
+      },
+      {
+        validator: (value) => /[A-Z]/.test(value),
+        errorMessage: 'Mật khẩu phải chứa ít nhất một chữ cái in hoa!',
+      },
+      {
+        validator: (value) => /[a-z]/.test(value),
+        errorMessage: 'Mật khẩu phải chứa ít nhất một chữ cái thường!',
+      },
+      {
+        validator: (value) => /\d/.test(value),
+        errorMessage: 'Mật khẩu phải chứa ít nhất một chữ số!',
+      },
+      {
+        validator: (value) => /[@$!%*?&]/.test(value),
+        errorMessage: 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt!',
+      },
+    ])
+    .onSuccess((event) => {
+      const fullName = event.target.fullName.value;
+      const email = event.target.email.value;
+      const phone = event.target.phone.value;
+      const role = event.target.role.value;
+      const positionCompany = event.target.positionCompany.value;
+      const status = event.target.status.value;
+      const password = event.target.password.value;
+      const avatars = filePond.avatar.getFiles();
+      const id=document.querySelector("[account-id]").getAttribute("account-id");
+      let avatar = null;
+      if(avatars.length > 0) {
+        avatar = avatars[0].file;
+      }
+
+      console.log(fullName);
+      console.log(email);
+      console.log(phone);
+      console.log(role);
+      console.log(positionCompany);
+      console.log(status);
+      console.log(password);
+      console.log(avatar);
+      const formData=new FormData();
+      formData.append("fullName",fullName);
+      formData.append("email",email);
+      formData.append("phone",phone);
+      formData.append("role",role);
+      formData.append("positionCompany",positionCompany);
+      formData.append("status",status);
+      formData.append("password",password);
+      formData.append("avatar",avatar);
+      fetch(`/${pathAdmin}/setting/account-admin/edit/${id}`,{
+        method:"PATCH",
+        body:formData
+      }).then(res=>res.json())
+      .then(data=>{
+        if(data.code=="error")        {
+          alert(data.message);
+        }
+        if(data.code=="success")        {
+          window.location.href=`/${pathAdmin}/setting/account-admin/list`;
+        }
+      })
+    })
+  ;
+}
+//End account admin edit form
 // Setting Role Create Form
 const settingRoleCreateForm = document.querySelector("#setting-role-create-form");
 if(settingRoleCreateForm) {
@@ -696,7 +839,58 @@ if(settingRoleCreateForm) {
   ;
 }
 // End Setting Role Create Form
+//Setting edit role form
+const settingRoleEditForm = document.querySelector("#setting-role-edit-form");
+if(settingRoleEditForm) {
+  const validation = new JustValidate('#setting-role-edit-form');
 
+  validation
+    .addField('#name', [
+      {
+        rule: 'required',
+        errorMessage: 'Vui lòng nhập tên nhóm quyền!'
+      },
+    ])
+    .onSuccess((event) => {
+      const name = event.target.name.value;
+      const description = event.target.description.value;
+      const permissions = [];
+      const id=event.target.id.value;
+
+      // permissions
+      const listElementPermission = settingRoleEditForm.querySelectorAll('input[name="permissions"]:checked');
+      listElementPermission.forEach(input => {
+        permissions.push(input.value);
+      });
+      // End permissions
+
+      console.log(name);
+      console.log(description);
+      console.log(permissions);
+      const dataFinal={
+        name:name,
+        description:description,
+        permissions:permissions
+      }
+      fetch(`/${pathAdmin}/setting/role/edit/${id}`,{
+        method:"PATCH",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify(dataFinal)
+      }).then(res=>res.json())
+      .then(data=>{
+        if(data.code=="error"){
+          alert(data.message);
+        }
+        if(data.code=="success"){
+          window.location.href=`/${pathAdmin}/setting/role/list`;
+        }
+      })
+    })
+  ;
+}
+//End Setting Role Edit Form
 // Profile Edit Form
 const profileEditForm = document.querySelector("#profile-edit-form");
 if(profileEditForm) {
@@ -1468,3 +1662,90 @@ if(applyStatusTourTrash){
   })
 }
 //End Change status tour trash
+//delete role list
+const buttonDeleteRole=document.querySelectorAll("[btn-delete-role-list]");
+if(buttonDeleteRole){
+  buttonDeleteRole.forEach(button=>{
+    button.addEventListener("click",()=>{
+      const id=button.getAttribute("btn-delete-role-list");
+      fetch(`/${pathAdmin}/setting/role/delete/${id}`,{
+        method:"PATCH",
+      }).then(res=>res.json())
+      .then(data=>{
+        if(data.code=="success"){
+          window.location.reload();
+        }
+        if(data.code=="error"){
+          alert(data.message);
+        }
+    })
+  })
+})
+}
+//end delete role list
+//Role list filter
+const settinglistcheckall=document.querySelector("[setting-role-list-checkall]");
+const settinglistcheckbox=document.querySelectorAll("[setting-role-list-check]");
+const settinglistapply=document.querySelector("[setting-role-list-apply]");
+if(settinglistcheckall){
+  settinglistcheckall.addEventListener("click",()=>{
+    settinglistcheckbox.forEach(checkbox=>{
+    checkbox.checked=settinglistcheckall.checked;
+    })
+  })
+}
+if(settinglistapply){
+  settinglistapply.addEventListener("click",()=>{
+    const changeStatus=document.querySelector("[setting-role-list-change-status]").value;
+    const arraycheckbox=document.querySelectorAll("[setting-role-list-check]:checked");
+    const arraySettingList=Array.from(arraycheckbox).map(checkbox=>checkbox.getAttribute("setting-role-list-check"));
+    fetch(`/${pathAdmin}/setting/role/change-status`,{
+      method:"PATCH",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        changeStatus:changeStatus,
+        idList:arraySettingList
+      })
+    }).then(res=>res.json())
+    .then(data=>{
+      if(data.code=="success"){
+        window.location.reload();
+      }
+      if(data.code=="error"){
+        alert(data.message);
+      }
+    })
+  
+  
+  
+  })
+}
+
+//Role list filter
+//Search Role List
+const searchRoleList=document.querySelector("[setting-role-list-search]");
+if(searchRoleList){
+  const url=new URL(window.location.href);
+  searchRoleList.addEventListener("keyup",(event)=>{
+    if(event.key=="Enter"){
+      const value=searchRoleList.value;
+      if(value){
+        url.searchParams.set("search",value);
+      }
+      else{
+        url.searchParams.delete("search");
+      }
+      window.location.href=url.href;
+    }
+    
+  })
+  
+  // Hiển thị giá trị tìm kiếm mặc định
+  const valueCurrent=url.searchParams.get("search");
+  if(valueCurrent){
+    searchRoleList.value=valueCurrent;
+  }
+}
+//End Search Role List
