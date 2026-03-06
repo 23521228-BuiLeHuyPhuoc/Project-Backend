@@ -1019,6 +1019,23 @@ if(profileChangePasswordForm) {
     .onSuccess((event) => {
       const password = event.target.password.value;
       console.log(password);
+      fetch(`/${pathAdmin}/profile/change-password`,{
+        method:"PATCH",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          password: password
+        })
+      }).then(res=>res.json())
+      .then(data=>{
+        if(data.code=="error")        {
+          alert(data.message);
+        }
+        if(data.code=="success")        {
+          window.location.reload();
+        }
+      })
     })
   ;
 }
