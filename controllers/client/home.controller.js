@@ -1,5 +1,6 @@
 const Tour=require('../../models/tour.model');
 const moment=require('moment');
+const FamilyHelper=require('../../helpers/category.helper');
 module.exports.home=async(req, res) => {
   const tourList=await Tour.find({
           deleted:false, 
@@ -22,8 +23,22 @@ module.exports.home=async(req, res) => {
         item.discount=0;
       }
     }
+    const categoryIdSection4='699c86067056d48790a13a8d';
+    const categoryHelperFamily= await FamilyHelper.CategoriesFamily(categoryIdSection4);
+    const tourListSection4=await Tour.find({
+      category:{$in:categoryHelperFamily},
+      deleted:false, 
+      status:"active"
+    }).sort({
+      position:"desc"
+    }).limit(8)
+
+
+
+  
   res.render('client/pages/home',{
     pageTitle:"Trang chủ",
-    tourListSection2:tourList
+    tourListSection2:tourList,
+    tourListSection4:tourListSection4
   })
 }
