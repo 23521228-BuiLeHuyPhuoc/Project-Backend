@@ -52,10 +52,10 @@ footer.footer
     .inner-bottom
       .inner-copyright © 2024 28Tech. All rights reserved.
       .inner-logo
-        a(href="index.html")
+        a(href=settingWebsiteInfo.logo?settingWebsiteInfo.logo:"/")
           img(
             alt="" 
-            src="/assets/images/logo.png"
+            src=settingWebsiteInfo.logo?settingWebsiteInfo.logo:"/assets/images/logo.png"
             )
       nav.inner-links
         ul
