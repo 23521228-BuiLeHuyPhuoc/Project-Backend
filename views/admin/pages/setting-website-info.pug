@@ -18,11 +18,11 @@ block main
         input(type="text" id="address" name="address" value=settingWebsiteInfo.address)
       .inner-group
         label(class="inner-label" for="logo") Logo
-        div(class="inner-upload-image" image-default=settingWebsiteInfo.logo)
+        div(class="inner-upload-image" image-default=settingWebsiteInfo.logo?settingWebsiteInfo.logo:"")
           input(type="file" id="logo" accept="image/*" filepond-image name="logo")
       .inner-group
         label(class="inner-label" for="favicon") Favicon
-        div(class="inner-upload-image" image-default=settingWebsiteInfo.favicon)
+        div(class="inner-upload-image" image-default=settingWebsiteInfo.favicon?settingWebsiteInfo.favicon:"")
           input(type="file" id="favicon" accept="image/*" filepond-image name="favicon")
       .inner-button.inner-two-col
         button Cập nhật

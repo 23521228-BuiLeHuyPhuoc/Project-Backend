@@ -6,6 +6,14 @@ const moment=require("moment");
 const slugify=require("slugify");
 const AccountAdmin=require("../../models/account-admin.model");
 module.exports.list=async(req,res)=>{
+    if(!req.permissions.includes('tour-view'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền xem tour!"
+        })
+        return;
+    }
     const findObject={
         deleted:false
     }
@@ -109,6 +117,14 @@ module.exports.list=async(req,res)=>{
 
 
 module.exports.create=async(req,res)=>{
+    if(!req.permissions.includes('tour-create'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền tạo tour!"
+        })
+        return;
+    }
     const categoryList= await categoryModel.find({
         deleted:false
     })
@@ -120,6 +136,14 @@ module.exports.create=async(req,res)=>{
     })
 }
 module.exports.trash= async(req,res)=>{
+    if(!req.permissions.includes('tour-trash'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền xem thùng rác tour!"
+        })
+        return;
+    }
     const findObject={
         deleted:true
     }
@@ -171,6 +195,14 @@ module.exports.trash= async(req,res)=>{
     })
 }
 module.exports.createPost=async(req,res)=>{
+    if(!req.permissions.includes('tour-create'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền tạo tour!"
+        })
+        return;
+    }
     try{
     if(req.body.position)
     {
@@ -212,6 +244,14 @@ catch(error)
 }
 }
 module.exports.edit=async(req,res)=>{
+    if(!req.permissions.includes('tour-edit'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền chỉnh sửa tour!"
+        })
+        return;
+    }
     const tour=await Tour.findOne({
         _id:req.params.id,
         deleted:false
@@ -230,6 +270,14 @@ module.exports.edit=async(req,res)=>{
     })
 }
 module.exports.trashPatch=async(req,res)=>{
+    if(!req.permissions.includes('tour-trash'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền sửa thùng rác tour!"
+        })
+        return;
+    }
     try{
     const id=req.params.id;
     const tour=await Tour.findOne({
@@ -291,6 +339,14 @@ catch(error)
 }
 }
 module.exports.editPatch=async(req,res)=>{
+    if(!req.permissions.includes('tour-edit'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền chỉnh sửa tour!"
+        })
+        return;
+    }
     try{
     const id=req.params.id;
     req.body.position=req.body.position?parseInt(req.body.position):0;
@@ -338,6 +394,14 @@ catch(error){
 }
 }
 module.exports.changeStatusPatch=async(req,res)=>{
+    if(!req.permissions.includes('tour-edit'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền sửa tour!"
+        })
+        return;
+    }
     const status=req.body.status;
     const idList=req.body.idList;
     const changeList=await Tour.find({
@@ -356,6 +420,14 @@ module.exports.changeStatusPatch=async(req,res)=>{
     })
 }
 module.exports.changeStatusTrashPatch=async(req,res)=>{
+    if(!req.permissions.includes('tour-trash'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền sửa thùng rác tour!"
+        })
+        return;
+    }
     const status=req.body.status;
     const idList=req.body.idList;
     const changeList={

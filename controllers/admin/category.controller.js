@@ -4,7 +4,14 @@ const CategoryTreeHelper=require('../../helpers/category.helper');
 const moment=require('moment');
 const slugify=require('slugify');
 module.exports.list=async (req,res)=>{
-    
+    if(!req.permissions.includes('category-view'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền xem danh mục!"
+        })
+        return;
+    }
     let find={
         deleted:false,
     }
@@ -95,6 +102,14 @@ module.exports.list=async (req,res)=>{
     })
 }
 module.exports.create=async (req,res)=>{
+    if(!req.permissions.includes('category-create'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền tạo danh mục!"
+        })
+        return;
+    }
     const categoryList=await Category.find({
         deleted:false
     })
@@ -105,6 +120,14 @@ module.exports.create=async (req,res)=>{
     })
 }
 module.exports.createPost=async(req,res)=>{
+    if(!req.permissions.includes('category-create'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền tạo danh mục!"
+        })
+        return;
+    }
     if(req.body.position)
     {
         req.body.position=parseInt(req.body.position);
@@ -135,6 +158,14 @@ module.exports.createPost=async(req,res)=>{
 
 }
 module.exports.edit=async(req,res)=>{
+    if(!req.permissions.includes('category-edit'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền chỉnh sửa danh mục!"
+        })
+        return;
+    }
     try{
     const categoryList=await Category.find({
         deleted:false
@@ -158,6 +189,14 @@ catch(error){
 }
 }
 module.exports.editPatch=async(req,res)=>{
+    if(!req.permissions.includes('category-edit'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền sửa danh mục!"
+        })
+        return;
+    }
     try{ 
     const id=req.params.id;
     
@@ -194,6 +233,14 @@ catch(error){
 }
 }
 module.exports.deletePatch=async(req,res)=>{
+    if(!req.permissions.includes('category-delete'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền xóa danh mục!"
+        })
+        return;
+    }
     try{
     const id=req.params.id;
     const category=await Category.findOne({
@@ -220,6 +267,14 @@ module.exports.deletePatch=async(req,res)=>{
     }
 }
 module.exports.changeStatusPatch=async(req,res)=>{
+    if(!req.permissions.includes('category-edit'))
+    {
+        res.json({
+            code:"error",
+            message:"Bạn không có quyền sửa danh mục!"
+        })
+        return;
+    }
     try{ 
     const status=req.body.status;
     const idList=req.body.updateList;
