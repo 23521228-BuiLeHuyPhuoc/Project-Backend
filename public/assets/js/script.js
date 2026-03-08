@@ -476,12 +476,58 @@ if(applyFilterCategorySearch){
 
 }
 
-
-
-
-
-
-
-
-
 //End Box Filter
+//Form Search
+const formSearch=document.querySelector("[form-search]");
+if(formSearch)
+{
+  formSearch.addEventListener("submit",(event)=>{
+    event.preventDefault();
+    const locationTo=formSearch.querySelector("input[name='locationTo']").value;
+    const url=new URL(window.location.origin+'/search');
+  if(locationTo){
+    url.searchParams.set("locationTo",locationTo);
+  }
+  else{
+    url.searchParams.delete("locationTo");
+  }
+  const stockAdult=parseInt(formSearch.querySelector("[stock-adult]").innerHTML);
+  const stockChildren=parseInt(formSearch.querySelector("[stock-children]").innerHTML);
+  const stockBaby=parseInt(formSearch.querySelector("[stock-baby]").innerHTML);
+  if(stockAdult){
+    url.searchParams.set("stockAdult",stockAdult);
+  }
+  else if(!stockAdult||stockAdult=="0"){
+    url.searchParams.delete("stockAdult");
+  }
+  if(stockChildren){
+    url.searchParams.set("stockChildren",stockChildren);
+  }
+  else if(!stockChildren||stockChildren=="0"){
+    url.searchParams.delete("stockChildren");
+  }
+  if(stockBaby){
+    url.searchParams.set("stockBaby",stockBaby);
+  }
+  else if(!stockBaby||stockBaby=="0"){
+    url.searchParams.delete("stockBaby");
+  }
+  const departureDate=formSearch.querySelector("input[name='departureDate']").value;
+  if(departureDate){
+    url.searchParams.set("departureDate",departureDate);
+  }
+  else{
+    url.searchParams.delete("departureDate");
+  }
+  window.location.href=url.href;
+
+
+  })
+}
+
+
+
+
+
+
+//End form search
