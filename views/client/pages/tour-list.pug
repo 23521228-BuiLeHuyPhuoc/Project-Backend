@@ -2,83 +2,7 @@ extends ../layouts/default.pug
 include ../mixins/box-breadcrumb.pug
 include ../mixins/product-item.pug
 block main 
-    // Breadcrumb
-    -
-        var breadcrumb={
-            image:"/assets/images/banner-6.jpg",
-            title:"Tour Nước Ngoài",
-            list: [            
-            {
-                link: "/",
-                title: "Trang Chủ"
-            },
-            {
-                link: "/tours",
-                title: "Tour Nước Ngoài"
-            }
-
-            ]
-        }
-    -
-        var productListSection9 = [
-            {
-                avatar: "/assets/images/product-1.jpg",
-                slug: "#",
-                discount: 30,
-                name: "Hà Nội - Lào Cai - SaPa 4N3Đ",
-                priceOld: 13650000,
-                priceNew: 2590000,
-                code: "TOUR000001",
-                departureDate: "22/12/2025",
-                time: "10 Ngày 9 Đêm",
-                ratingStars: 4,
-                ratingTotal: 20,
-                stock: 10
-            },
-            {
-                avatar: "/assets/images/product-2.jpg",
-                slug: "#",
-                discount: 0,
-                name: "Tour 2024 Phú Quốc - Thiên Đường Đảo Ngọc (3N2D)",
-                priceOld: 12000000,
-                priceNew: 12000000,
-                code: "TOUR000002",
-                departureDate: "24/12/2025",
-                time: "3 Ngày 2 Đêm",
-                ratingStars: 5,
-                ratingTotal: 30,
-                stock: 15
-            },
-            {
-                avatar: "/assets/images/product-3.jpg",
-                slug: "#",
-                discount: 30,
-                name: "Combo Đà Nẵng 2024: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL",
-                priceOld: 13650000,
-                priceNew: 2590000,
-                code: "TOUR000003",
-                departureDate: "22/12/2025",
-                time: "10 Ngày 9 Đêm",
-                ratingStars: 0,
-                ratingTotal: 0,
-                stock: 20
-            },
-            {
-                avatar: "/assets/images/product-3.jpg",
-                slug: "#",
-                discount: 30,
-                name: "Combo Đà Nẵng 2024: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL 2",
-                priceOld: 13650000,
-                priceNew: 2590000,
-                code: "TOUR000004",
-                departureDate: "22/12/2025",
-                time: "10 Ngày 9 Đêm",
-                ratingStars: 3,
-                ratingTotal: 12,
-                stock: 20
-            }
-        ];
-    //Breadcrumb
+    
     +box-breadcrumb(breadcrumb)
         // Section 9
     .section-9
@@ -170,8 +94,8 @@ block main
                             span.inner-title Bộ Lọc
                             i.fa-solid.fa-filter
                     .inner-list-tour 
-                        each item in productListSection9
-                            +product-item(item)
+                        //each item in productListSection9
+                            //+product-item(item)
                     // Pagination
                     .box-pagination
                         button

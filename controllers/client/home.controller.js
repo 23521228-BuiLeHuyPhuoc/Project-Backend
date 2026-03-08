@@ -32,13 +32,19 @@ module.exports.home=async(req, res) => {
     }).sort({
       position:"desc"
     }).limit(8)
-
-
-
-  
+    const categoryIdSection6='699d3e3d8c2cef9115a84fe1';
+    const categoryHelperFamilySection6= await FamilyHelper.CategoriesFamily(categoryIdSection6);
+    const tourListSection6=await Tour.find({
+      category:{$in:categoryHelperFamilySection6},
+      deleted:false,
+      status:"active"
+    }).sort({
+      position:"desc"
+    }).limit(8)
   res.render('client/pages/home',{
     pageTitle:"Trang chủ",
     tourListSection2:tourList,
-    tourListSection4:tourListSection4
+    tourListSection4:tourListSection4,
+    tourListSection6:tourListSection6
   })
 }
