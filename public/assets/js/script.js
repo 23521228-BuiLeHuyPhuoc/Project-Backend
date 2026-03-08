@@ -410,3 +410,78 @@ if(alertTime) {
   }, time);
 }
 // End Alert
+//Box Filter
+const boxFilter=document.querySelector(".box-filter");
+if(boxFilter)
+{
+  const url=new URL(window.location.origin+'/search');
+const applyFilterCategorySearch=boxFilter.querySelector("[apply-filter-category-search]");
+if(applyFilterCategorySearch){
+  applyFilterCategorySearch.addEventListener("click",()=>{
+  const locationFrom=boxFilter.querySelector("select[name='locationFrom']").value;
+  const locationTo=boxFilter.querySelector("select[name='locationTo']").value;
+  const departureDate=boxFilter.querySelector("input[name='departureDate']").value;
+  const stockAdult=boxFilter.querySelector("input[name='stockAdult']").value;
+  const stockChildren=boxFilter.querySelector("input[name='stockChildren']").value;
+  const stockBaby=boxFilter.querySelector("input[name='stockBaby']").value;
+  const priceRange=boxFilter.querySelector("select[name='priceRange']").value;
+  if(locationFrom){
+    url.searchParams.set("locationFrom",locationFrom);
+
+  }
+  else{
+    url.searchParams.delete("locationFrom");
+  }
+  if(locationTo){
+    url.searchParams.set("locationTo",locationTo);
+  }
+  else{
+    url.searchParams.delete("locationTo");
+  }
+  if(departureDate){
+    url.searchParams.set("departureDate",departureDate);
+  }
+  else{
+    url.searchParams.delete("departureDate");
+  }
+  if(stockAdult){
+    url.searchParams.set("stockAdult",stockAdult);
+  }
+  else{
+    url.searchParams.delete("stockAdult");
+  }
+  if(stockChildren)
+  {
+    url.searchParams.set("stockChildren",stockChildren);
+  }
+  else{
+    url.searchParams.delete("stockChildren");
+  }
+  if(stockBaby)
+  {
+    url.searchParams.set("stockBaby",stockBaby);
+  }
+  else{
+    url.searchParams.delete("stockBaby");
+  }
+  window.location.href=url.href;
+
+
+
+
+})
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+//End Box Filter
