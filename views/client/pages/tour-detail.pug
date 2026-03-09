@@ -2,30 +2,7 @@ extends ../layouts/default.pug
 include ../mixins/box-breadcrumb.pug
 block main
 
-    // Breadcrumb
-    -
-        var breadcrumb = {
-            image: "/assets/images/banner-7.jpg",
-            title: "Tour Hà Nội - Ninh Bình - Hạ Long - Yên Tử - Sapa | 6N5D",
-            list: [
-                {
-                    link: "/",
-                    title: "Trang Chủ"
-                },
-                {
-                    link: "/tours",
-                    title: "Tour Trong Nước"
-                },
-                {
-                    link: "/tours",
-                    title: "Tour Miền Bắc"
-                },
-                {
-                    link: "/tours/detail",
-                    title: "Tour Hà Nội - Ninh Bình - Hạ Long - Yên Tử - Sapa | 6N5D"
-                }
-            ]
-        };
+    
     +box-breadcrumb(breadcrumb)
     // End Breadcrumb
     // Section 10
@@ -37,69 +14,25 @@ block main
                         .inner-images-main
                             .swiper.swiper-box-images-main
                                 .swiper-wrapper
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-9.png"
-                                                )
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-10.png"
-                                                )
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-11.png"
-                                                )
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-12.png"
-                                                )
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-12.png"
-                                                )
+                                    each item in tour.images
+                                      .swiper-slide
+                                          .inner-image
+                                              img(
+                                                  alt="" 
+                                                  src=item
+                                                  )
+                                    
                         .inner-images-thumb
                             .swiper.swiper-box-images-thumb
                                 .swiper-wrapper
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-9.png"
-                                                )
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-10.png"
-                                                )
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-11.png"
-                                                )
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-12.png"
-                                                )
-                                    .swiper-slide
-                                        .inner-image
-                                            img(
-                                                alt="" 
-                                                src="/assets/images/banner-12.png"
-                                                )
+                                    each item in tour.images
+                                      .swiper-slide
+                                          .inner-image
+                                              img(
+                                                  alt="" 
+                                                  src=item
+                                                  )
+                                    
                     .box-tour-info
                         .inner-title Thông Tin Tour
                         .inner-content

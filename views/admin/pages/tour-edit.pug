@@ -5,7 +5,7 @@ block main
     h1.box-title Sửa tour
 
     .section-8
-        form#tour-edit-form(data-id=tour.id)
+        form#tour-edit-form(data-id=tour.id || tour._id)
             .inner-group(style="display: none;")
                 label(class="inner-label" for="id") Id
                 input(type="text" id="id" name="id" value=tour.id)
@@ -30,6 +30,13 @@ block main
                 label(class="inner-label" for="avatar" ) Ảnh đại diện
                 div(class="inner-upload-image" image-default=tour.avatar?tour.avatar:"")
                     input(type="file" id="avatar" accept="image/*" filepond-image name="avatar")
+
+            .inner-group.inner-two-col
+                label(class="inner-label" for="images") Danh sách ảnh
+                div(class="inner-upload-image-multi" list-image-default=tour.images&&tour.images.length>0?JSON.stringify(tour.images):"")
+                    input(type="file" multiple data-allow-reorder="true" id="images" accept="image/*" filepond-image-multi name="images")
+
+
             .inner-group
                 label(class="inner-label") Giá cũ
                 .inner-input-list
@@ -89,35 +96,35 @@ block main
 
                 label(class="inner-label") Lịch trình tour
                 if(tour.schedules.length>0)
-                  each schedule in tour.schedules
+                    each schedule in tour.schedules
+                        .inner-schedule
+                            .inner-schedule-list
+                                .inner-schedule-item
+                                    .inner-schedule-head
+                                        span(class="inner-schedule-button inner-move")
+                                            <i class="fa-solid fa-up-down-left-right"></i>
+                                        input(type="text" name="scheduleTitle" value=schedule.title)
+                                        span(class="inner-schedule-button inner-remove")
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        span(class="inner-schedule-button inner-more")
+                                            <i class="fa-solid fa-angle-down"></i>
+                                    .inner-schedule-body
+                                        textarea(textarea-mce name="scheduleContent" value=schedule.description) #{schedule.description}
+                else
                     .inner-schedule
                         .inner-schedule-list
                             .inner-schedule-item
                                 .inner-schedule-head
                                     span(class="inner-schedule-button inner-move")
                                         <i class="fa-solid fa-up-down-left-right"></i>
-                                    input(type="text" name="scheduleTitle" value=schedule.title)
+                                    input(type="text")
                                     span(class="inner-schedule-button inner-remove")
                                         <i class="fa-regular fa-trash-can"></i>
                                     span(class="inner-schedule-button inner-more")
                                         <i class="fa-solid fa-angle-down"></i>
                                 .inner-schedule-body
-                                    textarea(textarea-mce name="scheduleContent" value=schedule.description) #{schedule.description}
-                else
-                  .inner-schedule
-                      .inner-schedule-list
-                          .inner-schedule-item
-                              .inner-schedule-head
-                                  span(class="inner-schedule-button inner-move")
-                                      <i class="fa-solid fa-up-down-left-right"></i>
-                                  input(type="text")
-                                  span(class="inner-schedule-button inner-remove")
-                                      <i class="fa-regular fa-trash-can"></i>
-                                  span(class="inner-schedule-button inner-more")
-                                      <i class="fa-solid fa-angle-down"></i>
-                              .inner-schedule-body
-                                  textarea(textarea-mce)
-                      .inner-schedule-create + Thêm lich trình
+                                    textarea(textarea-mce)
+                        .inner-schedule-create + Thêm lich trình
             .inner-button.inner-two-col
                 button Chỉnh sửa
         .inner-back

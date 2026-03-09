@@ -215,7 +215,22 @@ module.exports.createPost=async(req,res)=>{
     }
     req.body.createdBy=req.account.id;
     req.body.updatedBy=req.account.id;
-    req.body.avatar=req.file?req.file.path:"";
+    if(req.files&&req.files.avatar)
+    {
+        req.body.avatar=req.files.avatar[0].path;
+    }
+    else{
+        delete req.body.avatar;
+    }
+    if(req.files&&req.files.images)
+    {
+        req.body.images=req.files.images.map(item=>item.path);
+
+    }
+    else{
+        delete req.body.images;
+    }
+    
     req.body.priceAdult=req.body.priceAdult?parseInt(req.body.priceAdult):0;
     req.body.priceChildren=req.body.priceChildren?parseInt(req.body.priceChildren):0;
     req.body.priceBaby=req.body.priceBaby?parseInt(req.body.priceBaby):0;
@@ -260,7 +275,7 @@ module.exports.edit=async(req,res)=>{
     const categoryList=await categoryModel.find({
         deleted:false
     })
-    const tourDepartureDate=tour.departureDate?moment(tour.departureDate).format("YYYY-MM-DD"):"";
+    const tourDepartureDate=tour&&tour.departureDate?moment(tour.departureDate).format("YYYY-MM-DD"):"";
     const cityList=await cityModel.find({})
     res.render("admin/pages/tour-edit",{
         pageTitle:"Chỉnh sửa tour",
@@ -361,7 +376,16 @@ module.exports.editPatch=async(req,res)=>{
     req.body.locations=req.body.locations?JSON.parse(req.body.locations):[];
     req.body.schedules=req.body.schedules?JSON.parse(req.body.schedules):[];
     req.body.departureDate=req.body.departureDate?moment(req.body.departureDate).toDate():null;
-    req.body.avatar=req.file?req.file.path:delete req.body.avatar;
+    if(req.files&&req.files.avatar&&req.files.avatar.length>0){
+        req.body.avatar=req.files.avatar[0].path;
+    }else{
+        delete req.body.avatar;
+    }
+    if(req.files&&req.files.images&&req.files.images.length>0){
+        req.body.images=req.files.images.map(item=>item.path);
+    }else{
+        delete req.body.images;
+    }
     req.body.priceAdult=req.body.priceAdult?parseInt(req.body.priceAdult):tour.priceAdult;
     req.body.priceChildren=req.body.priceChildren?parseInt(req.body.priceChildren):tour.priceChildren;
     req.body.priceBaby=req.body.priceBaby?parseInt(req.body.priceBaby):tour.priceBaby;

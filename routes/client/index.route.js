@@ -16,7 +16,7 @@ router.use(categoryMiddleware.list);
 router.use('/', homeRoutes );
 router.use('/cart', cartRoutes );
 router.use('/category', categoryRoutes );
-router.use('/tours', tourRoutes );
+router.use('/tour', tourRoutes );
 router.use('/contact',contactRoutes);
 router.use('/search',searchRoutes);
 

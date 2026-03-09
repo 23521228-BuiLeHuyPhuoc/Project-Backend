@@ -33,5 +33,33 @@ const CategoriesFamily=async(parentId)=>
    
 
 }
+const CategoriesParentToRoot=async(categories,categoryId)=>
+{
+    const catRecord=await Category.findOne({
+        _id:categoryId,
+        
+    })
+    const list=[];
+    list.push({
+        _id:catRecord._id,
+        name:catRecord.name,
+        slug:catRecord.slug
+    })
+    if(!catRecord || !catRecord.parent) return list;
+    for(const cat of categories)
+    {
+        if(cat._id.toString()==catRecord.parent.toString())
+        {
+             const parents = await CategoriesParentToRoot(categories,cat._id.toString());
+             list.unshift(...parents);
+             
+             break;
+       }
+
+    }
+
+    return list;
+}
+module.exports.CategoriesParentToRoot=CategoriesParentToRoot;
 module.exports.CategoriesFamily=CategoriesFamily;
 module.exports.buildCategoryTree=buildCategoryTree;

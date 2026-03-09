@@ -286,6 +286,14 @@ if(tourCreateForm) {
       formData.append("departureDate",departureDate);
       formData.append("information",information);
       formData.append("schedules",JSON.stringify(schedules));
+      // images
+      if(filePondMulti.images.getFiles().length > 0) {
+        filePondMulti.images.getFiles().forEach(item => {
+          formData.append("images", item.file);
+        })
+      }
+      // End images
+
       fetch(`/${pathAdmin}/tour/create`,{
         method:"POST",
         body:formData
@@ -390,6 +398,12 @@ if(tourEditForm) {
       formData.append("departureDate",departureDate);
       formData.append("information",information);
       formData.append("schedules",JSON.stringify(schedules));
+      if(filePondMulti.images.getFiles().length > 0) {
+        filePondMulti.images.getFiles().forEach(item => {
+          formData.append("images", item.file);
+        })
+      }
+
       fetch(`/${pathAdmin}/tour/edit/${idTour}`,{
         method:"PATCH",
         body:formData
@@ -923,6 +937,92 @@ if(filterAccountAdminRole)
     filterAccountAdminRole.value=rolefilter
   }
 }
+// Filepond Image Multi
+const listFilepondImageMulti = document.querySelectorAll("[filepond-image-multi]");
+let filePondMulti = {};
+if(listFilepondImageMulti.length > 0) {
+  listFilepondImageMulti.forEach(filepondImage => {
+    FilePond.registerPlugin(FilePondPluginImagePreview);
+    FilePond.registerPlugin(FilePondPluginFileValidateType);
+
+    let files = null;
+    const elementListImageDefault = filepondImage.closest("[list-image-default]");
+    if(elementListImageDefault) {
+      const rawListImageDefault = elementListImageDefault.getAttribute("list-image-default");
+      if(rawListImageDefault) {
+        let listImageDefault = [];
+        try {
+          const parsed = JSON.parse(rawListImageDefault);
+          if(Array.isArray(parsed)) {
+            listImageDefault = parsed;
+          } else if(typeof parsed === "string") {
+            listImageDefault = parsed.includes(",") ? parsed.split(",") : [parsed];
+          }
+        } catch (e) {
+          listImageDefault = rawListImageDefault.includes(",") ? rawListImageDefault.split(",") : [rawListImageDefault];
+        }
+
+        listImageDefault = listImageDefault
+          .map(item => {
+            if(typeof item === "string") {
+              return item.trim();
+            }
+            if(item && typeof item === "object") {
+              if(typeof item.path === "string") {
+                return item.path.trim();
+              }
+              if(typeof item.url === "string") {
+                return item.url.trim();
+              }
+              if(typeof item.secure_url === "string") {
+                return item.secure_url.trim();
+              }
+            }
+            return "";
+          })
+          .filter(Boolean);
+
+        if(listImageDefault.length > 0) {
+          files = listImageDefault.map(image => ({
+            source: image,
+            options: {
+              type: "local"
+            }
+          }));
+        }
+      }
+    }
+
+    filePondMulti[filepondImage.name] = FilePond.create(filepondImage, {
+      labelIdle: '+',
+      files: files,
+      server: {
+        load: (source, load, error, progress, abort) => {
+          const request = new XMLHttpRequest();
+          request.open("GET", source);
+          request.responseType = "blob";
+          request.onload = () => {
+            if(request.status >= 200 && request.status < 300) {
+              load(request.response);
+            } else {
+              error("Could not load image");
+            }
+          };
+          request.onerror = () => error("Could not load image");
+          request.send();
+
+          return {
+            abort: () => {
+              request.abort();
+              abort();
+            }
+          };
+        }
+      }
+    });
+  });
+}
+// End Filepond Image Multi
 
 //End Account Admin Filter
 //xoá filter

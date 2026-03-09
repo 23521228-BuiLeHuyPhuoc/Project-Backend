@@ -7,6 +7,7 @@ const schema=mongoose.Schema({
   position: String,
   status:String,
   avatar:String,
+  images:Array,
   priceAdult:Number,
   priceChildren:Number,
   priceBaby:Number,
