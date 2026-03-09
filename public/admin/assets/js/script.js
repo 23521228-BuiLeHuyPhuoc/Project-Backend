@@ -788,6 +788,153 @@ if(settingAccountAdminEditForm) {
   ;
 }
 //End account admin edit form
+//Account Admin change status
+//Check all
+const settingAccountAdminCheckall=document.querySelector("[setting-account-admin-checkall]");
+if(settingAccountAdminCheckall)
+{
+  settingAccountAdminCheckall.addEventListener("click",()=>{
+      const settingAccountAdminCheck=document.querySelectorAll("[setting-account-admin-check]");
+    settingAccountAdminCheck.forEach((item)=>{
+            item.checked=settingAccountAdminCheckall.checked;
+    })
+  })
+}
+//Change status
+const settingAccountAdminApply=document.querySelector("[setting-account-admin-apply]");
+if(settingAccountAdminApply){
+  settingAccountAdminApply.addEventListener("click",()=>{
+    const settingAccountAdminChangeStatus=document.querySelector("[setting-account-admin-change-status]").value;
+    const settingAccountAdminChecked=document.querySelectorAll("[setting-account-admin-check]:checked");
+    
+    fetch(`/${pathAdmin}/setting/account-admin/change-status`,{
+      method:"PATCH",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        status:settingAccountAdminChangeStatus,
+        idList:Array.from(settingAccountAdminChecked).map(item=>item.value)
+         
+      })
+    }).then(res=>res.json())
+    .then(data=>{
+      if(data.code=="success")
+      {
+        window.location.reload();
+      }
+      if(data.code=="error")
+      {
+        alert(data.message);
+      }
+        
+    })
+
+  })
+}
+
+//End account admin change status
+//Account Admin filter
+const filterAccountAdminStatus=document.querySelector("[filter-account-admin-status]");
+if(filterAccountAdminStatus){
+  const url=new URL(window.location.href);
+  filterAccountAdminStatus.addEventListener("change",()=>{
+    
+    const status=filterAccountAdminStatus.value;
+    if(status)
+    {
+    url.searchParams.set("status",status);
+  }
+  else{
+    url.searchParams.delete("status");
+  }
+  window.location.href=url.href;
+})
+  const filterStatus=url.searchParams.get("status");
+  if(filterStatus)
+  {
+    filterAccountAdminStatus.value=filterStatus;
+  }
+}
+const filterAccountAdminFromDate= document.querySelector("[filter-account-admin-fromDate]");
+if(filterAccountAdminFromDate)
+{
+  const url=new URL(window.location.href);
+  filterAccountAdminFromDate.addEventListener("change",()=>{
+    
+    const dateFrom=filterAccountAdminFromDate.value;
+    if(dateFrom)
+    {
+      url.searchParams.set("fromDate",dateFrom);
+    }
+    else{
+      url.searchParams.delete("fromDate");
+    }
+window.location.href=url.href;
+  })
+  const filterFromDate=url.searchParams.get("fromDate");
+  if(filterFromDate)
+  {
+    filterAccountAdminFromDate.value=filterFromDate;
+  }
+}
+const filterAccountAdminToDate= document.querySelector("[filter-account-admin-toDate]");
+if(filterAccountAdminToDate)
+{
+  const url=new URL(window.location.href);
+  filterAccountAdminToDate.addEventListener("change",()=>{
+    
+    const dateTo=filterAccountAdminToDate.value;
+    if(dateTo)
+    {
+      url.searchParams.set("toDate",dateTo);
+    }
+    else{
+      url.searchParams.delete("toDate");
+    }
+window.location.href=url.href;
+  })
+  const filterToDate=url.searchParams.get("toDate");
+  if(filterToDate)
+  {
+    filterAccountAdminToDate.value=filterToDate;
+  }
+}
+//Nhóm quyền filter
+const filterAccountAdminRole=document.querySelector('[filter-account-admin-role]')
+if(filterAccountAdminRole)
+{
+  const url=new URL(window.location.href);
+  filterAccountAdminRole.addEventListener("change",()=>{
+    const role =filterAccountAdminRole.value;
+    
+    if(role)
+    {
+      url.searchParams.set("role",role);
+    }
+    else{
+      url.searchParams.delete("role");
+    }
+    window.location.href=url.href
+  })
+  const rolefilter=url.searchParams.get("role");
+  if(rolefilter)
+  {
+    filterAccountAdminRole.value=rolefilter
+  }
+}
+
+//End Account Admin Filter
+//xoá filter
+const deleteFilterAccountAdmin=document.querySelector("[delete-setting-filter-account-admin]");
+if(deleteFilterAccountAdmin)
+{
+  deleteFilterAccountAdmin.addEventListener("click",()=>{
+    window.location.href=`/${pathAdmin}/setting/account-admin/list`;
+    
+  })
+}
+//hết xoá filter
 // Setting Role Create Form
 const settingRoleCreateForm = document.querySelector("#setting-role-create-form");
 if(settingRoleCreateForm) {
@@ -836,7 +983,7 @@ if(settingRoleCreateForm) {
         }
       })
     })
-  ;
+  
 }
 // End Setting Role Create Form
 //Setting edit role form

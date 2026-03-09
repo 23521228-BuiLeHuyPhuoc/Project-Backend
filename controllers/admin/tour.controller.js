@@ -71,10 +71,11 @@ module.exports.list=async(req,res)=>{
         const keyword=slugify(req.query.search,{
             lower:true,
             replacement:"-",
-            trim:true
+            trim:true,
+            locale:"vi"
         })
         const regex=new RegExp(keyword,"i");
-        findObject.name=regex;
+        findObject.slug=regex;
     }
 
     const totalPage=Math.ceil(totalRecord/itemperPage);
@@ -348,7 +349,12 @@ module.exports.editPatch=async(req,res)=>{
         return;
     }
     try{
-    const id=req.params.id;
+        const id=req.params.id;
+        const tour=await Tour.findOne({
+        _id:id,
+        deleted:false
+    })
+    
     req.body.position=req.body.position?parseInt(req.body.position):0;
     req.body.updatedBy=req.account.id;
     req.body.updatedAt=Date.now();
@@ -356,20 +362,17 @@ module.exports.editPatch=async(req,res)=>{
     req.body.schedules=req.body.schedules?JSON.parse(req.body.schedules):[];
     req.body.departureDate=req.body.departureDate?moment(req.body.departureDate).toDate():null;
     req.body.avatar=req.file?req.file.path:delete req.body.avatar;
-    req.body.priceAdult=req.body.priceAdult?parseInt(req.body.priceAdult):0;
-    req.body.priceChildren=req.body.priceChildren?parseInt(req.body.priceChildren):0;
-    req.body.priceBaby=req.body.priceBaby?parseInt(req.body.priceBaby):0;
-    req.body.priceNewAdult=req.body.priceNewAdult?parseInt(req.body.priceNewAdult):req.body.priceAdult;
-    req.body.priceNewChildren=req.body.priceNewChildren?parseInt(req.body.priceNewChildren):req.body.priceChildren;
-    req.body.priceNewBaby=req.body.priceNewBaby?parseInt(req.body.priceNewBaby):req.body.priceBaby;
-    req.body.stockAdult=req.body.stockAdult?parseInt(req.body.stockAdult):0;
-    req.body.stockChildren=req.body.stockChildren?parseInt(req.body.stockChildren):0;
-    req.body.stockBaby=req.body.stockBaby?parseInt(req.body.stockBaby):0;
+    req.body.priceAdult=req.body.priceAdult?parseInt(req.body.priceAdult):tour.priceAdult;
+    req.body.priceChildren=req.body.priceChildren?parseInt(req.body.priceChildren):tour.priceChildren;
+    req.body.priceBaby=req.body.priceBaby?parseInt(req.body.priceBaby):tour.priceBaby;
+    req.body.priceNewAdult=req.body.priceNewAdult?parseInt(req.body.priceNewAdult):tour.priceNewAdult;
+    req.body.priceNewChildren=req.body.priceNewChildren?parseInt(req.body.priceNewChildren):tour.priceNewChildren;
+    req.body.priceNewBaby=req.body.priceNewBaby?parseInt(req.body.priceNewBaby):tour.priceNewBaby;
+    req.body.stockAdult=req.body.stockAdult?parseInt(req.body.stockAdult):tour.stockAdult;
+    req.body.stockChildren=req.body.stockChildren?parseInt(req.body.stockChildren):tour.stockChildren;
+    req.body.stockBaby=req.body.stockBaby?parseInt(req.body.stockBaby):tour.stockBaby;
     
-    const tour=await Tour.findOne({
-        _id:id,
-        deleted:false
-    })
+    
     if(tour){
         await Tour.updateOne(tour,
             req.body

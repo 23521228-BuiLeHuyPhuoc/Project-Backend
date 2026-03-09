@@ -16,6 +16,8 @@ router.get('/account-admin/create',settingController.accountAdminCreate);
 router.get('/account-admin/edit/:id',settingController.accountAdminEdit);
 router.patch('/account-admin/edit/:id',upload.single('avatar'),settingController.accountEditPatch);
 router.post('/account-admin/create',upload.single('avatar'),settingController.accountAdminCreatePost);
+router.patch('/account-admin/change-status',settingController.changeStatusPatch);
+
 router.get('/role/edit/:id',settingController.roleEdit);
 router.patch('/role/edit/:id',settingController.roleEditPatch);
 router.get('/role/list',settingController.roleList);

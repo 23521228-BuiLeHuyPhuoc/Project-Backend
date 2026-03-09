@@ -9,22 +9,22 @@ block main
       .inner-item.inner-label
         <i class="fa-solid fa-filter"></i> Bộ lọc
       .inner-item
-        select
+        select(filter-account-admin-status)
           option(value="") Trạng thái
           option(value="initial") Khởi tạo
           option(value="active") Hoạt động
           option(value="inactive") Dừng hoạt động
 
       .inner-item.inner-date
-        input(type="date")
+        input(type="date" filter-account-admin-fromDate)
         span -
-        input(type="date")
+        input(type="date" filter-account-admin-toDate)
       .inner-item
-        select
+        select(filter-account-admin-role)
           option(value="") Nhóm quyền
           each item in roleList
             option(value=item._id)=item.name
-      .inner-item.inner-reset
+      .inner-item.inner-reset(delete-setting-filter-account-admin)
         <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
   //- End Section 4
 
@@ -33,16 +33,16 @@ block main
     .inner-wrap
       .inner-change-status
         .inner-item
-          select
+          select(setting-account-admin-change-status)
             option(value="") -- Hành động --
             option(value="active") Hoạt động
             option(value="inactive") Dừng hoạt động
             option(value="delete") Xóa
         .inner-item
-          button Áp dụng
+          button(setting-account-admin-apply) Áp dụng
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
-        input(type="text" placeholder="Tìm kiếm")
+        input(type="text" placeholder="Tìm kiếm" setting-account-admin-search)
       .inner-button-create
         a(href=`/${pathAdmin}/setting/account-admin/create`) + Tạo mới
   //- End Section 5
@@ -54,7 +54,7 @@ block main
         thead
           tr
             th(class="inner-center")
-              input(type="checkbox" class="inner-check")
+              input(type="checkbox" class="inner-check" setting-account-admin-checkall)
             th Họ tên
             th(class="inner-center") Ảnh đại diện
             th Email
@@ -67,7 +67,7 @@ block main
           each account in dsAccount
             tr
               td(class="inner-center")
-                input(type="checkbox" class="inner-check")
+                input(type="checkbox" class="inner-check" setting-account-admin-check value=account._id)
               td= account.fullName
               td(class="inner-center")
                 img(src=account.avatar?account.avatar:"/admin/assets/images/avatar.jpg" class="inner-avatar")

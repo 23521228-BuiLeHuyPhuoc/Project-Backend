@@ -20,6 +20,10 @@ mixin product-item(item)
                     .inner-price-new
                         | #{item.priceNewAdult.toLocaleString("vi-VN")}
                         span.inner-unit đ
+                else
+                    .inner-price-new
+                        | #{item.priceAdult.toLocaleString("vi-VN")}
+                        span.inner-unit đ
             .inner-desc
                 //- .inner-desc-item
                 //-     | Mã Tour:

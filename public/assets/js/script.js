@@ -464,6 +464,13 @@ if(applyFilterCategorySearch){
   else{
     url.searchParams.delete("stockBaby");
   }
+  if(priceRange)
+  {
+    url.searchParams.set("price",priceRange);
+  }
+  else{
+    url.searchParams.delete("price");
+  }
   window.location.href=url.href;
 
 

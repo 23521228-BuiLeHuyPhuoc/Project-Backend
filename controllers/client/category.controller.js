@@ -55,13 +55,18 @@ module.exports.list=async(req,res)=>{
     }).limit(8)
     for(const item of tourList)
         {
+          const priceAdultparse=parseInt(item.priceAdult);
+            const priceNewAdultparse=parseInt(item.priceNewAdult);
+            item.priceAdult=parseInt(priceAdultparse);
+            item.priceNewAdult=parseInt(priceNewAdultparse);
           if(item.departureDate)
           {
             item.departureFormatDate=moment(item.departureDate).format("DD/MM/YYYY");
           }
-          if(item.priceNewAdult&&item.priceAdult)
+           if(item.priceAdult&&item.priceNewAdult&&priceNewAdultparse<priceAdultparse)
           {
-            item.discount=parseInt((item.priceNewAdult-item.priceAdult)/item.priceAdult) *100;
+            
+            item.discount=(priceAdultparse-priceNewAdultparse)/priceAdultparse *100;
           }
           else{
             item.discount=0;

@@ -52,12 +52,32 @@ module.exports.websiteInfoPatch=async(req,res)=>{
 
 }
 module.exports.accountAdminList=async (req,res)=>{
-    const dsAccount=await AccountAdmin.find({
+    let findObj={
         deleted:false
-    })
+    }
+    if(req.query.status)
+    {
+        findObj.status=req.query.status
+        
+    }
+    if(req.query.role){
+        findObj.role=req.query.role
+    }
+    const dateFromTo={};
+    if(req.query.fromDate)
+    {
+        dateFromTo.$gte=new Date(req.query.fromDate);
+    }
+    if(req.query.toDate)
+    {
+        dateFromTo.$lte=new Date (req.query.toDate);
+    }
+
+    const dsAccount=await AccountAdmin.find(findObj)
     const roleList=await Role.find({
         deleted:false
     })
+
     res.render("admin/pages/setting-account-admin-list",{
         pageTitle:"Tài khoản quản trị",
         dsAccount:dsAccount,
@@ -82,7 +102,8 @@ module.exports.roleList=async (req,res)=>{
     const keyword=slugify(req.query.search,{
                 lower:true,
                 replacement:"-",
-                trim:true
+                trim:true,
+                locale:"vi" 
             });
     const regex=new RegExp(keyword,"i");
     dataFind.slug=regex;
@@ -245,4 +266,39 @@ module.exports.accountEditPatch=async(req,res)=>{
     res.json({
         code:"success"
     })
+}
+module.exports.changeStatusPatch=async(req,res)=>{
+    const status=req.body.status;
+    const idList=req.body.idList;
+    console.log(status);
+    console.log(idList);
+
+    const accountList=await AccountAdmin.find({
+        _id: {$in:idList}
+    })
+    if(status=="active"||status=="inactive")
+    {
+    if(accountList){
+    await AccountAdmin.updateMany({
+        _id:{$in:idList}
+    },{
+        status:req.body.status
+    })
+}
+    }
+    if(status=="delete")
+    {
+        if(accountList){
+            await AccountAdmin.updateMany({
+                _id:{$in:idList}
+            },{
+                deleted:true
+            })
+        }
+    }
+    req.flash("Thanh công","Đổi trạng thái thành công!");
+    res.json({
+        code:"success"
+    })
+
 }
