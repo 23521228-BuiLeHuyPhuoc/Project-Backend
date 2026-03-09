@@ -86,11 +86,10 @@ block main
                             .inner-image
                                 img(
                                     alt="" 
-                                    src="/assets/images/banner-13.png"
+                                    src=tour.avatar
                                     )
                             .inner-info
-                                .inner-title Hà Nội - Ninh Bình - Hạ Long - Yên Tử - Sapa | 6N5D
-                                .inner-rating
+                                .inner-title #{tour.name}
                                     .inner-stars
                                         i.fa-solid.fa-star
                                         i.fa-solid.fa-star
@@ -106,21 +105,22 @@ block main
                             .inner-item
                                 i.fa-solid.fa-calendar-days
                                 span Thời Gian:
-                                span.inner-highlight 6 Ngày 5 Đêm
+                                span.inner-highlight #{tour.time}
                             .inner-item
                                 i.fa-solid.fa-truck-plane
                                 span Phương Tiện:
-                                span.inner-highlight Ô tô 45 chỗ
+                                span.inner-highlight #{tour.vehicle}
                             .inner-item
                                 i.fa-solid.fa-calendar-days
                                 span Ngày Khởi Hành:
-                                span.inner-highlight 20/10/2024
+                                span.inner-highlight #{tour.departureFormatDate}
                         .inner-form
                             label.inner-label Khởi Hành Tại:
                             select
-                                option(value="") Hà Nội
-                                option(value="") Đà Nẵng
-                                option(value="") Hồ Chí Minh
+                                each location of tour.locations
+                                    each CITY of city
+                                        if String(location) == String(CITY._id)
+                                            option(value=CITY._id) #{CITY.name}
                         .inner-quantity
                             label.inner-label Số Lượng Hành Khách
                             .inner-list

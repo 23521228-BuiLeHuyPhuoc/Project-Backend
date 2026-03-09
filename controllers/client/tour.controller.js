@@ -1,6 +1,8 @@
 const Tour = require("../../models/tour.model");
 const CategoryHelper=require("../../helpers/category.helper");
 const Category=require("../../models/category.model");
+const City=require("../../models/city.model");
+const moment=require("moment");
 module.exports.detail= async(req,res)=>{
   const slug=req.params.slug;
   const tour=await Tour.findOne({
@@ -14,8 +16,10 @@ module.exports.detail= async(req,res)=>{
       deleted:false,
       status:"active"
     })
-    const CategoryTree=await CategoryHelper.CategoriesParentToRoot(category,tour.category.toString());
-    console.log(CategoryTree);
+    let CategoryTree=[];
+    if(tour.category){
+      CategoryTree=await CategoryHelper.CategoriesParentToRoot(category,tour.category.toString());
+    }
     const breadcrumb = {
             image: tour.avatar,
             title: tour.name,
@@ -37,10 +41,15 @@ module.exports.detail= async(req,res)=>{
         link:"/tour/detail/"+tour.slug,
         title:tour.name
     })
+    if(tour.departureDate){
+      tour.departureFormatDate=moment(tour.departureDate).format("DD/MM/YYYY");
+    }
+    const city=await City.find({});
     res.render("client/pages/tour-detail",{
     pageTitle:"Chi tiết tour",
     breadcrumb:breadcrumb,
-    tour:tour
+    tour:tour,
+    city:city
   })
   }
   else{

@@ -209,7 +209,7 @@ module.exports.editPatch=async(req,res)=>{
         avt=req.file.path;
     }
     if(category){
-       await Category.updateOne(category,{
+       await Category.updateOne({_id:id},{
             name:req.body.name,
             parent:req.body.parent,
             position:parseInt(req.body.position),
@@ -248,7 +248,7 @@ module.exports.deletePatch=async(req,res)=>{
         deleted:false
     })
     if(category){
-        await Category.updateOne(category,{
+        await Category.updateOne({_id:id},{
             deleted:true,
             deletedBy:req.account.id,
             deletedAt:Date.now()

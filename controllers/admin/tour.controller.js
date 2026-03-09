@@ -92,13 +92,17 @@ module.exports.list=async(req,res)=>{
             const createdUser=await AccountAdmin.findOne({
                 _id:tour.createdBy
             })
-            tour.createdUser=createdUser.fullName;
+            if(createdUser){
+                tour.createdUser=createdUser.fullName;
+            }
         }
         if(tour.updatedBy){
             const updatedUser=await AccountAdmin.findOne({
                 _id:tour.updatedBy
             })
-            tour.updatedUser=updatedUser.fullName;
+            if(updatedUser){
+                tour.updatedUser=updatedUser.fullName;
+            }
         }
     }
     const categoryList=await categoryModel.find({
@@ -173,15 +177,19 @@ module.exports.trash= async(req,res)=>{
     const trashList=await Tour.find(findObject).sort({
         position:"asc"
     }).limit(itemperPage).skip(skipPage);
-    for(tour of trashList){
+    for(const tour of trashList){
         const accountCreated=await AccountAdmin.findOne({
             _id:tour.createdBy
         })
-        tour.createdByFullName=accountCreated.fullName;
+        if(accountCreated){
+            tour.createdByFullName=accountCreated.fullName;
+        }
         const accountDeleted=await AccountAdmin.findOne({
             _id:tour.deletedBy
         })
-        tour.deletedByFullName=accountDeleted.fullName;
+        if(accountDeleted){
+            tour.deletedByFullName=accountDeleted.fullName;
+        }
         tour.deletedAtFormat=moment(tour.deletedAt).format("HH:mm - DD/MM/YYYY");
         tour.createdAtFormat=moment(tour.createdAt).format("HH:mm - DD/MM/YYYY");
     }
@@ -240,7 +248,8 @@ module.exports.createPost=async(req,res)=>{
     req.body.stockAdult=req.body.stockAdult?parseInt(req.body.stockAdult):0;
     req.body.stockChildren=req.body.stockChildren?parseInt(req.body.stockChildren):0;
     req.body.stockBaby=req.body.stockBaby?parseInt(req.body.stockBaby):0;
-    
+        req.body.category=req.body.category?req.body.category:"";
+
     req.body.locations = req.body.locations?JSON.parse(req.body.locations):[];
     req.body.schedules = req.body.schedules?JSON.parse(req.body.schedules):[];
     req.body.departureDate=req.body.departureDate?moment(req.body.departureDate).toDate():null;
@@ -386,6 +395,7 @@ module.exports.editPatch=async(req,res)=>{
     }else{
         delete req.body.images;
     }
+    req.body.category=req.body.category?req.body.category:"";
     req.body.priceAdult=req.body.priceAdult?parseInt(req.body.priceAdult):tour.priceAdult;
     req.body.priceChildren=req.body.priceChildren?parseInt(req.body.priceChildren):tour.priceChildren;
     req.body.priceBaby=req.body.priceBaby?parseInt(req.body.priceBaby):tour.priceBaby;
@@ -398,7 +408,7 @@ module.exports.editPatch=async(req,res)=>{
     
     
     if(tour){
-        await Tour.updateOne(tour,
+        await Tour.updateOne({_id:id},
             req.body
         )
         req.flash("success","Cập nhật tour thành công");

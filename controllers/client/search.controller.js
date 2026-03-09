@@ -42,11 +42,6 @@ module.exports.list=async(req,res)=>{
         objFind.stockChildren={$gte:parseInt(req.query.stockChildren)};
 
     }
-    if(req.query.stockChildren)
-    {
-        objFind.stockChildren={$gte:parseInt(req.query.stockChildren)};
-
-    }
     if(req.query.stockBaby)
     {
         objFind.stockBaby={$gte:parseInt(req.query.stockBaby)};

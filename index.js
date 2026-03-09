@@ -14,7 +14,7 @@ const cookieParser=require('cookie-parser');
 connect.connect();
 //sử dụng flash
 app.use(cookieParser("builehuyphuoc"));
-app.use(session({cookie:{maxAge:60000}}));
+app.use(session({secret:"builehuyphuoc", resave:false, saveUninitialized:true, cookie:{maxAge:60000}}));
 app.use(flash());
 
 app.set('views', path.join(__dirname, "views"));

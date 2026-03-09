@@ -20,15 +20,22 @@ module.exports.verifyToken=async (req,res,next)=>{
         res.redirect(`/${pathAdmin}/account/login`)
         return;
     }
-    const role=await Role.findOne({
-        _id:existAccount.role,
-        deleted:false
-    })
-    req.permissions=role.permissions;
+    let role=null;
+    let permissions=[];
+    if(existAccount.role){
+        role=await Role.findOne({
+            _id:existAccount.role,
+            deleted:false
+        })
+    }
+    if(role){
+        permissions=role.permissions;
+    }
+    req.permissions=permissions;
     req.account=existAccount;
     res.locals.account=existAccount;
     res.locals.role=role;
-    res.locals.permission=role.permissions;
+    res.locals.permission=permissions;
     next();
 }
 catch(error){

@@ -15,9 +15,9 @@ module.exports.home=async(req, res) => {
       {
         item.departureFormatDate=moment(item.departureDate).format("DD/MM/YYYY");
       }
-      if(item.priceNewAdult&&item.priceAdult)
+      if(item.priceNewAdult&&item.priceAdult&&item.priceNewAdult<item.priceAdult)
       {
-        item.discount=parseInt((item.priceNewAdult-item.priceAdult)/item.priceAdult) *100;
+        item.discount=Math.round((item.priceAdult-item.priceNewAdult)/item.priceAdult*100);
       }
       else{
         item.discount=0;
