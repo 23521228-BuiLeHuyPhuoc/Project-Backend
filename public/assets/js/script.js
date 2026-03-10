@@ -581,7 +581,8 @@ buttonAddToCart.addEventListener("click",()=>{
       quantityAdult:quantityAdult,
       quantityChildren:quantityChildren,
       quantityBaby:quantityBaby,
-      locationFrom:locationFrom
+      locationFrom:locationFrom,
+      checked:true
     }
     const cart=JSON.parse(localStorage.getItem("cart"));
     const indexItemExist=cart.findIndex(item=>item.tourId==tourId);
@@ -640,7 +641,7 @@ const drawCart=()=>{
         <button class="inner-delete">
           <i class="fa-solid fa-xmark" tour-id=${item.tourId} button-delete></i>
         </button>
-        <input class="inner-check" type="checkbox">
+        <input class="inner-check" type="checkbox" ${item.checked?'checked':""} checkbox-tour-id=${item.tourId}>
       </div>
       <div class="inner-product">
         <div class="inner-image">
@@ -725,10 +726,13 @@ const drawCart=()=>{
       //Tính tổng tiền
       let totalPrice=0;
       for(const item of data.cart){
+        if(item.checked==true)
+        {
         const priceAdult=item.quantityAdult*item.priceNewAdult;
         const priceChildren=item.quantityChildren*item.priceNewChildren;
         const priceBaby=item.quantityBaby*item.priceNewBaby;
         totalPrice += priceAdult + priceChildren + priceBaby;
+        }
       }        
       const elementTotalPrice=document.querySelector(`[cart-sub-total]`);
       elementTotalPrice.innerHTML=totalPrice.toLocaleString("vi-VN");
@@ -751,6 +755,7 @@ const drawCart=()=>{
       
       })
     })
+
     //sự kiện xoá item
     const listButtonDelete=document.querySelectorAll("[button-delete]");
     listButtonDelete.forEach(button=>{
@@ -763,7 +768,19 @@ const drawCart=()=>{
         drawCart();
       })
     })
-
+    //CHecked item
+    const checkBoxTourId=document.querySelectorAll("[checkbox-tour-id]");
+    checkBoxTourId.forEach(item=>{
+      item.addEventListener("change",()=>{
+        const tourId=item.getAttribute("checkbox-tour-id");
+        const status=item.checked;
+        const cart=JSON.parse(localStorage.getItem("cart"));
+        const updateOne=cart.find(cartItem=>cartItem.tourId==tourId);
+        updateOne["checked"]=status;
+        localStorage.setItem("cart",JSON.stringify(cart));
+        drawCart();
+      })
+    })
     }
   })
 }
