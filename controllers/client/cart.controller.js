@@ -25,10 +25,17 @@ module.exports.cartDetailPost=async(req,res)=>{
       item.priceNewChildren = tourInfo.priceNewChildren;
       item.priceNewBaby = tourInfo.priceNewBaby;
 
-      const city = await City.findOne({
+      
+      if(item.locationFrom)
+      {
+const city = await City.findOne({
         _id: item.locationFrom
       });
       item.locationFromName = city.name;
+      }
+      else{
+        item.locationFromName = "";
+      }
     } else {
       // Nếu không lấy được tour thì xóa tour khỏi giỏ hàng
       const indexItem = cart.findIndex(tour => tour.tourId == item.tourId);

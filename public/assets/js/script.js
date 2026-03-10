@@ -638,7 +638,7 @@ const drawCart=()=>{
     <div class="inner-tour-item">
       <div class="inner-actions">
         <button class="inner-delete">
-          <i class="fa-solid fa-xmark"></i>
+          <i class="fa-solid fa-xmark" tour-id=${item.tourId} button-delete></i>
         </button>
         <input class="inner-check" type="checkbox">
       </div>
@@ -748,12 +748,22 @@ const drawCart=()=>{
           itemUpdate[type]=value;
           localStorage.setItem("cart",JSON.stringify(cart));
           drawCart();
-
+      
       })
     })
-    
-    
-    
+    //sự kiện xoá item
+    const listButtonDelete=document.querySelectorAll("[button-delete]");
+    listButtonDelete.forEach(button=>{
+      button.addEventListener("click",()=>{
+        const tourId=button.getAttribute("tour-id");
+        const cart=JSON.parse(localStorage.getItem("cart"));
+        const indexItem=cart.findIndex(item=>item.tourId==tourId);
+        cart.splice(indexItem,1);
+        localStorage.setItem("cart",JSON.stringify(cart));
+        drawCart();
+      })
+    })
+
     }
   })
 }
