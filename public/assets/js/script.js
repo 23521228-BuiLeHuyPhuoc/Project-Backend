@@ -538,3 +538,85 @@ if(formSearch)
 
 
 //End form search
+//Box Tour Detail
+const boxTourDetail=document.querySelector(".box-tour-detail");
+if(boxTourDetail)
+{
+const inputStockAdult=document.querySelector("[input-stock-adult]");
+const inputStockChildren=document.querySelector("[input-stock-children]");
+const inputStockBaby=document.querySelector("[input-stock-baby]");
+//function chung
+const drawBoxDetail=()=>{
+  const quantityAdult=parseInt(inputStockAdult.value);
+  const quantityChildren=parseInt(inputStockChildren.value);
+  const quantityBaby=parseInt(inputStockBaby.value);
+  const stockAdult=document.querySelector("[stock-adult]");
+  const stockChildren=document.querySelector("[stock-children]");
+  const stockBaby=document.querySelector("[stock-baby]");
+  stockAdult.innerHTML=quantityAdult;
+  stockChildren.innerHTML=quantityChildren;
+  stockBaby.innerHTML=quantityBaby;
+  const priceAdult=parseInt(inputStockAdult.getAttribute("price"));
+  const priceChildren=parseInt(inputStockChildren.getAttribute("price"));
+  const priceBaby=parseInt(inputStockBaby.getAttribute("price"));
+  const totalPrice=quantityAdult*priceAdult+quantityChildren*priceChildren+quantityBaby*priceBaby;
+  const elementTotalPrice=boxTourDetail.querySelector("[total-price]");
+  elementTotalPrice.innerHTML=totalPrice.toLocaleString("vi-VN");
+  }
+
+inputStockAdult.addEventListener("change",drawBoxDetail);
+inputStockChildren.addEventListener("change",drawBoxDetail);
+inputStockBaby.addEventListener("change",drawBoxDetail);
+const buttonAddToCart=boxTourDetail.querySelector(".inner-button-add-cart");
+buttonAddToCart.addEventListener("click",()=>{
+  const tourId=buttonAddToCart.getAttribute("tour-id");
+  const quantityAdult=parseInt(inputStockAdult.value);
+  const quantityChildren=parseInt(inputStockChildren.value);
+  const quantityBaby=parseInt(inputStockBaby.value);
+  const locationFrom=boxTourDetail.querySelector("[location-from]").value;
+  if(quantityAdult>0||quantityChildren>0||quantityBaby>0)
+  {
+    const cartItem={
+      tourId:tourId,
+      quantityAdult:quantityAdult,
+      quantityChildren:quantityChildren,
+      quantityBaby:quantityBaby,
+      locationFrom:locationFrom
+    }
+    const cart=JSON.parse(localStorage.getItem("cart"));
+    const indexItemExist=cart.findIndex(item=>item.tourId==tourId);
+    if(indexItemExist!=-1)
+    {
+      cart[indexItemExist].quantityAdult+=cartItem.quantityAdult;
+      cart[indexItemExist].quantityChildren+=cartItem.quantityChildren;
+      cart[indexItemExist].quantityBaby+=cartItem.quantityBaby;
+      localStorage.setItem("cart",JSON.stringify(cart));
+      window.location.href="/cart";
+    }
+    else{
+       cart.push(cartItem);
+    localStorage.setItem("cart",JSON.stringify(cart));
+    window.location.href="/cart";
+    }
+   
+  }
+})
+
+}
+
+//End Box Tour Detail
+//Initial Cart
+const cart=localStorage.getItem("cart");
+if(!cart)
+{
+  localStorage.setItem("cart",JSON.stringify([]));
+}
+//End Initial Cart
+//Mini Cart
+const miniCart=document.querySelector("[mini-cart]");
+if(miniCart){
+  const cart=JSON.parse(localStorage.getItem("cart"));
+  miniCart.innerHTML=cart.length;
+
+}
+//End Mini Cart

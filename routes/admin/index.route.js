@@ -9,6 +9,7 @@ const userRoutes=require('./user.route');
 const contactRoutes=require('./contact.route');
 const settingRoutes=require('./setting.route');
 const profileRoutes=require('./profile.route');
+const uploadRoutes=require('./upload.route');
 router.use((req,res,next)=>{
     res.setHeader("Cache-Control","no-store");
     next();
@@ -22,6 +23,7 @@ router.use('/tour',authMiddleware.verifyToken,tourRoutes);
 router.use('/account', accountRoutes);
 router.use('/dashboard',authMiddleware.verifyToken,dashboardRoutes);
 router.use('/category',authMiddleware.verifyToken,categoryRoutes);
+router.use('/upload',authMiddleware.verifyToken,uploadRoutes);
 router.use(authMiddleware.verifyToken,(req,res)=>{
     res.render("admin/pages/error-404",{
         pageTitle:"Không tìm thấy trang"
