@@ -376,11 +376,64 @@ if(orderForm) {
       const phone = event.target.phone.value;
       const note = event.target.note.value;
       const method = event.target.method.value;
+      let cart=JSON.parse(localStorage.getItem("cart"));
+      cart=cart.filter(item=>{
+       return item.checked==true&&(item.quantityAdult+item.quantityChildren+item.quantityBaby)>0
+      });
+      cart=cart.map(item=>{
+        return {
+          tourId:item.tourId,
+          locationFrom:item.locationFrom,
+          quantityAdult:item.quantityAdult,
+          quantityChildren:item.quantityChildren,
+          quantityBaby:item.quantityBaby
+        }
+      })
+      if(cart.length>0)
+      {
+        const dataFinal={
+          fullName:fullName,
+          phone:phone,
+          note:note,
+          paymentMethod:method,
+          items:cart
+        }
+        console.log(dataFinal);
+        fetch(`/order/create`,{
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify(dataFinal)
+        }).then(res=>res.json())
+        .then(data=>{
+          if(data.code=="success")
+          {
 
-      console.log(fullName);
-      console.log(phone);
-      console.log(note);
-      console.log(method);
+            let cart=JSON.parse(localStorage.getItem("cart"));
+            cart=cart.filter(item=>item.checked==false);
+            localStorage.setItem("cart",JSON.stringify(cart));
+            window.location.href=`/order/success?orderId=${data.orderId}&phone=${phone}`;
+
+          }
+          if(data.code=="error")
+          {
+            alert(data.message);
+          }
+        })
+      }
+      else{
+        alert("Vui lòng đặt ít nhất 1 tour!");
+        
+      }
+
+
+
+
+
+
+
+      
     })
   ;
 
@@ -588,11 +641,28 @@ buttonAddToCart.addEventListener("click",()=>{
     const indexItemExist=cart.findIndex(item=>item.tourId==tourId);
     if(indexItemExist!=-1)
     {
+      if(cart[indexItemExist].stockAdult && cart[indexItemExist].quantityAdult + cartItem.quantityAdult > parseInt(cart[indexItemExist].stockAdult)
+      || cart[indexItemExist].stockChildren && cart[indexItemExist].quantityChildren + cartItem.quantityChildren > parseInt(cart[indexItemExist].stockChildren)
+      || cart[indexItemExist].stockBaby && cart[indexItemExist].quantityBaby + cartItem.quantityBaby > parseInt(cart[indexItemExist].stockBaby)
+      )
+      {
+        alert("Số lượng Tour trong giỏ vượt quá số lượng hiện có!");
+        return;
+      }
+       if(cart[indexItemExist].locationFrom==locationFrom) {
+      
       cart[indexItemExist].quantityAdult+=cartItem.quantityAdult;
       cart[indexItemExist].quantityChildren+=cartItem.quantityChildren;
       cart[indexItemExist].quantityBaby+=cartItem.quantityBaby;
       localStorage.setItem("cart",JSON.stringify(cart));
       window.location.href="/cart";
+      }
+      else if(cart[indexItemExist].locationFrom!=locationFrom){
+
+        cart.push(cartItem);
+    localStorage.setItem("cart",JSON.stringify(cart));
+    window.location.href="/cart";
+      }
     }
     else{
        cart.push(cartItem);
@@ -639,9 +709,9 @@ const drawCart=()=>{
     <div class="inner-tour-item">
       <div class="inner-actions">
         <button class="inner-delete">
-          <i class="fa-solid fa-xmark" tour-id=${item.tourId} button-delete></i>
+          <i class="fa-solid fa-xmark" tour-id=${item.tourId} location-from="${item.locationFrom}" button-delete></i>
         </button>
-        <input class="inner-check" type="checkbox" ${item.checked?'checked':""} checkbox-tour-id=${item.tourId}>
+        <input class="inner-check" type="checkbox" ${item.checked?'checked':""} checkbox-tour-id=${item.tourId} location-from="${item.locationFrom}">
       </div>
       <div class="inner-product">
         <div class="inner-image">
@@ -671,9 +741,11 @@ const drawCart=()=>{
             <div class="inner-item-input">
               <input value=${item.quantityAdult} 
               min="0" 
+              max="${item.stockAdult}"
               type="number"
               input-quantity="quantityAdult"
               tour-id="${item.tourId}"
+              location-from="${item.locationFrom}"
               >
             </div>
             <div class="inner-item-price">
@@ -687,9 +759,11 @@ const drawCart=()=>{
             <div class="inner-item-input">
               <input value=${item.quantityChildren}
                min="0" 
+               max="${item.stockChildren}"
                type="number"
                input-quantity="quantityChildren"
               tour-id="${item.tourId}"
+              location-from="${item.locationFrom}"
                >
             </div>
             <div class="inner-item-price">
@@ -703,9 +777,11 @@ const drawCart=()=>{
             <div class="inner-item-input">
               <input value=${item.quantityBaby} 
               min="0" 
+              max="${item.stockBaby}"
               type="number"
               input-quantity="quantityBaby"
               tour-id="${item.tourId}"
+              location-from="${item.locationFrom}"
               >
             </div>
             <div class="inner-item-price">
@@ -746,10 +822,13 @@ const drawCart=()=>{
       input.addEventListener("change",()=>{
           const value=parseInt(input.value);
           const tourId=input.getAttribute("tour-id");
+          const locationFrom=input.getAttribute("location-from");
           const type=input.getAttribute("input-quantity");
           const cart=JSON.parse(localStorage.getItem("cart"));
-          const itemUpdate=cart.find(item=>item.tourId==tourId);
-          itemUpdate[type]=value;
+          const itemUpdate=cart.find(item=>item.tourId==tourId && item.locationFrom==locationFrom);
+          if(itemUpdate){
+            itemUpdate[type]=value;
+          }
           localStorage.setItem("cart",JSON.stringify(cart));
           drawCart();
       
@@ -761,8 +840,9 @@ const drawCart=()=>{
     listButtonDelete.forEach(button=>{
       button.addEventListener("click",()=>{
         const tourId=button.getAttribute("tour-id");
+        const locationFrom=button.getAttribute("location-from");
         const cart=JSON.parse(localStorage.getItem("cart"));
-        const indexItem=cart.findIndex(item=>item.tourId==tourId);
+        const indexItem=cart.findIndex(item=>item.tourId==tourId && item.locationFrom==locationFrom);
         cart.splice(indexItem,1);
         localStorage.setItem("cart",JSON.stringify(cart));
         drawCart();
@@ -773,9 +853,10 @@ const drawCart=()=>{
     checkBoxTourId.forEach(item=>{
       item.addEventListener("change",()=>{
         const tourId=item.getAttribute("checkbox-tour-id");
+        const locationFrom=item.getAttribute("location-from");
         const status=item.checked;
         const cart=JSON.parse(localStorage.getItem("cart"));
-        const updateOne=cart.find(cartItem=>cartItem.tourId==tourId);
+        const updateOne=cart.find(cartItem=>cartItem.tourId==tourId && cartItem.locationFrom==locationFrom);
         updateOne["checked"]=status;
         localStorage.setItem("cart",JSON.stringify(cart));
         drawCart();

@@ -11,6 +11,7 @@ const categoryRoutes=require('./category.route');
 const settingMiddleware=require('../../middlewares/client/setting.middlewares');
 const categoryMiddleware=require('../../middlewares/client/category.middleware');
 const searchRoutes=require('./search.route');
+const orderRoutes=require('./order.route');
 router.use(settingMiddleware.websiteInfo);
 router.use(categoryMiddleware.list);
 router.use('/', homeRoutes );
@@ -18,6 +19,7 @@ router.use('/cart', cartRoutes );
 router.use('/category', categoryRoutes );
 router.use('/tour', tourRoutes );
 router.use('/contact',contactRoutes);
+router.use('/order',orderRoutes);
 router.use('/search',searchRoutes);
 
 module.exports=router;

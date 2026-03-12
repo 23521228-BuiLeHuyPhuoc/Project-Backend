@@ -25,6 +25,19 @@ module.exports.cartDetailPost=async(req,res)=>{
       item.priceNewChildren = tourInfo.priceNewChildren;
       item.priceNewBaby = tourInfo.priceNewBaby;
 
+      // Tính stock còn lại: trừ đi số lượng của các item khác cùng tourId
+      const otherItems = cart.filter(
+        c => c.tourId == item.tourId && c.locationFrom != item.locationFrom
+      );
+      let usedAdult = 0, usedChildren = 0, usedBaby = 0;
+      for (const other of otherItems) {
+        usedAdult += parseInt(other.quantityAdult) || 0;
+        usedChildren += parseInt(other.quantityChildren) || 0;
+        usedBaby += parseInt(other.quantityBaby) || 0;
+      }
+      item.stockAdult = tourInfo.stockAdult - usedAdult;
+      item.stockChildren = tourInfo.stockChildren - usedChildren;
+      item.stockBaby = tourInfo.stockBaby - usedBaby;
       
       if(item.locationFrom)
       {

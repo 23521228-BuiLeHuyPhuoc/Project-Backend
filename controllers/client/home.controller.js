@@ -17,7 +17,7 @@ module.exports.home=async(req, res) => {
       }
       if(item.priceNewAdult&&item.priceAdult&&item.priceNewAdult<item.priceAdult)
       {
-        item.discount=Math.round((item.priceAdult-item.priceNewAdult)/item.priceAdult*100);
+        item.discount=Number(((item.priceAdult-item.priceNewAdult)/item.priceAdult*100).toFixed(2));
       }
       else{
         item.discount=0;

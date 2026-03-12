@@ -66,7 +66,7 @@ module.exports.list=async(req,res)=>{
            if(item.priceAdult&&item.priceNewAdult&&priceNewAdultparse<priceAdultparse)
           {
             
-            item.discount=(priceAdultparse-priceNewAdultparse)/priceAdultparse *100;
+        item.discount=Number(((item.priceAdult-item.priceNewAdult)/item.priceAdult*100).toFixed(2));
           }
           else{
             item.discount=0;
