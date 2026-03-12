@@ -7,7 +7,7 @@ block main
         h4 Cảm ơn quý khách đã đặt tour! Chúng tôi sẽ liên hệ lại với quý khách trong thời gian sớm nhất.
         .inner-head
           .inner-title Thông tin đơn hàng
-        p Mã đơn hàng: OD0123456789
+        p Mã đơn hàng: #{order.orderCode}
         p Tên khách hàng: #{order.fullName}
         p Số điện thoại: #{order.phone}
         p Ghi chú: #{order.note}
@@ -47,14 +47,14 @@ block main
             .inner-tour-item
               .inner-product
                 .inner-image
-                  a(href="#")
+                  a(href=`/tour/detail/${item.slug}`)
                     img(
                       alt="" 
                       src=item.avatar
                       )
                 .inner-content
                   .inner-title
-                    a(href="#") #{item.name}
+                    a(href=`/tour/detail/${item.slug}`) #{item.name}
                   .inner-meta
                     .inner-meta-item
                       | Ngày Khởi Hành: 
@@ -88,6 +88,7 @@ block main
           .inner-item
             .inner-label Tổng tiền:
             .inner-price #{(order.discount+order.total).toLocaleString("vi-VN")}
+              span đ
           .inner-item
             .inner-label Giảm:
             .inner-price #{order.discount.toLocaleString("vi-VN")}

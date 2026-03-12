@@ -2,7 +2,10 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
-    orderCode: String,
+    orderCode:{
+        type:String,
+        unique:true
+    },
     fullName: String,
     phone: String,
     note: String,

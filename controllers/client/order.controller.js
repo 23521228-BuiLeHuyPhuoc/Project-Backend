@@ -2,6 +2,7 @@ const Tour=require('../../models/tour.model');
 const Order=require('../../models/order.model');
 const moment=require('moment');
 const City=require('../../models/city.model');
+const generateHelper=require('../../helpers/generate.helper');
 module.exports.createPost=async(req,res)=>{
    try{
     let subTotal=0;
@@ -31,6 +32,8 @@ module.exports.createPost=async(req,res)=>{
         }
 
     }
+        req.body.orderCode="OD"+Date.now();
+        
         req.body.discount=0;
         req.body.total=subTotal-req.body.discount;
         req.body.paymentStatus="unpaid";
@@ -79,6 +82,7 @@ module.exports.success=async(req,res)=>{
             if(tour._id==item.tourId)
             {
                 item.name=tour.name;
+                item.slug=tour.slug;
             }
         }
         item.formatDepartureDate=moment(item.departureDate).format("DD/MM/YYYY");
