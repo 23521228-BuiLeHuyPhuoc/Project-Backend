@@ -460,19 +460,42 @@ if(orderEditForm) {
       },
     ])
     .onSuccess((event) => {
+      const id = event.target.querySelector("#id")?.value;
+      if(!id) {
+        alert("Không tìm thấy mã đơn hàng để cập nhật");
+        return;
+      }
       const fullName = event.target.fullName.value;
       const phone = event.target.phone.value;
       const note = event.target.note.value;
       const paymentMethod = event.target.paymentMethod.value;
       const paymentStatus = event.target.paymentStatus.value;
       const status = event.target.status.value;
+      fetch(`/${pathAdmin}/order/edit/${id}`,{
+        method:"PATCH",
+        headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        fullName:fullName,
+        phone:phone,
+        note:note,
+        paymentMethod:paymentMethod,
+        paymentStatus:paymentStatus,
+        status:status
+      })
+      }).then(res=>res.json())
+      .then(data=>{
+        if(data.code=="success")
+        {
+          window.location.reload();
+        }
+        if(data.code=="error")
+        {
+          alert(data.message);
+        }
+      })
 
-      console.log(fullName);
-      console.log(phone);
-      console.log(note);
-      console.log(paymentMethod);
-      console.log(paymentStatus);
-      console.log(status);
     })
   ;
 }

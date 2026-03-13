@@ -947,7 +947,9 @@ a {
   border-radius: 14px;
   overflow: hidden;
   width: 100%;
-  min-width: 1141px;
+  min-width: 1184px;
+
+
 }
 
 .table-2 table thead tr th {

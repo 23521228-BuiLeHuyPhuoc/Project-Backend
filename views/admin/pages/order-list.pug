@@ -56,47 +56,57 @@ block main
             th(class="inner-center") Ngày đặt
             th Hành động
         tbody
-          tr
-            td
-              .inner-code OD000001
-            td
-              div Họ tên: Lê Văn A
-              div SĐT: 0123456789
-              div Ghi chú: Test...
-            td
-              .inner-item
-                .inner-image
-                  img(src="/admin/assets/images/tour-1.jpg", alt="Tour Hạ Long")
-                .inner-content
-                  .inner-name Tour Hạ Long
-                  .inner-quantity Người lớn: 3 x 1.500.000đ
-                  .inner-quantity Trẻ em: 2 x 1.300.000đ
-                  .inner-quantity Em bé: 2 x 1.000.000đ
-              .inner-item
-                .inner-image
-                  img(src="/admin/assets/images/tour-1.jpg", alt="Tour Hạ Long")
-                .inner-content
-                  .inner-name Tour Hạ Long
-                  .inner-quantity Người lớn: 3 x 1.500.000đ
-                  .inner-quantity Trẻ em: 2 x 1.300.000đ
-                  .inner-quantity Em bé: 2 x 1.000.000đ
-            td
-              div Tổng tiền: 10.000.000đ
-              div Giảm: 400.000đ
-              div Mã giảm: TOURMUAHE2024
-              div Thanh toán: 9.600.000đ
-              div PTTT: Ví Momo
-              div TTTT: Đã thanh toán
-            td
-              .badge.badge-orange Khởi tạo
-            td(class="inner-center")
-              div 16:20
-              div 01/01/2024
-            td
-              .inner-buttons
-                a(href=`/${pathAdmin}/order/edit`) 
-                  button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
-                button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
+          each order in orderList
+            tr
+              td
+                .inner-code  #{order.orderCode?order.orderCode:"null"}
+              td
+                div #{order.fullName}
+                div SĐT: #{order.phone}
+                div Ghi chú: #{order.note}
+              td
+                each item in order.items
+                  .inner-item
+                    .inner-image
+                      img(src=item.avatar, alt="")
+                    .inner-content
+                      .inner-name #{item.Name}
+                      .inner-quantity Người lớn: #{item.quantityAdult} x #{item.priceNewAdult.toLocaleString("vi-VN")}đ
+                      .inner-quantity Trẻ em: #{item.quantityChildren} x #{item.priceNewChildren.toLocaleString("vi-VN")}đ
+                      .inner-quantity Em bé: #{item.quantityBaby} x #{item.priceNewBaby.toLocaleString("vi-VN")}đ
+                
+              td
+                div Tổng tiền: #{(order.total + order.discount).toLocaleString("vi-VN")}đ
+                div Giảm: #{order.discount.toLocaleString("vi-VN")}đ
+                div Mã giảm: TOURMUAHE2024
+                div Thanh toán: #{order.total.toLocaleString("vi-VN")}đ
+                div
+                  |PTTT: 
+                  if order.paymentMethod=="momo"
+                    | Ví Momo
+                  else if order.paymentMethod=="money"
+                    | Tiền mặt
+                  else if order.paymentMethod=="zalopay"
+                    | ZaloPay
+                  else 
+                    | Chưa xác định
+                div 
+                  |TTTT: 
+                  if (order.paymentStatus=="unpaid")
+                    | Chưa thanh toán 
+                  else 
+                    | Đã thanh toán
+              td
+                -if(order.status=="initial")
+                .badge.badge-orange Khởi tạo
+                
+              td(class="inner-center")
+                div #{order.FormatCreatedAt}
+              td
+                .inner-buttons
+                  a(href=`/${pathAdmin}/order/edit/${order._id}`) 
+                    button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
+                  button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
   //- End Section 6
 
   //- Section 7
