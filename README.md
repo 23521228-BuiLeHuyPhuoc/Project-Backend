@@ -267,14 +267,17 @@ Chuyển đổi ứng dụng thành **Progressive Web App (PWA)** với khả n�
 
 ```bash
 # Clone repository
-git clone <repository-url>
+git clone https://github.com/23521228-BuiLeHuyPhuoc/Project-Backend.git
+
+# Di chuyển vào thư mục dự án
+cd Project-Backend
 
 # Cài đặt dependencies
 yarn install
 
 # Tạo file .env từ .env.example
 cp .env.example .env
-# Cập nhật các biến môi trường trong file .env
+# Cập nhật các biến môi trường trong file .env (xem bảng bên dưới)
 
 # Chạy ở chế độ development
 yarn dev
@@ -282,6 +285,19 @@ yarn dev
 # Chạy ở chế độ production
 yarn start
 ```
+
+### Biến Môi Trường (.env)
+
+| Biến | Mô tả |
+|---|---|
+| `DATABASE` | Connection string MongoDB (MongoDB Atlas hoặc local) |
+| `JWT_SECRET` | Khóa bí mật để tạo JWT token |
+| `EMAIL_USERNAME` | Địa chỉ Gmail dùng gửi email (OTP, thông báo) |
+| `EMAIL_PASSWORD` | App password của Gmail |
+| `EMAIL_SECURE` | `true` cho production, `false` cho local |
+| `CLOUDINARY_CLOUD_NAME` | Tên cloud Cloudinary |
+| `CLOUDINARY_API_KEY` | API key Cloudinary |
+| `API_SECRET_KEY` | API secret key Cloudinary |
 
 ## 📁 Cấu Trúc Thư Mục
 
