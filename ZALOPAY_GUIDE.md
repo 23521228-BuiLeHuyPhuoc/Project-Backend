@@ -289,18 +289,63 @@ Server sẽ chạy tại `http://localhost:3000`.
 
 ## Tài khoản test ZaloPay Sandbox
 
-Khi thanh toán trên trang ZaloPay Sandbox, sử dụng thông tin test sau:
+Khi thanh toán trên trang ZaloPay Sandbox, bạn có thể chọn nhiều phương thức thanh toán khác nhau. Dưới đây là thông tin thẻ test cho từng loại:
 
-### Thẻ ATM test:
+### 1. Thẻ tín dụng / ghi nợ quốc tế (Visa / Mastercard / JCB)
+
+#### Thẻ Visa test:
 | Thông tin | Giá trị |
 |-----------|---------|
-| Ngân hàng | Chọn bất kỳ ngân hàng nào |
+| Số thẻ | `4111 1111 1111 1111` |
+| Tên chủ thẻ | `NGUYEN VAN A` |
+| Ngày hết hạn | `01/25` |
+| CVV | `123` |
+
+#### Thẻ Mastercard test:
+| Thông tin | Giá trị |
+|-----------|---------|
+| Số thẻ | `5200 0000 0000 1096` |
+| Tên chủ thẻ | `NGUYEN VAN A` |
+| Ngày hết hạn | `01/25` |
+| CVV | `123` |
+
+#### Thẻ JCB test:
+| Thông tin | Giá trị |
+|-----------|---------|
+| Số thẻ | `3566 0000 0000 0000` |
+| Tên chủ thẻ | `NGUYEN VAN A` |
+| Ngày hết hạn | `01/25` |
+| CVV | `123` |
+
+### 2. Thẻ ATM nội địa (Domestic Debit Card)
+
+| Thông tin | Giá trị |
+|-----------|---------|
+| Ngân hàng | Chọn bất kỳ ngân hàng nào trong danh sách |
 | Số thẻ | `9704 0000 0000 0018` |
 | Tên chủ thẻ | `NGUYEN VAN A` |
 | Ngày phát hành | `03/07` |
 | OTP | `otp` |
 
-> **Lưu ý:** Đây là thông tin test, chỉ hoạt động trên môi trường Sandbox.
+### 3. Ví ZaloPay (QR Code)
+
+Khi chọn phương thức **Ví ZaloPay**, trang thanh toán sẽ hiển thị mã QR. Trong môi trường Sandbox, bạn có thể quét mã QR bằng app ZaloPay (phiên bản Sandbox) hoặc chọn phương thức thanh toán khác (thẻ tín dụng / ATM) để test.
+
+### Tóm tắt nhanh — dùng thẻ nào để test?
+
+| Bạn muốn test | Loại thẻ | Số thẻ |
+|----------------|----------|--------|
+| Thanh toán thẻ quốc tế | Visa | `4111 1111 1111 1111` |
+| Thanh toán thẻ quốc tế | Mastercard | `5200 0000 0000 1096` |
+| Thanh toán thẻ quốc tế | JCB | `3566 0000 0000 0000` |
+| Thanh toán thẻ nội địa | ATM | `9704 0000 0000 0018` |
+
+> **Lưu ý quan trọng:**
+> - Tất cả thông tin trên chỉ hoạt động trên môi trường **Sandbox** (app_id = `554`).
+> - Tên chủ thẻ luôn dùng `NGUYEN VAN A` cho mọi loại thẻ.
+> - Với thẻ quốc tế: dùng ngày hết hạn `01/25` và CVV `123`.
+> - Với thẻ ATM nội địa: dùng ngày phát hành `03/07` và OTP `otp`.
+> - Nếu giao dịch thất bại, kiểm tra lại `ZALOPAY_APP_ID` và các key trong `.env`.
 
 ---
 
