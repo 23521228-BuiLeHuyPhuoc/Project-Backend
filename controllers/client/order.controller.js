@@ -127,7 +127,7 @@ module.exports.paymentZaloPay=async(req,res)=>{
     endpoint: "https://sb-openapi.zalopay.vn/v2/create"
 };
 const embed_data = {
-      redirecturl: `https://810f-2405-4802-1bf2-d830-4401-74a4-5de7-bfcd.ngrok-free.app/order/success?orderId=${orderDetail.id}&phone=${orderDetail.phone}`
+      redirecturl: `https://nonproportionally-unwild-albertine.ngrok-free.dev/order/success?orderId=${orderDetail.id}&phone=${orderDetail.phone}`
     };
 
 
