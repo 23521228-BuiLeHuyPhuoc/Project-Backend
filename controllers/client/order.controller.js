@@ -6,6 +6,7 @@ const generateHelper=require('../../helpers/generate.helper');
 const axios=require('axios');
 const CryptoJS=require('crypto-js');
 require('dotenv').config();
+const sortHelper=require('../../helpers/sort.helper');
 module.exports.createPost=async(req,res)=>{
    try{
     let subTotal=0;
@@ -125,7 +126,7 @@ module.exports.paymentZaloPay=async(req,res)=>{
     app_id: process.env.ZALOPAY_APPID,
     key1: process.env.ZALOPAY_KEY1,
     key2: process.env.ZALOPAY_KEY2,
-    endpoint: "https://sb-openapi.zalopay.vn/v2/create"
+    endpoint: process.env.ZALOPAY_ENDPOINT
 };
 const embed_data = {
       redirecturl: `${process.env.NGROK}/order/success?orderId=${orderDetail.id}&phone=${orderDetail.phone}`
@@ -216,4 +217,112 @@ module.exports.paymentZaloPayResultPost = async (req, res) => {
 
   // thông báo kết quả cho ZaloPay server
   res.json(result);
+}
+module.exports.paymentVnPay=async(req,res)=>{
+    try{
+        const OrderId=req.params.orderId;
+        const orderDetail=await Order.findOne({
+            deleted:false,
+            paymentStatus:"unpaid",
+            _id:OrderId
+        });
+        if(!orderDetail)        {
+           res.redirect("/");
+           return;
+        
+    }
+    let date = new Date();
+    let createDate = moment(date).format('YYYYMMDDHHmmss');
+    
+    let ipAddr = req.headers['x-forwarded-for'] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
+
+    
+    
+    let tmnCode = process.env.VNPAY_TMNCODE;
+    let secretKey = process.env.VNPAY_SECRETKEY;
+    let vnpUrl = process.env.VNPAY_URL;
+    let returnUrl = `${process.env.NGROK}/order/payment-vnpay-result`;
+    let orderId = `${OrderId}-${Date.now()}`;
+    let amount = orderDetail.total;
+    let bankCode = "";
+    
+    let locale = "vn";
+    let currCode = 'VND';
+    let vnp_Params = {};
+    vnp_Params['vnp_Version'] = '2.1.0';
+    vnp_Params['vnp_Command'] = 'pay';
+    vnp_Params['vnp_TmnCode'] = tmnCode;
+    vnp_Params['vnp_Locale'] = locale;
+    vnp_Params['vnp_CurrCode'] = currCode;
+    vnp_Params['vnp_TxnRef'] = orderId;
+    vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD:' + orderId;
+    vnp_Params['vnp_OrderType'] = 'other';
+    vnp_Params['vnp_Amount'] = amount * 100;
+    vnp_Params['vnp_ReturnUrl'] = returnUrl;
+    vnp_Params['vnp_IpAddr'] = ipAddr;
+    vnp_Params['vnp_CreateDate'] = createDate;
+    if(bankCode !== null && bankCode !== ''){
+        vnp_Params['vnp_BankCode'] = bankCode;
+    }
+
+    vnp_Params = sortHelper.sortObject(vnp_Params);
+
+    let querystring = require('qs');
+    let signData = querystring.stringify(vnp_Params, { encode: false });
+    let crypto = require("crypto");     
+    let hmac = crypto.createHmac("sha512", secretKey);
+    let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex"); 
+    vnp_Params['vnp_SecureHash'] = signed;
+    vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+
+    res.redirect(vnpUrl)
+}
+    catch(error){
+        res.redirect("/");
+    }
+
+}
+module.exports.paymentVnPayResult=async(req,res)=>{
+    let vnp_Params = req.query;
+
+    let secureHash = vnp_Params['vnp_SecureHash'];
+
+    delete vnp_Params['vnp_SecureHash'];
+    delete vnp_Params['vnp_SecureHashType'];
+
+    vnp_Params = sortHelper.sortObject(vnp_Params);
+
+    let secretKey = process.env.VNPAY_SECRETKEY;
+
+    let querystring = require('qs');
+    let signData = querystring.stringify(vnp_Params, { encode: false });
+    let crypto = require("crypto");     
+    let hmac = crypto.createHmac("sha512", secretKey);
+    let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
+
+    if(secureHash === signed){
+        //Kiem tra xem du lieu trong db co hop le hay khong va thong bao ket qua
+        if(vnp_Params['vnp_ResponseCode'] === '00'&& vnp_Params['vnp_TransactionStatus']==='00') {
+        const orderId=vnp_Params['vnp_TxnRef'].split("-")[0];
+        const orderDetail=await Order.findOne({
+            _id:orderId,
+            deleted:false
+        })
+        await Order.updateOne({
+            _id:orderId,
+            deleted:false
+        },{
+                paymentStatus:"paid"
+        })
+        res.redirect(`${process.env.NGROK}/order/success?orderId=${orderId}&phone=${orderDetail.phone}`);
+    }
+    else{
+        res.redirect("/");
+    }
+    } else{
+        res.redirect("/");
+    }
 }

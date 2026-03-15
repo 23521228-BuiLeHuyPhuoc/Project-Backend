@@ -424,8 +424,9 @@ if(orderForm) {
               case "momo":
                 window.location.href=`/order/payment-momo/${data.orderId}`;
                 break;
-            
-            
+              case "vnpay":
+                window.location.href=`/order/payment-vnpay/${data.orderId}`;
+              break;
             
             
             }
