@@ -120,59 +120,37 @@ module.exports.paymentZaloPay=async(req,res)=>{
             paymentStatus:"unpaid",
             _id:orderId
         });
+        const config = {
+    app_id: "2553",
+    key1: "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
+    key2: "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
+    endpoint: "https://sb-openapi.zalopay.vn/v2/create"
+};
+const embed_data = {};
 
-        if(!orderDetail) {
-            return res.status(404).json({
-                code:"error",
-                message:"Không tìm thấy đơn hàng hoặc đơn đã thanh toán"
-            });
-        }
+const items = [{}];
+const transID = Math.floor(Math.random() * 1000000);
+const order = {
+    app_id: config.app_id,
+    app_trans_id: `${moment().format('YYMMDD')}_${transID}`, // translation missing: vi.docs.shared.sample_code.comments.app_trans_id
+    app_user: `${orderDetail.phone}-${orderDetail._id}`, 
+    app_time: Date.now(), // miliseconds
+    item: JSON.stringify(items),
+    embed_data: JSON.stringify(embed_data),
+    amount: 50000,
+    description: `Lazada - Payment for the order #${transID}`,
+    bank_code: "",
+};
 
-        const appId=Number(process.env.ZALOPAY_APP_ID || 554);
-        const key1=process.env.ZALOPAY_KEY1 || "8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn";
-        const endpoint=process.env.ZALOPAY_ENDPOINT || "https://sb-openapi.zalopay.vn/v2/create";
+// appid|app_trans_id|appuser|amount|apptime|embeddata|item
+const data = config.app_id + "|" + order.app_trans_id + "|" + order.app_user + "|" + order.amount + "|" + order.app_time + "|" + order.embed_data + "|" + order.item;
+order.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
 
-        const appTime=Date.now();
-        const appTransId=`${moment().format('YYMMDD')}_${orderDetail.orderCode}_${appTime}`;
-        const item=JSON.stringify(orderDetail.items || []);
-        const embedData=JSON.stringify({
-            orderId:String(orderDetail._id),
-            redirect:"/order/success"
-        });
-
-        const data={
-            app_id:appId,
-            app_user:String(orderDetail.phone || "guest"),
-            app_trans_id:appTransId,
-            app_time:appTime,
-            item:item,
-            embed_data:embedData,
-            amount:Number(orderDetail.total || 0),
-            description:`Thanh toan don hang ${orderDetail.orderCode}`,
-            bank_code:""
-        };
-
-        const dataForMac=`${data.app_id}|${data.app_trans_id}|${data.app_user}|${data.amount}|${data.app_time}|${data.embed_data}|${data.item}`;
-        data.mac=CryptoJS.HmacSHA256(dataForMac, key1).toString();
-
-        const response=await axios.post(endpoint, data, {
-            headers:{
-                "Content-Type":"application/json",
-                "Accept":"application/json"
-            }
-        });
-
-        console.log("ZaloPay response:", response.data);
-
-        if(response.data?.return_code === 1 && response.data?.order_url) {
-            return res.redirect(response.data.order_url);
-        }
-
-        return res.status(400).json({
-            code:"error",
-            message:response.data?.return_message || "Không thể tạo giao dịch ZaloPay",
-            data:response.data
-        });
+axios.post(config.endpoint, null, { params: order })
+    .then(res => {
+        console.log(res.data);
+    })
+    .catch(err => console.log(err));
     }
     catch(error)
     {
@@ -183,4 +161,49 @@ module.exports.paymentZaloPay=async(req,res)=>{
             detail:error.response?.data || error.message
         });
     }
+}
+module.exports.paymentZaloPayResultPost = async (req, res) => {
+  const config = {
+    key2: "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz"
+  };
+
+  let result = {};
+
+  try {
+    let dataStr = req.body.data;
+    let reqMac = req.body.mac;
+
+    let mac = CryptoJS.HmacSHA256(dataStr, config.key2).toString();
+    console.log("mac =", mac);
+
+
+    // kiểm tra callback hợp lệ (đến từ ZaloPay server)
+    if (reqMac !== mac) {
+      // callback không hợp lệ
+      result.return_code = -1;
+      result.return_message = "mac not equal";
+    }
+    else {
+      // thanh toán thành công
+      let dataJson = JSON.parse(dataStr, config.key2);
+      const [ phone, orderId ] = dataJson.app_user.split("-");
+
+      await Order.updateOne({
+        _id: orderId,
+        phone: phone,
+        deleted: false
+      }, {
+        paymentStatus: "paid"
+      })
+
+      result.return_code = 1;
+      result.return_message = "success";
+    }
+  } catch (ex) {
+    result.return_code = 0; // ZaloPay server sẽ callback lại (tối đa 3 lần)
+    result.return_message = ex.message;
+  }
+
+  // thông báo kết quả cho ZaloPay server
+  res.json(result);
 }
