@@ -413,7 +413,24 @@ if(orderForm) {
             let cart=JSON.parse(localStorage.getItem("cart"));
             cart=cart.filter(item=>item.checked==false);
             localStorage.setItem("cart",JSON.stringify(cart));
-            window.location.href=`/order/success?orderId=${data.orderId}&phone=${phone}`;
+            switch(method){
+              case "money":
+              case "bank":
+              window.location.href=`/order/success?orderId=${data.orderId}&phone=${phone}`;
+                break;
+              case "zalopay":
+                window.location.href=`/order/payment-zalopay/${data.orderId}`;
+                break;
+              case "momo":
+                window.location.href=`/order/payment-momo/${data.orderId}`;
+                break;
+            
+            
+            
+            
+            }
+            
+            
 
           }
           if(data.code=="error")

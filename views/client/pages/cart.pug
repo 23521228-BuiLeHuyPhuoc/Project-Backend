@@ -10,7 +10,7 @@ block main
                         | Quay lại mua hàng
                         i.fa-solid.fa-angle-right
                 .inner-tour-list(cart-list)
-                    
+
                     // Tour Item
                     // Nhân bản Tour Item
                     // End Tour Item
@@ -26,16 +26,16 @@ block main
                     .inner-item
                         .inner-label Tổng tiền:
                         .inner-price
-                          span(cart-sub-total) 0 
-                          span đ
+                            span(cart-sub-total) 0 
+                            span đ
                     .inner-item
                         .inner-label Giảm:
                         .inner-price -0 đ
                     .inner-item
                         .inner-label Thanh toán:
                         .inner-price-highlight 
-                          span(cart-total) 0 
-                          span đ
+                            span(cart-total) 0 
+                            span đ
     // End Section 11
     // Section 12
     .section-12
@@ -79,6 +79,13 @@ block main
                                     type="radio"
                                     )
                                 label(for="methodMomo") Ví MoMo
+                            .inner-item
+                                input#methodZaloPay(
+                                    value="zalopay" 
+                                    name="method" 
+                                    type="radio"
+                                    )
+                                label(for="methodZaloPay") Ví ZaloPay
                             .inner-item
                                 input#methodBank(
                                     value="bank" 
