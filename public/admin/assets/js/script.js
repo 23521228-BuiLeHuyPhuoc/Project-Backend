@@ -105,24 +105,83 @@ if(listFilepondImage.length > 0) {
 }
 // End Filepond Image
 
-
 // Biểu đồ doanh thu
 const revenueChart = document.querySelector("#revenue-chart");
+let revenueChartInstance = null;
+
 if(revenueChart) {
-  new Chart(revenueChart, {
+  const now = new Date();
+  drawChart(now);
+}
+
+const inputDate = document.querySelector('.section-2 .inner-filter input[type="month"]');
+
+if(inputDate){
+  inputDate.addEventListener("change",()=>{
+    const now = new Date(inputDate.value);
+    drawChart(now);
+  })
+}
+// Hết Biểu đồ doanh thu
+function drawChart(now) {
+  // Lấy ngày hiện tại
+  // const now = new Date();
+
+  // Lấy tháng và năm hiện tại
+  const currentMonth = now.getMonth() + 1; // getMonth() trả về giá trị từ 0 đến 11, nên cần +1
+  const currentYear = now.getFullYear();
+
+  // Tạo một đối tượng Date mới cho tháng trước
+  // Nếu hiện tại là tháng 1 thì new Date(currentYear, 0 - 1, 1) sẽ tự động chuyển thành tháng 12 của năm trước.
+  const previousMonthDate = new Date(currentYear, now.getMonth() - 1, 1);
+
+  // Lấy tháng và năm từ đối tượng previousMonthDate
+  const previousMonth = previousMonthDate.getMonth() + 1;
+  const previousYear = previousMonthDate.getFullYear();
+
+  // Lấy ra tổng số ngày
+  const daysInMonthCurrent = new Date(currentYear, currentMonth, 0).getDate();
+  const daysInMonthPrevious = new Date(previousYear, previousMonth, 0).getDate();
+  const days = daysInMonthCurrent > daysInMonthPrevious ? daysInMonthCurrent : daysInMonthPrevious;
+  const arrayDay = [];
+  for(let i = 1; i <= days; i++) {
+    arrayDay.push(i);
+  }
+  const dataFinal = {
+    currentMonth: currentMonth,
+    currentYear: currentYear,
+    previousMonth: previousMonth,
+    previousYear: previousYear,
+    arrayDay: arrayDay
+  };
+  fetch(`/${pathAdmin}/dashboard/revenue-chart`, {
+    method: "POST",
+    headers: {
+    "Content-Type": "application/json"
+    }
+    ,body:JSON.stringify(dataFinal)
+  }).then(res => res.json())
+  .then(data => {
+    if(data.code=="success")
+    {
+      if(revenueChartInstance) {
+        revenueChartInstance.destroy();
+      }
+
+      revenueChartInstance = new Chart(revenueChart, {
     type: 'line',
     data: {
-      labels: ['01', '02', '03', '04', '05'],
+      labels: arrayDay,
       datasets: [
         {
-          label: 'Tháng 04/2025', // Nhãn của dataset
-          data: [1200000, 1800000, 3200000, 900000, 1600000], // Dữ liệu
+           label: `Tháng ${currentMonth}/${currentYear}`, // Nhãn của dataset
+          data: data.dataMonthCurrent, // Dữ liệu
           borderColor: '#4379EE', // Màu viền
           borderWidth: 1.5, // Độ dày của đường
         },
         {
-          label: 'Tháng 03/2025', // Nhãn của dataset
-          data: [1000000, 900000, 1200000, 1200000, 1400000], // Dữ liệu
+          label: `Tháng ${previousMonth}/${previousYear}`, // Nhãn của dataset
+          data: data.dataMonthPrevious, // Dữ liệu
           borderColor: '#EF3826', // Màu viền
           borderWidth: 1.5, // Độ dày của đường
         }
@@ -151,8 +210,13 @@ if(revenueChart) {
       maintainAspectRatio: false, // Không giữ tỷ lệ khung hình mặc định
     }
   });
+    }
+    if(data.code=="error")
+    {
+      alert(data.message);
+    }
+  })
 }
-// Hết Biểu đồ doanh thu
 
 // Category Create Form
 const categoryCreateForm = document.querySelector("#category-create-form");
