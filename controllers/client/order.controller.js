@@ -126,7 +126,10 @@ module.exports.paymentZaloPay=async(req,res)=>{
     key2: "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
     endpoint: "https://sb-openapi.zalopay.vn/v2/create"
 };
-const embed_data = {};
+const embed_data = {
+      redirecturl: `https://810f-2405-4802-1bf2-d830-4401-74a4-5de7-bfcd.ngrok-free.app/order/success?orderId=${orderDetail.id}&phone=${orderDetail.phone}`
+    };
+
 
 const items = [{}];
 const transID = Math.floor(Math.random() * 1000000);
@@ -137,20 +140,26 @@ const order = {
     app_time: Date.now(), // miliseconds
     item: JSON.stringify(items),
     embed_data: JSON.stringify(embed_data),
-    amount: 50000,
-    description: `Lazada - Payment for the order #${transID}`,
+    amount: orderDetail.total,
+    description: `Thanh toán đơn hàng ${orderDetail.orderCode}`,
     bank_code: "",
+    callback_url: `https://nonproportionally-unwild-albertine.ngrok-free.dev/order/payment-zalopay-result`
 };
 
 // appid|app_trans_id|appuser|amount|apptime|embeddata|item
 const data = config.app_id + "|" + order.app_trans_id + "|" + order.app_user + "|" + order.amount + "|" + order.app_time + "|" + order.embed_data + "|" + order.item;
 order.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
 
-axios.post(config.endpoint, null, { params: order })
-    .then(res => {
-        console.log(res.data);
-    })
-    .catch(err => console.log(err));
+const response=await axios.post(config.endpoint, null, { params: order })
+    if(response.data.return_code==1)
+    {
+        res.redirect(response.data.order_url);
+    }
+    else{
+        res.redirect("/");
+
+    }
+
     }
     catch(error)
     {
