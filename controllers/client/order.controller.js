@@ -5,6 +5,7 @@ const City=require('../../models/city.model');
 const generateHelper=require('../../helpers/generate.helper');
 const axios=require('axios');
 const CryptoJS=require('crypto-js');
+require('dotenv').config();
 module.exports.createPost=async(req,res)=>{
    try{
     let subTotal=0;
@@ -121,13 +122,13 @@ module.exports.paymentZaloPay=async(req,res)=>{
             _id:orderId
         });
         const config = {
-    app_id: "2553",
-    key1: "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
-    key2: "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
+    app_id: process.env.ZALOPAY_APPID,
+    key1: process.env.ZALOPAY_KEY1,
+    key2: process.env.ZALOPAY_KEY2,
     endpoint: "https://sb-openapi.zalopay.vn/v2/create"
 };
 const embed_data = {
-      redirecturl: `https://nonproportionally-unwild-albertine.ngrok-free.dev/order/success?orderId=${orderDetail.id}&phone=${orderDetail.phone}`
+      redirecturl: `${process.env.NGROK}/order/success?orderId=${orderDetail.id}&phone=${orderDetail.phone}`
     };
 
 
@@ -143,7 +144,7 @@ const order = {
     amount: orderDetail.total,
     description: `Thanh toán đơn hàng ${orderDetail.orderCode}`,
     bank_code: "",
-    callback_url: `https://nonproportionally-unwild-albertine.ngrok-free.dev/order/payment-zalopay-result`
+    callback_url: `${process.env.NGROK}/order/payment-zalopay-result`
 };
 
 // appid|app_trans_id|appuser|amount|apptime|embeddata|item
@@ -173,7 +174,7 @@ const response=await axios.post(config.endpoint, null, { params: order })
 }
 module.exports.paymentZaloPayResultPost = async (req, res) => {
   const config = {
-    key2: "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz"
+    key2: process.env.ZALOPAY_KEY2
   };
 
   let result = {};
