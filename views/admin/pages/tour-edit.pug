@@ -95,10 +95,10 @@ block main
             .inner-group.inner-two-col
 
                 label(class="inner-label") Lịch trình tour
-                if(tour.schedules.length>0)
-                    each schedule in tour.schedules
-                        .inner-schedule
-                            .inner-schedule-list
+                .inner-schedule
+                    .inner-schedule-list
+                        if(tour.schedules.length>0)
+                            each schedule in tour.schedules
                                 .inner-schedule-item
                                     .inner-schedule-head
                                         span(class="inner-schedule-button inner-move")
@@ -110,10 +110,7 @@ block main
                                             <i class="fa-solid fa-angle-down"></i>
                                     .inner-schedule-body
                                         textarea(textarea-mce name="scheduleContent" value=schedule.description) #{schedule.description}
-                            .inner-schedule-create + Thêm lich trình
-                else
-                    .inner-schedule
-                        .inner-schedule-list
+                        else
                             .inner-schedule-item
                                 .inner-schedule-head
                                     span(class="inner-schedule-button inner-move")
@@ -125,7 +122,7 @@ block main
                                         <i class="fa-solid fa-angle-down"></i>
                                 .inner-schedule-body
                                     textarea(textarea-mce)
-                        .inner-schedule-create + Thêm lich trình
+                    .inner-schedule-create + Thêm lich trình
             .inner-button.inner-two-col
                 button Chỉnh sửa
         .inner-back
