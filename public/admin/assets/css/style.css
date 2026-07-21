@@ -67,6 +67,13 @@ a {
   position: relative;
 }
 
+.form-account .inner-group #toggle-password {
+  position: absolute;
+  right: 16px;
+  bottom: 20px;
+  cursor: pointer;
+}
+
 .form-account .inner-group .just-validate-error-label {
   position: absolute;
   top: 104%;
@@ -94,6 +101,10 @@ a {
   font-size: 18px;
   color: var(--color-text);
   outline: none;
+}
+
+.form-account .inner-group #password {
+  padding-right: 48px;
 }
 
 .form-account .inner-group .inner-control.just-validate-error-field {
@@ -151,6 +162,7 @@ a {
   color: var(--color-primary);
   opacity: 1;
 }
+
 
 .form-account .inner-button {
   width: 100%;

@@ -72,6 +72,18 @@ if(loginForm) {
     })
   ;
 }
+const togglePassword = document.querySelector("#toggle-password");
+const passwordInput = document.querySelector("#password");
+
+if(togglePassword && passwordInput) {
+  togglePassword.addEventListener("click", function() {
+    const isHidden = passwordInput.type === "password";
+
+    passwordInput.type = isHidden ? "text" : "password";
+    togglePassword.classList.toggle("fa-eye", !isHidden);
+    togglePassword.classList.toggle("fa-eye-slash", isHidden);
+  });
+}
 // End Login Form
 
 // Register Form

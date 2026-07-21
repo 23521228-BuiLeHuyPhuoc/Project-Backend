@@ -163,7 +163,9 @@ input, button, textarea {
   color: #fff;
   background-color: var(--color-primary);
 }
-
+.header .inner-cart{
+  display:none;
+}
 .header .inner-cart a {
   display: inline-flex;
   align-items: center;
@@ -197,6 +199,11 @@ input, button, textarea {
   position: absolute;
   left: -3.5px;
   top: 5.5px;
+}
+.inner-athentication{
+  display:flex;
+  gap:20px;
+  font-weight:bold;
 }
 
 .header .inner-menu-mobile {
