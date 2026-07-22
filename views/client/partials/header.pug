@@ -67,6 +67,18 @@ header.header
               span.inner-user-name #{user.fullName}
               i.fa-solid.fa-chevron-down
             .inner-user-dropdown
+              a(href="/account")
+                i.fa-solid.fa-table-cells-large
+                |  Tài khoản của tôi
+              a(href="/account/orders")
+                i.fa-solid.fa-suitcase-rolling
+                |  Đơn hàng
+              a(href="/account/notifications")
+                i.fa-regular.fa-bell
+                |  Thông báo
+              a(href="/account/favorites")
+                i.fa-regular.fa-heart
+                |  Tour yêu thích
               form(action="/auth/logout" method="post")
                 button(type="submit")
                   i.fa-solid.fa-arrow-right-from-bracket

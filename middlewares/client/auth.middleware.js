@@ -32,3 +32,19 @@ module.exports.optionalAuth=async(req,res,next)=>{
     next();
   }
 };
+
+module.exports.requireAuth=(req,res,next)=>{
+  if(req.user){
+    return next();
+  }
+
+  if(req.method==='GET'){
+    return res.redirect('/auth/login');
+  }
+
+  res.status(401).json({
+    code:'error',
+    message:'Vui lòng đăng nhập để tiếp tục!',
+    redirect:'/auth/login'
+  });
+};

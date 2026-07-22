@@ -1,0 +1,32 @@
+extends ../../layouts/default.pug
+include ../../partials/account-sidebar.pug
+
+block main
+  section.account-page
+    .container
+      .account-layout
+        +account-sidebar(activeAccountPage)
+        main.account-content
+          +account-heading('Danh sách cảm hứng','Tour yêu thích','Lưu lại những điểm đến khiến bạn muốn xách vali lên và đi.')
+          if favorites.length
+            .account-favorite-grid
+              each item in favorites
+                article.account-favorite-card
+                  .account-favorite-image
+                    a(href=`/tour/detail/${item.tour.slug}`)
+                      img(src=item.tour.avatar alt=item.tour.name)
+                    button.account-favorite-toggle.is-active(type="button" aria-label="Bỏ yêu thích" data-favorite-toggle=item.tour._id)
+                      i.fa-solid.fa-heart
+                    if item.tour.discount
+                      span -#{item.tour.discount}%
+                  .account-favorite-copy
+                    small Khởi hành #{item.tour.departureDateLabel}
+                    h2
+                      a(href=`/tour/detail/${item.tour.slug}`)= item.tour.name
+                    .account-favorite-price
+                      if item.tour.priceNewAdult < item.tour.priceAdult
+                        del #{Number(item.tour.priceAdult).toLocaleString('vi-VN')}đ
+                      strong #{Number(item.tour.priceNewAdult || item.tour.priceAdult).toLocaleString('vi-VN')}đ
+                    a.account-button.account-button-primary(href=`/tour/detail/${item.tour.slug}`) Xem hành trình
+          else
+            +account-empty('fa-regular fa-heart','Chưa có tour yêu thích','Nhấn biểu tượng trái tim ở trang tour để lưu hành trình bạn quan tâm.','/','Khám phá tour')

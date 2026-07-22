@@ -1,0 +1,59 @@
+mixin account-sidebar(activePage)
+  aside.account-sidebar
+    .account-user-card
+      if user.avatar
+        img.account-user-avatar(src=user.avatar alt=user.fullName)
+      else
+        .account-user-avatar.account-user-initial= user.fullName.charAt(0).toUpperCase()
+      .account-user-copy
+        strong= user.fullName
+        span= user.email
+    nav.account-nav(aria-label="Quản lý tài khoản")
+      a(class=activePage === 'dashboard' ? 'active' : '' href="/account")
+        i.fa-solid.fa-table-cells-large
+        span Tổng quan
+      a(class=activePage === 'orders' ? 'active' : '' href="/account/orders")
+        i.fa-solid.fa-suitcase-rolling
+        span Đơn hàng
+        if accountMeta && accountMeta.orderCount
+          em= accountMeta.orderCount
+      a(class=activePage === 'vouchers' ? 'active' : '' href="/account/vouchers")
+        i.fa-solid.fa-ticket
+        span Voucher
+        if accountMeta && accountMeta.voucherCount
+          em= accountMeta.voucherCount
+      a(class=activePage === 'notifications' ? 'active' : '' href="/account/notifications")
+        i.fa-regular.fa-bell
+        span Thông báo
+        if accountMeta && accountMeta.unreadCount
+          em= accountMeta.unreadCount
+      a(class=activePage === 'reviews' ? 'active' : '' href="/account/reviews")
+        i.fa-regular.fa-star
+        span Đánh giá
+      a(class=activePage === 'favorites' ? 'active' : '' href="/account/favorites")
+        i.fa-regular.fa-heart
+        span Yêu thích
+        if accountMeta && accountMeta.favoriteCount
+          em= accountMeta.favoriteCount
+      a(class=activePage === 'profile' ? 'active' : '' href="/account/profile")
+        i.fa-regular.fa-user
+        span Thông tin tài khoản
+    form.account-logout(action="/auth/logout" method="post")
+      button(type="submit")
+        i.fa-solid.fa-arrow-right-from-bracket
+        span Đăng xuất
+
+mixin account-heading(eyebrow,title,description)
+  .account-heading
+    span= eyebrow
+    h1= title
+    if description
+      p= description
+
+mixin account-empty(icon,title,description,link,label)
+  .account-empty
+    i(class=icon)
+    h3= title
+    p= description
+    if link
+      a.account-button.account-button-primary(href=link)= label

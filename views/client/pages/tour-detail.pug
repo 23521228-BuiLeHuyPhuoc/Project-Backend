@@ -46,11 +46,45 @@ block main
                               .inner-item
                                   .inner-title #{item.title}
                                   .inner-content !{item.description}
+
+                    .tour-review-section
+                        .tour-review-head
+                            div
+                                span Cảm nhận thực tế
+                                h2 Đánh giá từ khách hàng
+                            .tour-review-score
+                                strong= ratingAverage ? ratingAverage.toFixed(1) : '0.0'
+                                .inner-stars
+                                    - for(let star=1;star<=5;star++)
+                                        i(class=star <= Math.round(ratingAverage) ? 'fa-solid fa-star' : 'fa-regular fa-star')
+                                span #{reviews.length} đánh giá
+                        if reviews.length
+                            .tour-review-list
+                                each review in reviews
+                                    article.tour-review-item
+                                        .tour-review-avatar
+                                            if review.userId && review.userId.avatar
+                                                img(src=review.userId.avatar alt=review.userId.fullName)
+                                            else
+                                                span= review.userId ? review.userId.fullName.charAt(0).toUpperCase() : 'K'
+                                        .tour-review-content
+                                            .tour-review-meta
+                                                strong= review.userId ? review.userId.fullName : 'Khách hàng'
+                                                span= review.createdAtLabel
+                                            .inner-stars
+                                                - for(let star=1;star<=5;star++)
+                                                    i(class=star <= review.rating ? 'fa-solid fa-star' : 'fa-regular fa-star')
+                                            p= review.comment
+                        else
+                            .tour-review-empty Chưa có đánh giá cho tour này.
                                      
                             
                 .inner-right
                     .box-tour-detail
-                        .inner-title-main Chuyến Đi Của Bạn
+                        .tour-detail-heading
+                            .inner-title-main Chuyến Đi Của Bạn
+                            button.tour-favorite-button(type="button" class=isFavorite ? 'is-active' : '' data-favorite-toggle=tour._id aria-label="Lưu tour yêu thích")
+                                i(class=isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart')
                         .inner-product
                             .inner-image
                                 img(
@@ -60,12 +94,9 @@ block main
                             .inner-info
                                 .inner-title #{tour.name}
                                     .inner-stars
-                                        i.fa-solid.fa-star
-                                        i.fa-solid.fa-star
-                                        i.fa-solid.fa-star
-                                        i.fa-solid.fa-star
-                                        i.fa-solid.fa-star
-                                    .inner-number 500 lượt đánh giá
+                                        - for(let star=1;star<=5;star++)
+                                            i(class=star <= Math.round(ratingAverage) ? 'fa-solid fa-star' : 'fa-regular fa-star')
+                                    .inner-number #{reviews.length} lượt đánh giá
                         .inner-meta
                             .inner-item
                                 i.fa-solid.fa-ticket-simple

@@ -1,0 +1,68 @@
+extends ../../layouts/default.pug
+include ../../partials/account-sidebar.pug
+
+block main
+  section.account-page
+    .container
+      .account-layout
+        +account-sidebar(activeAccountPage)
+        main.account-content
+          .account-back
+            a(href="/account/orders")
+              i.fa-solid.fa-arrow-left
+              | Quay lại đơn hàng
+          +account-heading('Chi tiết hành trình',order.orderCode,`Đặt lúc ${order.createdAtLabel}`)
+
+          .account-order-detail-grid
+            section.account-panel
+              .account-panel-head
+                div
+                  span Danh sách đặt chỗ
+                  h2 Tour trong đơn
+              .account-order-items.account-order-items-large
+                each item in order.items
+                  .account-order-item
+                    img(src=item.tour ? item.tour.avatar : item.avatar alt=item.tour ? item.tour.name : 'Tour')
+                    .account-order-item-copy
+                      if item.tour
+                        a(href=`/tour/detail/${item.tour.slug}`)= item.tour.name
+                      else
+                        strong Tour không còn hiển thị
+                      span Khởi hành: #{item.departureDateLabel}
+                      span Người lớn #{item.quantityAdult || 0} · Trẻ em #{item.quantityChildren || 0} · Em bé #{item.quantityBaby || 0}
+                      strong #{(Number(item.priceNewAdult || 0) * Number(item.quantityAdult || 0) + Number(item.priceNewChildren || 0) * Number(item.quantityChildren || 0) + Number(item.priceNewBaby || 0) * Number(item.quantityBaby || 0)).toLocaleString('vi-VN')}đ
+
+            aside.account-order-summary
+              h2 Tóm tắt đơn hàng
+              dl
+                div
+                  dt Trạng thái
+                  dd(class=`status-${order.status}`)= order.statusLabel
+                div
+                  dt Thanh toán
+                  dd(class=`status-${order.paymentStatus}`)= order.paymentLabel
+                div
+                  dt Phương thức
+                  dd= order.paymentMethod || 'Chưa chọn'
+                div
+                  dt Người đặt
+                  dd= order.fullName
+                div
+                  dt Số điện thoại
+                  dd= order.phone
+                if order.note
+                  div
+                    dt Ghi chú
+                    dd= order.note
+              .account-price-lines
+                div
+                  span Tạm tính
+                  strong #{Number(order.subTotal || 0).toLocaleString('vi-VN')}đ
+                div
+                  span Giảm giá
+                  strong -#{Number(order.discount || 0).toLocaleString('vi-VN')}đ
+                div.account-price-total
+                  span Tổng cộng
+                  strong #{Number(order.total || 0).toLocaleString('vi-VN')}đ
+              if order.canCancel
+                button.account-button.account-button-danger.account-button-block(type="button" data-account-action=`/account/orders/${order._id}/cancel` data-method="POST" data-confirm="Bạn chắc chắn muốn hủy đơn hàng này?") Hủy đơn hàng

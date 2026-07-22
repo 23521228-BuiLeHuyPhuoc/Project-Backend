@@ -1,0 +1,96 @@
+extends ../layouts/default.pug
+include ../mixins/box-breadcrumb.pug
+
+block main
+    +box-breadcrumb(breadcrumb)
+
+    main.news-detail-page
+        .container
+            article.news-article
+                header.inner-header(
+                    data-aos-duration="700"
+                    data-aos="fade-up"
+                    )
+                    span.inner-category #{article.category}
+                    h1.inner-title #{article.title}
+                    p.inner-lead #{article.description}
+                    .inner-meta
+                        span
+                            i.fa-regular.fa-calendar
+                            | #{article.date}
+                        span
+                            i.fa-regular.fa-user
+                            | #{article.author}
+                        span
+                            i.fa-regular.fa-clock
+                            | #{article.readTime} đọc
+
+                figure.inner-hero(
+                    data-aos-delay="100"
+                    data-aos-duration="700"
+                    data-aos="fade-up"
+                    )
+                    img(
+                        alt=article.title
+                        src=article.image
+                        )
+
+                .inner-layout
+                    .inner-body
+                        each section, index in article.content
+                            section.inner-section(
+                                id=`noi-dung-${index + 1}`
+                                data-aos-duration="650"
+                                data-aos="fade-up"
+                                )
+                                h2 #{section.heading}
+                                each paragraph in section.paragraphs
+                                    p #{paragraph}
+                                if section.bullets
+                                    ul
+                                        each bullet in section.bullets
+                                            li #{bullet}
+
+                            if index === 0
+                                blockquote.inner-quote(
+                                    data-aos-duration="650"
+                                    data-aos="fade-up"
+                                    )
+                                    i.fa-solid.fa-quote-left
+                                    p #{article.quote}
+
+                    aside.inner-sidebar
+                        .inner-toc
+                            .inner-label Nội dung bài viết
+                            nav
+                                each section, index in article.content
+                                    a(href=`#noi-dung-${index + 1}`)
+                                        span #{String(index + 1).padStart(2, "0")}
+                                        | #{section.heading}
+                            a.inner-back(href="/tin-tuc")
+                                i.fa-solid.fa-arrow-left
+                                | Quay lại trang tin tức
+
+            if relatedArticles.length
+                section.news-related
+                    .inner-head
+                        div
+                            span.inner-kicker Đọc tiếp
+                            h2 Có thể bạn quan tâm
+                        a(href="/tin-tuc") Xem tất cả
+                    .inner-list
+                        each related in relatedArticles
+                            article.inner-item
+                                a.inner-image(href=`/tin-tuc/${related.slug}`)
+                                    img(
+                                        alt=related.title
+                                        loading="lazy"
+                                        src=related.image
+                                        )
+                                .inner-content
+                                    .inner-meta #{related.category} · #{related.readTime}
+                                    h3
+                                        a(href=`/tin-tuc/${related.slug}`) #{related.title}
+                                    a.inner-link(href=`/tin-tuc/${related.slug}`)
+                                        | Đọc bài viết
+                                        i.fa-solid.fa-arrow-right

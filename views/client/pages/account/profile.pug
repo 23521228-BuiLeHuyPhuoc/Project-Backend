@@ -1,0 +1,77 @@
+extends ../../layouts/default.pug
+include ../../partials/account-sidebar.pug
+
+block main
+  section.account-page
+    .container
+      .account-layout
+        +account-sidebar(activeAccountPage)
+        main.account-content
+          +account-heading('Hồ sơ cá nhân','Thông tin tài khoản','Cập nhật thông tin liên hệ và sở thích để nhận gợi ý tour phù hợp hơn.')
+
+          form.account-profile-form#account-profile-form(novalidate)
+            section.account-panel
+              .account-panel-head
+                div
+                  span Thông tin cơ bản
+                  h2 Hồ sơ của bạn
+              .account-profile-avatar
+                if user.avatar
+                  img(src=user.avatar alt=user.fullName)
+                else
+                  .account-profile-initial= user.fullName.charAt(0).toUpperCase()
+                div
+                  strong= user.fullName
+                  span Thành viên từ #{user.createdAt ? new Date(user.createdAt).getFullYear() : ''}
+              .account-form-grid
+                .account-field
+                  label(for="account-full-name") Họ và tên
+                  .account-control
+                    i.fa-regular.fa-user
+                    input#account-full-name(type="text" name="fullName" value=user.fullName autocomplete="name")
+                .account-field
+                  label(for="account-phone") Số điện thoại
+                  .account-control
+                    i.fa-solid.fa-phone
+                    input#account-phone(type="tel" name="phone" value=user.phone autocomplete="tel")
+                .account-field.account-field-wide
+                  label(for="account-email") Email đăng nhập
+                  .account-control
+                    i.fa-regular.fa-envelope
+                    input#account-email(type="email" name="email" value=user.email autocomplete="email")
+
+            section.account-panel
+              .account-panel-head
+                div
+                  span Cá nhân hóa
+                  h2 Sở thích du lịch
+              .account-preference-group
+                strong Loại tour yêu thích
+                .account-chip-list
+                  each option in [{value:'beach',label:'Biển đảo',icon:'fa-umbrella-beach'},{value:'mountain',label:'Núi rừng',icon:'fa-mountain-sun'},{value:'city',label:'Thành phố',icon:'fa-city'},{value:'culture',label:'Văn hóa',icon:'fa-landmark'},{value:'adventure',label:'Phiêu lưu',icon:'fa-person-hiking'}]
+                    label.account-chip
+                      input(type="checkbox" name="tourTypes" value=option.value checked=user.preferences && user.preferences.tourTypes.includes(option.value))
+                      span
+                        i(class=`fa-solid ${option.icon}`)
+                        | #{option.label}
+              .account-preference-group
+                strong Ngân sách mỗi chuyến
+                .account-chip-list
+                  each option in [{value:'under-2',label:'Dưới 2 triệu'},{value:'2-5',label:'2 - 5 triệu'},{value:'5-10',label:'5 - 10 triệu'},{value:'above-10',label:'Trên 10 triệu'}]
+                    label.account-chip
+                      input(type="radio" name="budgetRange" value=option.value checked=budgetKey === option.value)
+                      span= option.label
+              .account-preference-group
+                strong Điểm đến quan tâm
+                .account-chip-list
+                  each option in [{value:'da-lat',label:'Đà Lạt'},{value:'nha-trang',label:'Nha Trang'},{value:'phu-quoc',label:'Phú Quốc'},{value:'ha-noi',label:'Hà Nội'},{value:'da-nang',label:'Đà Nẵng'}]
+                    label.account-chip
+                      input(type="checkbox" name="locations" value=option.value checked=user.preferences && user.preferences.locations.includes(option.value))
+                      span= option.label
+
+            .account-form-message(data-form-message hidden)
+            .account-profile-actions
+              a.account-button.account-button-outline(href="/account") Hủy thay đổi
+              button.account-button.account-button-primary(type="submit")
+                i.fa-solid.fa-floppy-disk
+                | Lưu thông tin

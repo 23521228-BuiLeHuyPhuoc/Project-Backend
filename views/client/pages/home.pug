@@ -324,7 +324,7 @@ block main
                 each article in newsList
                     if article.featured
                         .blog-item-2
-                            a(href=`/tin-tuc#${article.slug}`)
+                            a(href=`/tin-tuc/${article.slug}`)
                                 .inner-image
                                     img(
                                         alt=article.title
@@ -336,7 +336,7 @@ block main
                                     .inner-desc #{article.description}
                     else
                         .blog-item
-                            a(href=`/tin-tuc#${article.slug}`)
+                            a(href=`/tin-tuc/${article.slug}`)
                                 .inner-image
                                     img(
                                         alt=article.title

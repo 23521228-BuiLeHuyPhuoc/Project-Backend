@@ -14,6 +14,7 @@ const searchRoutes=require('./search.route');
 const orderRoutes=require('./order.route');
 const authRoutes=require('./auth.route');
 const newsRoutes=require('./news.route');
+const accountRoutes=require('./account.route');
 const authMiddleware=require('../../middlewares/client/auth.middleware');
 router.use(settingMiddleware.websiteInfo);
 router.use(categoryMiddleware.list);
@@ -23,6 +24,7 @@ router.use((req,res,next)=>{
   next();
 });
 router.use('/auth',authRoutes);
+router.use('/account',accountRoutes);
 router.get('/login',(req,res)=>res.redirect('/auth/login'));
 router.get('/register',(req,res)=>res.redirect('/auth/register'));
 router.use('/', homeRoutes );

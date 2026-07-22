@@ -4,6 +4,7 @@ const jwt=require('jsonwebtoken');
 const User=require('../../models/user.model');
 const ForgotPasswordUser=require('../../models/forgot-password-user.model');
 const sendMail=require('../../helpers/mail.helper');
+const Notification=require('../../models/notification.model');
 
 const resetCookieName='tokenResetUser';
 const otpLifetime=5*60*1000;
@@ -78,12 +79,20 @@ module.exports.registerPost=async(req,res)=>{
       locations:req.body.locations
     };
 
-    await User.create({
+    const user=await User.create({
       fullName:req.body.fullName,
       email:req.body.email,
       phone:req.body.phone,
       password,
       preferences
+    });
+
+    await Notification.create({
+      userId:user.id,
+      title:'Chào mừng đến với 28.TRAVEL',
+      message:'Tài khoản của bạn đã sẵn sàng. Hãy lưu tour yêu thích và khám phá các voucher mới.',
+      type:'account',
+      link:'/account'
     });
 
     req.flash('success','Đăng ký tài khoản thành công!');

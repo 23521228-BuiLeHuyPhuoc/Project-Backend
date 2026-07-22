@@ -1,0 +1,45 @@
+extends ../../layouts/default.pug
+include ../../partials/account-sidebar.pug
+
+block main
+  section.account-page
+    .container
+      .account-layout
+        +account-sidebar(activeAccountPage)
+        main.account-content
+          +account-heading('Hành trình của bạn','Quản lý đơn hàng','Theo dõi trạng thái, thanh toán và chi tiết từng chuyến đi.')
+          .account-filter-tabs
+            a(class=!selectedStatus ? 'active' : '' href="/account/orders") Tất cả
+            a(class=selectedStatus === 'initial' ? 'active' : '' href="/account/orders?status=initial") Chờ xác nhận
+            a(class=selectedStatus === 'completed' ? 'active' : '' href="/account/orders?status=completed") Hoàn thành
+            a(class=selectedStatus === 'cancelled' ? 'active' : '' href="/account/orders?status=cancelled") Đã hủy
+
+          if orders.length
+            .account-order-list
+              each order in orders
+                article.account-order-card
+                  .account-order-head
+                    .account-order-code
+                      span Mã đơn
+                      strong= order.orderCode
+                    .account-order-statuses
+                      span(class=`status-${order.paymentStatus}`)= order.paymentLabel
+                      span(class=`status-${order.status}`)= order.statusLabel
+                  .account-order-items
+                    each item in order.items
+                      .account-order-item
+                        img(src=item.tour ? item.tour.avatar : item.avatar alt=item.tour ? item.tour.name : 'Tour')
+                        .account-order-item-copy
+                          strong= item.tour ? item.tour.name : 'Tour không còn hiển thị'
+                          span Khởi hành: #{item.departureDateLabel}
+                          span Người lớn #{item.quantityAdult || 0} · Trẻ em #{item.quantityChildren || 0} · Em bé #{item.quantityBaby || 0}
+                  .account-order-foot
+                    .account-order-total
+                      span Tổng thanh toán
+                      strong #{Number(order.total || 0).toLocaleString('vi-VN')}đ
+                    .account-order-actions
+                      if order.canCancel
+                        button.account-button.account-button-danger(type="button" data-account-action=`/account/orders/${order._id}/cancel` data-method="POST" data-confirm="Bạn chắc chắn muốn hủy đơn hàng này?") Hủy đơn
+                      a.account-button.account-button-outline(href=`/account/orders/${order._id}`) Xem chi tiết
+          else
+            +account-empty('fa-solid fa-map-location-dot','Chưa có đơn hàng phù hợp','Hãy chọn một hành trình để bắt đầu chuyến đi mới.','/','Khám phá tour')

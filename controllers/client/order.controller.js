@@ -7,6 +7,7 @@ const axios=require('axios');
 const CryptoJS=require('crypto-js');
 require('dotenv').config();
 const sortHelper=require('../../helpers/sort.helper');
+const Notification=require('../../models/notification.model');
 module.exports.createPost=async(req,res)=>{
    try{
     let subTotal=0;
@@ -42,8 +43,19 @@ module.exports.createPost=async(req,res)=>{
         req.body.total=subTotal-req.body.discount;
         req.body.paymentStatus="unpaid";
         req.body.status="initial";
+        req.body.userId=req.user ? req.user.id : null;
         const order=new Order(req.body);
         await order.save();
+
+        if(req.user){
+            await Notification.create({
+                userId:req.user.id,
+                title:"Đặt tour thành công",
+                message:`Đơn ${order.orderCode} đã được tạo và đang chờ xác nhận.`,
+                type:"order",
+                link:`/account/orders/${order.id}`
+            });
+        }
 
 
 

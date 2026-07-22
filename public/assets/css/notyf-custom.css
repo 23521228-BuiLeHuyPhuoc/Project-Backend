@@ -1,0 +1,61 @@
+.notyf {
+  top: 12px;
+  right: 12px;
+  z-index: 9999;
+  padding: 0;
+}
+
+.notyf__toast {
+  max-width: min(390px, calc(100vw - 24px));
+  border-radius: 14px;
+  box-shadow: 0 18px 45px rgba(30, 20, 42, 0.2);
+}
+
+.notyf__wrapper {
+  align-items: center;
+  padding: 15px 16px;
+}
+
+.notyf__icon {
+  width: 26px;
+  height: 26px;
+  margin-right: 12px;
+}
+
+.notyf__icon i {
+  font-size: 14px;
+}
+
+.notyf__message {
+  padding-right: 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.notyf__dismiss-btn {
+  width: 38px;
+  opacity: 0.72;
+}
+
+.notyf__dismiss-btn:hover {
+  opacity: 1;
+}
+
+@media (max-width: 575.98px) {
+  .notyf {
+    top: 8px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
+
+  .notyf__toast {
+    max-width: none;
+  }
+
+  .notyf__wrapper {
+    padding: 13px 14px;
+  }
+}

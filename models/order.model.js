@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
+    userId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"User",
+      index:true,
+      default:null
+    },
     orderCode:{
         type:String,
         unique:true
@@ -15,10 +21,19 @@ const schema = new mongoose.Schema(
       type: Number,
       default: 0 
     },
+    voucherCode:{
+      type:String,
+      default:""
+    },
     total: Number,
     paymentMethod: String,
     paymentStatus: String,
     status: String,
+    cancelledAt:Date,
+    isMock:{
+      type:Boolean,
+      default:false
+    },
     updatedBy: String,
     deleted: {
       type: Boolean,

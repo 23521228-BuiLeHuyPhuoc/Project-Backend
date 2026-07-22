@@ -1,0 +1,82 @@
+extends ../../layouts/default.pug
+include ../../partials/account-sidebar.pug
+
+block main
+  section.account-page
+    .container
+      .account-layout
+        +account-sidebar(activeAccountPage)
+        main.account-content
+          .account-welcome
+            .account-welcome-copy
+              span Chào mừng trở lại
+              h1 Xin chào, #{user.fullName}!
+              p Mọi chuyến đi, ưu đãi và trải nghiệm của bạn được quản lý tại một nơi.
+            a.account-button.account-button-light(href="/account/profile")
+              i.fa-solid.fa-pen
+              | Cập nhật hồ sơ
+
+          .account-stats
+            a.account-stat(href="/account/orders")
+              .account-stat-icon.account-stat-orange
+                i.fa-solid.fa-suitcase-rolling
+              .account-stat-copy
+                strong= accountMeta.orderCount
+                span Đơn hàng
+            a.account-stat(href="/account/vouchers")
+              .account-stat-icon.account-stat-green
+                i.fa-solid.fa-ticket
+              .account-stat-copy
+                strong= accountMeta.voucherCount
+                span Voucher khả dụng
+            a.account-stat(href="/account/favorites")
+              .account-stat-icon.account-stat-red
+                i.fa-solid.fa-heart
+              .account-stat-copy
+                strong= accountMeta.favoriteCount
+                span Tour yêu thích
+            a.account-stat(href="/account/reviews")
+              .account-stat-icon.account-stat-blue
+                i.fa-solid.fa-star
+              .account-stat-copy
+                strong= reviewCount
+                span Đánh giá
+
+          .account-grid-two
+            section.account-panel
+              .account-panel-head
+                div
+                  span Hoạt động gần đây
+                  h2 Đơn hàng mới nhất
+                a(href="/account/orders") Xem tất cả
+              if latestOrders.length
+                .account-order-mini-list
+                  each order in latestOrders
+                    a.account-order-mini(href=`/account/orders/${order._id}`)
+                      .account-order-mini-icon
+                        i.fa-solid.fa-route
+                      .account-order-mini-copy
+                        strong= order.orderCode
+                        span #{order.items.length} tour · #{order.createdAtLabel}
+                      .account-order-mini-meta
+                        strong #{Number(order.total || 0).toLocaleString('vi-VN')}đ
+                        span(class=`status-${order.status}`)= order.statusLabel
+              else
+                +account-empty('fa-solid fa-suitcase','Chưa có đơn hàng','Tour bạn đặt sẽ xuất hiện tại đây.','/','Khám phá tour')
+
+            section.account-panel
+              .account-panel-head
+                div
+                  span Cập nhật dành cho bạn
+                  h2 Thông báo mới
+                a(href="/account/notifications") Xem tất cả
+              if latestNotifications.length
+                .account-notification-mini-list
+                  each notification in latestNotifications
+                    a.account-notification-mini(class=notification.readAt ? '' : 'unread' href=notification.link)
+                      i(class=notification.type === 'order' ? 'fa-solid fa-box' : notification.type === 'voucher' ? 'fa-solid fa-ticket' : 'fa-regular fa-bell')
+                      .account-notification-mini-copy
+                        strong= notification.title
+                        span= notification.createdAtLabel
+              else
+                +account-empty('fa-regular fa-bell','Chưa có thông báo','Những cập nhật quan trọng sẽ xuất hiện tại đây.')

@@ -1,0 +1,59 @@
+extends ../../layouts/default.pug
+include ../../partials/account-sidebar.pug
+
+block main
+  section.account-page
+    .container
+      .account-layout
+        +account-sidebar(activeAccountPage)
+        main.account-content
+          +account-heading('Ưu đãi riêng','Ví voucher','Lưu và quản lý các mã giảm giá dành cho hành trình tiếp theo.')
+
+          section.account-section
+            .account-section-head
+              div
+                span Đã lưu
+                h2 Voucher của tôi
+              strong #{wallet.length} mã
+            if wallet.length
+              .account-voucher-grid
+                each item in wallet
+                  article.account-voucher-card(class=item.status === 'used' ? 'is-used' : '')
+                    .account-voucher-value
+                      span Giảm
+                      strong= item.voucher.valueLabel
+                    .account-voucher-copy
+                      .account-voucher-code
+                        strong= item.voucher.code
+                        span= item.status === 'used' ? 'Đã sử dụng' : 'Sẵn sàng'
+                      h3= item.voucher.title
+                      p= item.voucher.description
+                      small Đơn tối thiểu #{item.voucher.minOrderLabel}đ · HSD #{item.voucher.endAtLabel}
+                      if item.status === 'available'
+                        button.account-link-danger(type="button" data-account-action=`/account/vouchers/${item._id}` data-method="DELETE" data-confirm="Xóa voucher này khỏi ví?") Xóa khỏi ví
+            else
+              +account-empty('fa-solid fa-ticket','Ví voucher đang trống','Lưu các ưu đãi đang có để sử dụng khi đặt tour.')
+
+          section.account-section
+            .account-section-head
+              div
+                span Khám phá
+                h2 Voucher đang khả dụng
+              strong #{availableVouchers.length} mã
+            if availableVouchers.length
+              .account-voucher-grid
+                each voucher in availableVouchers
+                  article.account-voucher-card.account-voucher-available
+                    .account-voucher-value
+                      span Giảm
+                      strong= voucher.valueLabel
+                    .account-voucher-copy
+                      .account-voucher-code
+                        strong= voucher.code
+                        span Ưu đãi mới
+                      h3= voucher.title
+                      p= voucher.description
+                      small Đơn tối thiểu #{voucher.minOrderLabel}đ · HSD #{voucher.endAtLabel}
+                      button.account-button.account-button-primary(type="button" data-account-action=`/account/vouchers/${voucher._id}/claim` data-method="POST") Lưu voucher
+            else
+              +account-empty('fa-solid fa-wand-magic-sparkles','Chưa có ưu đãi mới','Các voucher mới sẽ được cập nhật tại đây.')

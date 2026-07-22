@@ -1,0 +1,76 @@
+extends ../../layouts/default.pug
+include ../../partials/account-sidebar.pug
+
+block main
+  section.account-page
+    .container
+      .account-layout
+        +account-sidebar(activeAccountPage)
+        main.account-content
+          +account-heading('Chia sẻ trải nghiệm','Đánh giá của tôi','Bạn chỉ có thể đánh giá những tour đã thanh toán và hoàn thành.')
+
+          section.account-section
+            .account-section-head
+              div
+                span Chờ cảm nhận của bạn
+                h2 Tour có thể đánh giá
+              strong #{eligibleTours.length} tour
+            if eligibleTours.length
+              .account-review-eligible-list
+                each item,index in eligibleTours
+                  article.account-review-editor
+                    .account-review-tour
+                      img(src=item.tour.avatar alt=item.tour.name)
+                      .account-review-tour-copy
+                        small Đơn #{item.orderCode} · #{item.departureDateLabel}
+                        h3= item.tour.name
+                    form.account-review-form(data-review-create novalidate)
+                      input(type="hidden" name="orderId" value=item.orderId)
+                      input(type="hidden" name="tourId" value=item.tour._id)
+                      .account-rating-field
+                        span Chất lượng chuyến đi
+                        .account-stars
+                          each star in [5,4,3,2,1]
+                            input(type="radio" id=`create-${index}-star-${star}` name="rating" value=star)
+                            label(for=`create-${index}-star-${star}` aria-label=`${star} sao`)
+                              i.fa-solid.fa-star
+                      textarea(name="comment" rows="4" placeholder="Điều gì khiến chuyến đi đáng nhớ?" maxlength="1000")
+                      .account-form-message(data-form-message hidden)
+                      button.account-button.account-button-primary(type="submit") Gửi đánh giá
+            else
+              +account-empty('fa-regular fa-star','Chưa có tour cần đánh giá','Sau khi tour đã thanh toán và hoàn thành, bạn có thể chia sẻ cảm nhận tại đây.')
+
+          section.account-section
+            .account-section-head
+              div
+                span Lịch sử chia sẻ
+                h2 Đánh giá đã đăng
+              strong #{reviews.length} bài
+            if reviews.length
+              .account-review-list
+                each review,index in reviews
+                  article.account-review-card
+                    .account-review-card-head
+                      img(src=review.tourId.avatar alt=review.tourId.name)
+                      .account-review-card-title
+                        h3
+                          a(href=`/tour/detail/${review.tourId.slug}`)= review.tourId.name
+                        .account-review-stars
+                          - for(let star=1;star<=5;star++)
+                            i(class=star <= review.rating ? 'fa-solid fa-star' : 'fa-regular fa-star')
+                          span= review.createdAtLabel
+                    form.account-review-form(data-review-edit=review._id novalidate)
+                      .account-rating-field
+                        span Chỉnh số sao
+                        .account-stars
+                          each star in [5,4,3,2,1]
+                            input(type="radio" id=`edit-${index}-star-${star}` name="rating" value=star checked=review.rating === star)
+                            label(for=`edit-${index}-star-${star}` aria-label=`${star} sao`)
+                              i.fa-solid.fa-star
+                      textarea(name="comment" rows="4" maxlength="1000")= review.comment
+                      .account-form-message(data-form-message hidden)
+                      .account-review-actions
+                        button.account-button.account-button-primary(type="submit") Lưu thay đổi
+                        button.account-button.account-button-danger(type="button" data-account-action=`/account/reviews/${review._id}` data-method="DELETE" data-confirm="Xóa đánh giá này?") Xóa đánh giá
+            else
+              +account-empty('fa-regular fa-message','Bạn chưa đăng đánh giá','Những cảm nhận đã chia sẻ sẽ được quản lý tại đây.')

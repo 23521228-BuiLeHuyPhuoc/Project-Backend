@@ -23,7 +23,7 @@ block main
                     data-aos-duration="700"
                     data-aos="fade-up"
                     )
-                    .inner-image
+                    a.inner-image(href=`/tin-tuc/${featuredArticle.slug}`)
                         img(
                             alt=featuredArticle.title
                             src=featuredArticle.image
@@ -37,11 +37,12 @@ block main
                             span
                                 i.fa-regular.fa-clock
                                 | #{featuredArticle.readTime}
-                        h2.inner-title #{featuredArticle.title}
+                        h2.inner-title
+                            a(href=`/tin-tuc/${featuredArticle.slug}`) #{featuredArticle.title}
                         p.inner-desc #{featuredArticle.description}
-                        .inner-category
-                            i.fa-solid.fa-location-dot
-                            | #{featuredArticle.category}
+                        a.inner-read-more(href=`/tin-tuc/${featuredArticle.slug}`)
+                            | Đọc bài viết
+                            i.fa-solid.fa-arrow-right
 
             .news-section-head(
                 data-aos-duration="700"
@@ -61,7 +62,7 @@ block main
                             data-aos-duration="650"
                             data-aos="fade-up"
                             )
-                            .inner-image
+                            a.inner-image(href=`/tin-tuc/${article.slug}`)
                                 img(
                                     alt=article.title
                                     loading="lazy"
@@ -74,5 +75,9 @@ block main
                                     span
                                         i.fa-regular.fa-clock
                                         | #{article.readTime}
-                                h3.inner-title #{article.title}
+                                h3.inner-title
+                                    a(href=`/tin-tuc/${article.slug}`) #{article.title}
                                 p.inner-desc #{article.description}
+                                a.inner-read-more(href=`/tin-tuc/${article.slug}`)
+                                    | Đọc bài viết
+                                    i.fa-solid.fa-arrow-right

@@ -1,0 +1,13 @@
+-if (messages)
+  - const flashMessageTypes = Object.keys(messages)
+  each flashMessageType in flashMessageTypes
+    - const flashMessageValue = messages[flashMessageType]
+    - const flashMessageItems = Array.isArray(flashMessageValue) ? flashMessageValue : [flashMessageValue]
+    each flashMessage in flashMessageItems
+      if flashMessage
+        span(
+          data-message=flashMessage
+          data-type=flashMessageType
+          flash-message
+          hidden
+          )

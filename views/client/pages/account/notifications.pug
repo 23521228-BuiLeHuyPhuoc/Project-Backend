@@ -1,0 +1,38 @@
+extends ../../layouts/default.pug
+include ../../partials/account-sidebar.pug
+
+block main
+  section.account-page
+    .container
+      .account-layout
+        +account-sidebar(activeAccountPage)
+        main.account-content
+          .account-heading-row
+            +account-heading('Không bỏ lỡ cập nhật','Thông báo','Theo dõi trạng thái đơn hàng, voucher và hoạt động tài khoản.')
+            if accountMeta.unreadCount
+              button.account-button.account-button-outline(type="button" data-account-action="/account/notifications/read-all" data-method="PATCH")
+                i.fa-solid.fa-check-double
+                | Đọc tất cả
+          .account-filter-tabs
+            a(class=!selectedStatus ? 'active' : '' href="/account/notifications") Tất cả
+            a(class=selectedStatus === 'unread' ? 'active' : '' href="/account/notifications?status=unread") Chưa đọc
+            a(class=selectedStatus === 'read' ? 'active' : '' href="/account/notifications?status=read") Đã đọc
+
+          if notifications.length
+            .account-notification-list
+              each notification in notifications
+                article.account-notification-card(class=notification.readAt ? '' : 'unread')
+                  button.account-notification-main(type="button" data-account-action=`/account/notifications/${notification._id}/read` data-method="PATCH")
+                    .account-notification-icon(class=`type-${notification.type}`)
+                      i(class=notification.type === 'order' ? 'fa-solid fa-box' : notification.type === 'voucher' ? 'fa-solid fa-ticket' : notification.type === 'review' ? 'fa-solid fa-star' : notification.type === 'account' ? 'fa-solid fa-user-shield' : 'fa-regular fa-bell')
+                    .account-notification-copy
+                      .account-notification-title
+                        strong= notification.title
+                        if !notification.readAt
+                          span Mới
+                      p= notification.message
+                      small= notification.createdAtLabel
+                  button.account-icon-button(type="button" aria-label="Xóa thông báo" data-account-action=`/account/notifications/${notification._id}` data-method="DELETE" data-confirm="Xóa thông báo này?")
+                    i.fa-regular.fa-trash-can
+          else
+            +account-empty('fa-regular fa-bell-slash','Không có thông báo','Bạn đã xem hết các cập nhật trong mục này.')
