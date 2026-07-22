@@ -1,0 +1,37 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Tạo quyền theo đường dẫn
+
+  .section-8
+    form(data-admin-form data-method="POST" data-api=`/${pathAdmin}/setting/permission/create` data-redirect=`/${pathAdmin}/setting/permission/list`)
+      .inner-group
+        label.inner-label(for="label") Tên quyền
+        input#label(type="text" name="label" required placeholder="Ví dụ: Xem báo cáo doanh thu")
+      .inner-group
+        label.inner-label(for="group") Nhóm chức năng
+        input#group(type="text" name="group" placeholder="Ví dụ: Báo cáo")
+      .inner-group
+        label.inner-label(for="path") Đường dẫn quản trị
+        input#path(type="text" name="path" required placeholder="/report/revenue")
+        small Có thể nhập cả /admin/report/revenue; hệ thống sẽ tự chuẩn hóa.
+      .inner-group
+        label.inner-label(for="method") Phương thức HTTP
+        select#method(name="method")
+          each method in ["GET","POST","PATCH","PUT","DELETE","ALL"]
+            option(value=method)=method
+      .inner-group
+        label.inner-label(for="permissionCodePreview") Mã quyền tự sinh
+        input#permissionCodePreview(type="text" readonly placeholder="get-report-revenue")
+      .inner-group
+        label.inner-label(for="status") Trạng thái
+        select#status(name="status")
+          option(value="active") Hoạt động
+          option(value="inactive") Tạm dừng
+      .inner-group
+        label.inner-label(for="description") Mô tả
+        textarea#description(name="description" placeholder="Mô tả mục đích của quyền")
+      .inner-button.inner-two-col
+        button(type="submit") Tạo quyền
+    .inner-back
+      a(href=`/${pathAdmin}/setting/permission/list`) Quay lại danh sách

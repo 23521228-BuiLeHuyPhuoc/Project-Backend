@@ -3,6 +3,7 @@ const multer=require('multer');
 const cloudinaryHelper=require('../../helpers/cloudinary.helper');
 const upload=multer({storage:cloudinaryHelper.storage});
 const settingController=require('../../controllers/admin/setting.controller');
+const permissionController=require('../../controllers/admin/permission.controller');
 const uploadField=upload.fields([
     {name:"logo",maxCount:1},
     {name:"favicon",maxCount:1}
@@ -24,4 +25,10 @@ router.get('/role/list',settingController.roleList);
 router.get('/role/create',settingController.roleCreate);
 router.post('/role/create',settingController.roleCreatePost);
 router.patch('/role/change-status',settingController.roleChangeStatusPatch);
+router.get('/permission/list',permissionController.list);
+router.get('/permission/create',permissionController.create);
+router.post('/permission/create',permissionController.createPost);
+router.get('/permission/edit/:id',permissionController.edit);
+router.patch('/permission/edit/:id',permissionController.editPatch);
+router.patch('/permission/delete/:id',permissionController.deletePatch);
 module.exports=router;

@@ -1,7 +1,7 @@
 extends ../layouts/default.pug
 
 block main
-  h1.box-title Quản lý người dùng
+  h1.box-title Quản lý tài khoản người dùng
 
   //- Section 4
   .section-4
@@ -11,7 +11,6 @@ block main
       .inner-item
         select(filter-user-status)
           option(value="") Trạng thái
-          option(value="initial" selected=filters.status==="initial") Khởi tạo
           option(value="active" selected=filters.status==="active") Hoạt động
           option(value="inactive" selected=filters.status==="inactive") Tạm dừng
       .inner-item.inner-date
@@ -25,15 +24,18 @@ block main
   //- Section 5
   .section-5
     .inner-wrap
-      .inner-change-status
-        .inner-item
-          select(change-status-user)
-            option(value="") -- Hành động --
-            option(value="active") Hoạt động
-            option(value="inactive") Dừng hoạt động
-            option(value="delete") Xóa
-        .inner-item
-          button(type="button" apply-change-status-user) Áp dụng
+      if permission.includes('user-status')
+        .inner-change-status
+          .inner-item
+            select(change-status-user)
+              option(value="") -- Hành động --
+              if permission.includes('user-status')
+                option(value="active") Hoạt động
+                option(value="inactive") Dừng hoạt động
+              if permission.includes('user-delete')
+                option(value="delete") Xóa
+          .inner-item
+            button(type="button" apply-change-status-user) Áp dụng
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
         input(type="text" placeholder="Tìm theo họ tên, email, số điện thoại..." value=filters.search filter-user-search)
@@ -51,7 +53,6 @@ block main
             th(class="inner-center") Ảnh đại diện
             th Email
             th Số điện thoại
-            th Địa chỉ
             th Trạng thái
             th Hành động
         tbody
@@ -65,23 +66,22 @@ block main
                   img(src=user.avatar || "/admin/assets/images/avatar.jpg" class="inner-avatar")
                 td #{user.email}
                 td #{user.phone || "-"}
-                td #{user.address || "-"}
                 td
                   if(user.status === 'active')
                     .badge.badge-green Hoạt động
                   else if(user.status === 'inactive')
                     .badge.badge-red Tạm dừng
-                  else
-                    .badge.badge-orange Khởi tạo
                 td
                   .inner-buttons
-                    a.inner-edit(href=`/${pathAdmin}/user/edit/${user._id}` title="Sửa người dùng")
-                      i.fa-regular.fa-pen-to-square
-                    a.inner-delete(href="#" user-delete data-api=`/${pathAdmin}/user/delete/${user._id}` title="Xóa người dùng")
-                      i.fa-regular.fa-trash-can
+                    if permission.includes('user-edit')
+                      a.inner-edit(href=`/${pathAdmin}/user/edit/${user._id}` title="Sửa người dùng")
+                        i.fa-regular.fa-pen-to-square
+                    if permission.includes('user-delete')
+                      a.inner-delete(href="#" user-delete data-api=`/${pathAdmin}/user/delete/${user._id}` title="Xóa người dùng")
+                        i.fa-regular.fa-trash-can
           else
             tr
-              td(colspan="8" class="inner-center") Không tìm thấy người dùng phù hợp.
+              td(colspan="7" class="inner-center") Không tìm thấy người dùng phù hợp.
   //- End Section 6
 
   //- Section 7

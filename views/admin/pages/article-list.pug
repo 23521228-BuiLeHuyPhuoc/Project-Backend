@@ -1,0 +1,71 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Quản lý bài viết
+
+  .section-4
+    .inner-wrap
+      .inner-item.inner-label
+        i.fa-solid.fa-filter
+        |  Bộ lọc
+      .inner-item
+        select(data-query-filter="status")
+          option(value="") Trạng thái
+          option(value="published" selected=filters.status==="published") Đã xuất bản
+          option(value="draft" selected=filters.status==="draft") Bản nháp
+      a.inner-item.inner-reset(href=`/${pathAdmin}/article/list`)
+        i.fa-solid.fa-rotate-left
+        |  Xóa bộ lọc
+
+  .section-5
+    .inner-wrap
+      .inner-search
+        i.fa-solid.fa-magnifying-glass
+        input(type="text" value=filters.search placeholder="Tìm tiêu đề, slug, chuyên mục" data-query-search)
+      if permission.includes('article-create')
+        .inner-button-create
+          a(href=`/${pathAdmin}/article/create`) + Tạo bài viết
+
+  .section-6
+    .table-2
+      table
+        thead
+          tr
+            th Ảnh
+            th Tiêu đề
+            th Chuyên mục
+            th Tác giả
+            th Trạng thái
+            th Ngày tạo
+            th Hành động
+        tbody
+          if articleList.length
+            each item in articleList
+              tr
+                td
+                  img.inner-avatar(src=item.image || "/admin/assets/images/avatar.jpg" alt=item.title)
+                td
+                  strong=item.title
+                  div
+                    small /tin-tuc/#{item.slug}
+                  if item.featured
+                    .badge.badge-orange Nổi bật
+                td=item.category
+                td=item.author
+                td
+                  if item.status==="published"
+                    .badge.badge-green Đã xuất bản
+                  else
+                    .badge.badge-orange Bản nháp
+                td=item.createdAtLabel
+                td
+                  .inner-buttons
+                    if permission.includes('article-edit')
+                      a.inner-edit(href=`/${pathAdmin}/article/edit/${item._id}` title="Sửa bài viết")
+                        i.fa-regular.fa-pen-to-square
+                    if permission.includes('article-delete')
+                      button.inner-delete(type="button" data-delete-api=`/${pathAdmin}/article/delete/${item._id}` title="Xóa bài viết")
+                        i.fa-regular.fa-trash-can
+          else
+            tr
+              td.inner-center(colspan="7") Chưa có bài viết phù hợp.

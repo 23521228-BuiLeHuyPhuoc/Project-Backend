@@ -30,7 +30,7 @@ module.exports.verifyToken=async (req,res,next)=>{
         })
     }
     if(role){
-        permissions=role.permissions;
+        permissions=Array.isArray(role.permissions) ? role.permissions : [];
     }
     req.permissions=permissions;
     req.account=existAccount;

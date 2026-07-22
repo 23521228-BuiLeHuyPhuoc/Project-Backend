@@ -1,0 +1,81 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Quản lý voucher
+
+  .section-4
+    .inner-wrap
+      .inner-item.inner-label
+        i.fa-solid.fa-filter
+        |  Bộ lọc
+      .inner-item
+        select(data-query-filter="status")
+          option(value="") Trạng thái
+          option(value="active" selected=filters.status==="active") Hoạt động
+          option(value="inactive" selected=filters.status==="inactive") Tạm dừng
+      a.inner-item.inner-reset(href=`/${pathAdmin}/voucher/list`)
+        i.fa-solid.fa-rotate-left
+        |  Xóa bộ lọc
+
+  .section-5
+    .inner-wrap
+      .inner-search
+        i.fa-solid.fa-magnifying-glass
+        input(type="text" value=filters.search placeholder="Tìm mã hoặc tên voucher" data-query-search)
+      if permission.includes('voucher-create')
+        .inner-button-create
+          a(href=`/${pathAdmin}/voucher/create`) + Tạo voucher
+
+  .section-6
+    .table-2
+      table
+        thead
+          tr
+            th Mã voucher
+            th Tên chương trình
+            th Mức giảm
+            th Đơn tối thiểu
+            th Thời gian
+            th Lượt dùng
+            th Trạng thái
+            th Hành động
+        tbody
+          if voucherList.length
+            each item in voucherList
+              tr
+                td
+                  .inner-code=item.code
+                td
+                  strong=item.title
+                  if item.description
+                    div
+                      small=item.description
+                td
+                  if item.discountType==="percent"
+                    | #{item.discountValue}%
+                  else
+                    | #{item.discountValue.toLocaleString("vi-VN")}đ
+                td #{item.minOrderValue.toLocaleString("vi-VN")}đ
+                td
+                  div #{item.startAtLabel} - #{item.endAtLabel}
+                  if item.isExpired
+                    small Đã hết hạn
+                td #{item.usedCount} / #{item.usageLimit || "Không giới hạn"}
+                td
+                  if item.status==="active" && !item.isExpired
+                    .badge.badge-green Hoạt động
+                  else if item.isExpired
+                    .badge.badge-orange Hết hạn
+                  else
+                    .badge.badge-red Tạm dừng
+                td
+                  .inner-buttons
+                    if permission.includes('voucher-edit')
+                      a.inner-edit(href=`/${pathAdmin}/voucher/edit/${item._id}` title="Sửa voucher")
+                        i.fa-regular.fa-pen-to-square
+                    if permission.includes('voucher-delete')
+                      button.inner-delete(type="button" data-delete-api=`/${pathAdmin}/voucher/delete/${item._id}` title="Xóa voucher")
+                        i.fa-regular.fa-trash-can
+          else
+            tr
+              td.inner-center(colspan="8") Chưa có voucher phù hợp.

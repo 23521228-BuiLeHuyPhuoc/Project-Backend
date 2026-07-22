@@ -1,0 +1,8 @@
+extends ../layouts/default.pug
+
+block main
+  .error-permission
+    i.fa-solid.fa-shield-halved
+    h1 Không có quyền truy cập
+    p Tài khoản của bạn chưa được cấp quyền cho đường dẫn #{requestedPath}.
+    a(href=`/${pathAdmin}/dashboard`) Trở về trang tổng quan

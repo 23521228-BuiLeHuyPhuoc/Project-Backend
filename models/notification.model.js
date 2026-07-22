@@ -33,7 +33,10 @@ const notificationSchema=new mongoose.Schema({
   deleted:{
     type:Boolean,
     default:false
-  }
+  },
+  createdBy:String,
+  deletedBy:String,
+  deletedAt:Date
 },{timestamps:true});
 
 module.exports=mongoose.model('Notification',notificationSchema,'notifications');

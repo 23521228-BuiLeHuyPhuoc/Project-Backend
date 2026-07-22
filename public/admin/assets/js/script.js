@@ -2268,3 +2268,136 @@ deleteUserButtons.forEach(button=>{
       });
   });
 });
+
+// Shared controls for the newer admin management pages.
+document.querySelectorAll("[data-query-filter]").forEach(element=>{
+  element.addEventListener("change",()=>{
+    const url=new URL(window.location.href);
+    const key=element.dataset.queryFilter;
+    if(element.value){
+      url.searchParams.set(key,element.value);
+    }
+    else{
+      url.searchParams.delete(key);
+    }
+    url.searchParams.delete("page");
+    window.location.href=url.href;
+  });
+});
+
+document.querySelectorAll("[data-query-search]").forEach(element=>{
+  element.addEventListener("keyup",event=>{
+    if(event.key!=="Enter"){
+      return;
+    }
+    const url=new URL(window.location.href);
+    const value=element.value.trim();
+    if(value){
+      url.searchParams.set("search",value);
+    }
+    else{
+      url.searchParams.delete("search");
+    }
+    url.searchParams.delete("page");
+    window.location.href=url.href;
+  });
+});
+
+document.querySelectorAll("[data-admin-form]").forEach(form=>{
+  form.addEventListener("submit",async event=>{
+    event.preventDefault();
+    if(window.tinymce){
+      tinymce.triggerSave();
+    }
+
+    const submitButton=form.querySelector('button[type="submit"]');
+    if(submitButton){
+      submitButton.disabled=true;
+    }
+    try{
+      const body=Object.fromEntries(new FormData(form).entries());
+      const response=await fetch(form.dataset.api,{
+        method:form.dataset.method || "POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(body)
+      });
+      const data=await response.json();
+      if(data.code!=="success"){
+        alert(data.message || "Không thể thực hiện thao tác!");
+        return;
+      }
+      window.location.href=form.dataset.redirect || window.location.href;
+    }
+    catch(error){
+      alert("Không thể kết nối tới máy chủ!");
+    }
+    finally{
+      if(submitButton){
+        submitButton.disabled=false;
+      }
+    }
+  });
+});
+
+const permissionPathInput=document.querySelector('#path[name="path"]');
+const permissionMethodInput=document.querySelector('#method[name="method"]');
+const permissionCodePreview=document.querySelector("#permissionCodePreview");
+if(permissionPathInput && permissionMethodInput && permissionCodePreview && !permissionPathInput.readOnly){
+  const updatePermissionCodePreview=()=>{
+    let routePath=permissionPathInput.value.trim().split(/[?#]/)[0].replace(/\\/g,"/");
+    routePath=routePath.replace(new RegExp(`^/?${pathAdmin}/?`,"i"),"");
+    const pathCode=routePath
+      .split("/")
+      .filter(Boolean)
+      .join("-")
+      .replace(/[^a-zA-Z0-9-]/g,"-")
+      .replace(/-+/g,"-")
+      .replace(/^-|-$/g,"")
+      .toLowerCase();
+    permissionCodePreview.value=`${permissionMethodInput.value.toLowerCase()}-${pathCode}`;
+  };
+  permissionPathInput.addEventListener("input",updatePermissionCodePreview);
+  permissionMethodInput.addEventListener("change",updatePermissionCodePreview);
+  updatePermissionCodePreview();
+}
+
+document.querySelectorAll("[data-delete-api]").forEach(button=>{
+  button.addEventListener("click",async()=>{
+    if(!confirm("Bạn có chắc muốn xóa bản ghi này?")){
+      return;
+    }
+    try{
+      const response=await fetch(button.dataset.deleteApi,{method:"PATCH"});
+      const data=await response.json();
+      if(data.code!=="success"){
+        alert(data.message || "Không thể xóa bản ghi!");
+        return;
+      }
+      window.location.reload();
+    }
+    catch(error){
+      alert("Không thể kết nối tới máy chủ!");
+    }
+  });
+});
+
+document.querySelectorAll("[data-status-api]").forEach(button=>{
+  button.addEventListener("click",async()=>{
+    try{
+      const response=await fetch(button.dataset.statusApi,{
+        method:"PATCH",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({status:button.dataset.status})
+      });
+      const data=await response.json();
+      if(data.code!=="success"){
+        alert(data.message || "Không thể cập nhật trạng thái!");
+        return;
+      }
+      window.location.reload();
+    }
+    catch(error){
+      alert("Không thể kết nối tới máy chủ!");
+    }
+  });
+});

@@ -1,0 +1,73 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Quản lý thông báo
+
+  .section-4
+    .inner-wrap
+      .inner-item.inner-label
+        i.fa-solid.fa-filter
+        |  Bộ lọc
+      .inner-item
+        select(data-query-filter="type")
+          option(value="") Loại thông báo
+          each type in ["order","voucher","review","account","system"]
+            option(value=type selected=filters.type===type)=type
+      .inner-item
+        select(data-query-filter="status")
+          option(value="") Trạng thái đọc
+          option(value="unread" selected=filters.status==="unread") Chưa đọc
+          option(value="read" selected=filters.status==="read") Đã đọc
+      a.inner-item.inner-reset(href=`/${pathAdmin}/notification/list`)
+        i.fa-solid.fa-rotate-left
+        |  Xóa bộ lọc
+
+  .section-5
+    .inner-wrap
+      .inner-search
+        i.fa-solid.fa-magnifying-glass
+        input(type="text" value=filters.search placeholder="Tìm tiêu đề hoặc nội dung" data-query-search)
+      if permission.includes('notification-create')
+        .inner-button-create
+          a(href=`/${pathAdmin}/notification/create`) + Gửi thông báo
+
+  .section-6
+    .table-2
+      table
+        thead
+          tr
+            th Người nhận
+            th Tiêu đề
+            th Nội dung
+            th Loại
+            th Trạng thái
+            th Thời gian
+            th Hành động
+        tbody
+          if notificationList.length
+            each item in notificationList
+              tr
+                td
+                  if item.userId
+                    strong=item.userId.fullName
+                    div
+                      small=item.userId.email
+                  else
+                    | Tài khoản đã xóa
+                td=item.title
+                td=item.message
+                td=item.type
+                td
+                  if item.readAt
+                    .badge.badge-green Đã đọc
+                  else
+                    .badge.badge-orange Chưa đọc
+                td=item.createdAtLabel
+                td
+                  if permission.includes('notification-delete')
+                    .inner-buttons
+                      button.inner-delete(type="button" data-delete-api=`/${pathAdmin}/notification/delete/${item._id}` title="Xóa thông báo")
+                        i.fa-regular.fa-trash-can
+          else
+            tr
+              td.inner-center(colspan="7") Chưa có thông báo phù hợp.

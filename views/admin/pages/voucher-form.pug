@@ -1,0 +1,48 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title=pageTitle
+
+  .section-8
+    form(data-admin-form data-method=formMethod data-api=formAction data-redirect=`/${pathAdmin}/voucher/list`)
+      .inner-group
+        label.inner-label(for="code") Mã voucher
+        input#code(type="text" name="code" required value=record ? record.code : "" placeholder="SUMMER2026")
+      .inner-group
+        label.inner-label(for="title") Tên chương trình
+        input#title(type="text" name="title" required value=record ? record.title : "")
+      .inner-group.inner-two-col
+        label.inner-label(for="description") Mô tả
+        textarea#description(name="description")=record ? record.description : ""
+      .inner-group
+        label.inner-label(for="discountType") Loại giảm giá
+        select#discountType(name="discountType")
+          option(value="percent" selected=record && record.discountType==="percent") Phần trăm
+          option(value="fixed" selected=record && record.discountType==="fixed") Số tiền cố định
+      .inner-group
+        label.inner-label(for="discountValue") Giá trị giảm
+        input#discountValue(type="number" name="discountValue" min="1" required value=record ? record.discountValue : "")
+      .inner-group
+        label.inner-label(for="minOrderValue") Giá trị đơn tối thiểu
+        input#minOrderValue(type="number" name="minOrderValue" min="0" value=record ? record.minOrderValue : 0)
+      .inner-group
+        label.inner-label(for="maxDiscount") Mức giảm tối đa (0 là không giới hạn)
+        input#maxDiscount(type="number" name="maxDiscount" min="0" value=record ? record.maxDiscount : 0)
+      .inner-group
+        label.inner-label(for="startAt") Bắt đầu
+        input#startAt(type="datetime-local" name="startAt" required value=record ? record.startAtValue : "")
+      .inner-group
+        label.inner-label(for="endAt") Kết thúc
+        input#endAt(type="datetime-local" name="endAt" required value=record ? record.endAtValue : "")
+      .inner-group
+        label.inner-label(for="usageLimit") Giới hạn lượt dùng (0 là không giới hạn)
+        input#usageLimit(type="number" name="usageLimit" min="0" value=record ? record.usageLimit : 0)
+      .inner-group
+        label.inner-label(for="status") Trạng thái
+        select#status(name="status")
+          option(value="active" selected=!record || record.status==="active") Hoạt động
+          option(value="inactive" selected=record && record.status==="inactive") Tạm dừng
+      .inner-button.inner-two-col
+        button(type="submit")=record ? "Cập nhật" : "Tạo voucher"
+    .inner-back
+      a(href=`/${pathAdmin}/voucher/list`) Quay lại danh sách

@@ -1,0 +1,55 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Quản lý đơn hàng đã hủy
+
+  .section-5
+    .inner-wrap
+      .inner-button-create
+        a(href=`/${pathAdmin}/order/list`) Xem tất cả đơn hàng
+
+  .section-6
+    .table-2
+      table
+        thead
+          tr
+            th Mã đơn
+            th Khách hàng
+            th Danh sách tour
+            th Tổng tiền
+            th Thanh toán
+            th Thời gian hủy
+            th Hành động
+        tbody
+          if orderList.length
+            each order in orderList
+              tr
+                td
+                  .inner-code=order.orderCode || "-"
+                td
+                  strong=order.fullName
+                  div SĐT: #{order.phone || "-"}
+                td
+                  each item in order.items
+                    .inner-item
+                      if item.avatar
+                        .inner-image
+                          img(src=item.avatar alt=item.Name)
+                      .inner-content
+                        .inner-name=item.Name
+                        .inner-quantity Người lớn: #{item.quantityAdult || 0}, trẻ em: #{item.quantityChildren || 0}, em bé: #{item.quantityBaby || 0}
+                td #{Number(order.total || 0).toLocaleString("vi-VN")}đ
+                td
+                  if order.paymentStatus==="paid"
+                    .badge.badge-green Đã thanh toán
+                  else
+                    .badge.badge-orange Chưa thanh toán
+                td=order.CancelledAtLabel
+                td
+                  if permission.includes('order-edit')
+                    .inner-buttons
+                      a.inner-edit(href=`/${pathAdmin}/order/edit/${order._id}` title="Xem đơn hàng")
+                        i.fa-regular.fa-pen-to-square
+          else
+            tr
+              td.inner-center(colspan="7") Chưa có đơn hàng bị hủy.

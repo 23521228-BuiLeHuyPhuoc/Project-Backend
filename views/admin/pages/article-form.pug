@@ -1,0 +1,47 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title=pageTitle
+
+  .section-8
+    form(data-admin-form data-method=formMethod data-api=formAction data-redirect=`/${pathAdmin}/article/list`)
+      .inner-group
+        label.inner-label(for="title") Tiêu đề
+        input#title(type="text" name="title" required value=record ? record.title : "")
+      .inner-group
+        label.inner-label(for="slug") Slug (để trống sẽ tự sinh)
+        input#slug(type="text" name="slug" value=record ? record.slug : "" placeholder="kinh-nghiem-du-lich")
+      .inner-group
+        label.inner-label(for="category") Chuyên mục
+        input#category(type="text" name="category" value=record ? record.category : "Cẩm nang")
+      .inner-group
+        label.inner-label(for="author") Tác giả
+        input#author(type="text" name="author" value=record ? record.author : "28.TRAVEL")
+      .inner-group.inner-two-col
+        label.inner-label(for="image") URL ảnh đại diện
+        input#image(type="url" name="image" value=record ? record.image : "")
+      .inner-group.inner-two-col
+        label.inner-label(for="description") Mô tả ngắn
+        textarea#description(name="description" required)=record ? record.description : ""
+      .inner-group
+        label.inner-label(for="readTime") Thời gian đọc
+        input#readTime(type="text" name="readTime" value=record ? record.readTime : "5 phút")
+      .inner-group
+        label.inner-label(for="status") Trạng thái
+        select#status(name="status")
+          option(value="draft" selected=!record || record.status==="draft") Bản nháp
+          option(value="published" selected=record && record.status==="published") Xuất bản
+      .inner-group.inner-two-col
+        label.inner-label(for="quote") Trích dẫn nổi bật
+        textarea#quote(name="quote")=record ? record.quote : ""
+      .inner-group.inner-two-col
+        label.inner-label(for="contentHtml") Nội dung bài viết
+        textarea#contentHtml(name="contentHtml" textarea-mce required)=record ? record.contentHtml : ""
+      .inner-group.inner-two-col
+        label.inner-checkbox-item
+          input(type="checkbox" name="featured" checked=record && record.featured)
+          span Đặt làm bài viết nổi bật
+      .inner-button.inner-two-col
+        button(type="submit")=record ? "Cập nhật" : "Tạo bài viết"
+    .inner-back
+      a(href=`/${pathAdmin}/article/list`) Quay lại danh sách

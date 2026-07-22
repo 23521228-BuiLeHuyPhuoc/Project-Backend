@@ -1,0 +1,40 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Chỉnh sửa quyền
+
+  .section-8
+    form(data-admin-form data-method="PATCH" data-api=`/${pathAdmin}/setting/permission/edit/${record._id}` data-redirect=`/${pathAdmin}/setting/permission/list`)
+      .inner-group
+        label.inner-label(for="label") Tên quyền
+        input#label(type="text" name="label" required value=record.label)
+      .inner-group
+        label.inner-label(for="group") Nhóm chức năng
+        input#group(type="text" name="group" value=record.group)
+      .inner-group
+        label.inner-label(for="path") Đường dẫn quản trị
+        input#path(type="text" name="path" required value=record.path readonly=record.isSystem)
+        if record.isSystem
+          small Đường dẫn của quyền hệ thống được khóa để không làm sai lệch route.
+      .inner-group
+        label.inner-label(for="method") Phương thức HTTP
+        select#method(name="method" disabled=record.isSystem)
+          each method in ["GET","POST","PATCH","PUT","DELETE","ALL"]
+            option(value=method selected=record.method===method)=method
+        if record.isSystem
+          input(type="hidden" name="method" value=record.method)
+      .inner-group
+        label.inner-label(for="permissionCodePreview") Mã quyền
+        input#permissionCodePreview(type="text" readonly value=record.code)
+      .inner-group
+        label.inner-label(for="status") Trạng thái
+        select#status(name="status")
+          option(value="active" selected=record.status==="active") Hoạt động
+          option(value="inactive" selected=record.status==="inactive") Tạm dừng
+      .inner-group
+        label.inner-label(for="description") Mô tả
+        textarea#description(name="description")=record.description
+      .inner-button.inner-two-col
+        button(type="submit") Cập nhật
+    .inner-back
+      a(href=`/${pathAdmin}/setting/permission/list`) Quay lại danh sách

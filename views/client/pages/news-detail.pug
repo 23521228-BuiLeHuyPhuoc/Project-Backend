@@ -37,36 +37,45 @@ block main
 
                 .inner-layout
                     .inner-body
-                        each section, index in article.content
-                            section.inner-section(
-                                id=`noi-dung-${index + 1}`
-                                data-aos-duration="650"
-                                data-aos="fade-up"
-                                )
-                                h2 #{section.heading}
-                                each paragraph in section.paragraphs
-                                    p #{paragraph}
-                                if section.bullets
-                                    ul
-                                        each bullet in section.bullets
-                                            li #{bullet}
-
-                            if index === 0
-                                blockquote.inner-quote(
+                        if article.contentHtml
+                            section.inner-section.article-rich-content(data-aos-duration="650" data-aos="fade-up")
+                                != article.contentHtml
+                            if article.quote
+                                blockquote.inner-quote(data-aos-duration="650" data-aos="fade-up")
+                                    i.fa-solid.fa-quote-left
+                                    p #{article.quote}
+                        else
+                            each section, index in article.content
+                                section.inner-section(
+                                    id=`noi-dung-${index + 1}`
                                     data-aos-duration="650"
                                     data-aos="fade-up"
                                     )
-                                    i.fa-solid.fa-quote-left
-                                    p #{article.quote}
+                                    h2 #{section.heading}
+                                    each paragraph in section.paragraphs
+                                        p #{paragraph}
+                                    if section.bullets
+                                        ul
+                                            each bullet in section.bullets
+                                                li #{bullet}
+
+                                if index === 0
+                                    blockquote.inner-quote(
+                                        data-aos-duration="650"
+                                        data-aos="fade-up"
+                                        )
+                                        i.fa-solid.fa-quote-left
+                                        p #{article.quote}
 
                     aside.inner-sidebar
                         .inner-toc
                             .inner-label Nội dung bài viết
-                            nav
-                                each section, index in article.content
-                                    a(href=`#noi-dung-${index + 1}`)
-                                        span #{String(index + 1).padStart(2, "0")}
-                                        | #{section.heading}
+                            if article.content
+                                nav
+                                    each section, index in article.content
+                                        a(href=`#noi-dung-${index + 1}`)
+                                            span #{String(index + 1).padStart(2, "0")}
+                                            | #{section.heading}
                             a.inner-back(href="/tin-tuc")
                                 i.fa-solid.fa-arrow-left
                                 | Quay lại trang tin tức

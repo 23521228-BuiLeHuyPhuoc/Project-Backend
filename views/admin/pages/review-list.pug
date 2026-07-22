@@ -1,0 +1,74 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Quản lý đánh giá
+
+  .section-4
+    .inner-wrap
+      .inner-item.inner-label
+        i.fa-solid.fa-filter
+        |  Bộ lọc
+      .inner-item
+        select(data-query-filter="status")
+          option(value="") Trạng thái
+          option(value="published" selected=filters.status==="published") Đang hiển thị
+          option(value="hidden" selected=filters.status==="hidden") Đã ẩn
+      .inner-item
+        select(data-query-filter="rating")
+          option(value="") Số sao
+          each star in [5,4,3,2,1]
+            option(value=star selected=String(filters.rating)===String(star)) #{star} sao
+      a.inner-item.inner-reset(href=`/${pathAdmin}/review/list`)
+        i.fa-solid.fa-rotate-left
+        |  Xóa bộ lọc
+
+  .section-6
+    .table-2
+      table
+        thead
+          tr
+            th Người đánh giá
+            th Tour
+            th Đơn hàng
+            th Điểm
+            th Nội dung
+            th Trạng thái
+            th Thời gian
+            th Hành động
+        tbody
+          if reviewList.length
+            each item in reviewList
+              tr
+                td
+                  if item.userId
+                    strong=item.userId.fullName
+                    div
+                      small=item.userId.email
+                  else
+                    | Tài khoản đã xóa
+                td=item.tourId ? item.tourId.name : "Tour đã xóa"
+                td=item.orderId ? item.orderId.orderCode : "-"
+                td
+                  .review-stars #{"★".repeat(item.rating)}#{"☆".repeat(5-item.rating)}
+                td=item.comment
+                td
+                  if item.status==="published"
+                    .badge.badge-green Đang hiển thị
+                  else
+                    .badge.badge-red Đã ẩn
+                td=item.createdAtLabel
+                td
+                  .inner-buttons
+                    if permission.includes('review-edit')
+                      if item.status==="published"
+                        button.inner-edit(type="button" data-status-api=`/${pathAdmin}/review/status/${item._id}` data-status="hidden" title="Ẩn đánh giá")
+                          i.fa-regular.fa-eye-slash
+                      else
+                        button.inner-edit(type="button" data-status-api=`/${pathAdmin}/review/status/${item._id}` data-status="published" title="Hiện đánh giá")
+                          i.fa-regular.fa-eye
+                    if permission.includes('review-delete')
+                      button.inner-delete(type="button" data-delete-api=`/${pathAdmin}/review/delete/${item._id}` title="Xóa đánh giá")
+                        i.fa-regular.fa-trash-can
+          else
+            tr
+              td.inner-center(colspan="8") Chưa có đánh giá phù hợp.

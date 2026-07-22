@@ -80,7 +80,9 @@ const userSchema=new mongoose.Schema({
     type:Boolean,
     default:false
   },
-  deletedAt:Date
+  deletedAt:Date,
+  updatedBy:String,
+  deletedBy:String
 },{
   timestamps:true
 });

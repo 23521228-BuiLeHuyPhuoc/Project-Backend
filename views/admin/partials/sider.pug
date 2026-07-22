@@ -12,9 +12,24 @@ nav.sider
     if(permission.includes('order-view'))
       li
         a(href=`/${pathAdmin}/order/list`) <i class="fa-solid fa-list-check"></i> Quản lý đơn hàng
+    if(permission.includes('cancelled-order-view'))
+      li
+        a(href=`/${pathAdmin}/order/cancelled`) <i class="fa-solid fa-ban"></i> Đơn hàng đã hủy
+    if(permission.includes('voucher-view'))
+      li
+        a(href=`/${pathAdmin}/voucher/list`) <i class="fa-solid fa-ticket"></i> Quản lý voucher
+    if(permission.includes('notification-view'))
+      li
+        a(href=`/${pathAdmin}/notification/list`) <i class="fa-solid fa-bell"></i> Quản lý thông báo
     if(permission.includes('user-view'))
       li
-        a(href=`/${pathAdmin}/user/list`) <i class="fa-solid fa-user"></i> Quản lý người dùng
+        a(href=`/${pathAdmin}/user/list`) <i class="fa-solid fa-users"></i> Tài khoản người dùng
+    if(permission.includes('article-view'))
+      li
+        a(href=`/${pathAdmin}/article/list`) <i class="fa-solid fa-newspaper"></i> Quản lý bài viết
+    if(permission.includes('review-view'))
+      li
+        a(href=`/${pathAdmin}/review/list`) <i class="fa-solid fa-star"></i> Quản lý đánh giá
     if(permission.includes('contact-view'))
       li
         a(href=`/${pathAdmin}/contact/list`) <i class="fa-solid fa-user-group"></i> Thông tin liên hệ

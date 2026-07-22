@@ -4,7 +4,6 @@ const voucherSchema=new mongoose.Schema({
   code:{
     type:String,
     required:true,
-    unique:true,
     uppercase:true,
     trim:true
   },
@@ -59,7 +58,13 @@ const voucherSchema=new mongoose.Schema({
   deleted:{
     type:Boolean,
     default:false
-  }
+  },
+  createdBy:String,
+  updatedBy:String,
+  deletedBy:String,
+  deletedAt:Date
 },{timestamps:true});
+
+voucherSchema.index({code:1},{unique:true,partialFilterExpression:{deleted:false}});
 
 module.exports=mongoose.model('Voucher',voucherSchema,'vouchers');

@@ -15,12 +15,8 @@ block main
         label.inner-label(for="phone") Số điện thoại
         input(type="text" id="phone" name="phone" value=user.phone)
       .inner-group
-        label.inner-label(for="address") Địa chỉ
-        input(type="text" id="address" name="address" value=user.address)
-      .inner-group
         label.inner-label(for="status") Trạng thái
         select(id="status" name="status")
-          option(value="initial" selected=user.status==="initial") Khởi tạo
           option(value="active" selected=user.status==="active") Hoạt động
           option(value="inactive" selected=user.status==="inactive") Tạm dừng
       .inner-button.inner-two-col

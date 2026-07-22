@@ -1,5 +1,6 @@
 const router=require('express').Router();
 const authMiddleware=require('../../middlewares/admin/auth.middlewares');
+const permissionMiddleware=require('../../middlewares/admin/permission.middleware');
 const accountRoutes=require('./account.route');
 const dashboardRoutes=require('./dashboard.route');
 const categoryRoutes=require('./category.route');
@@ -10,21 +11,31 @@ const contactRoutes=require('./contact.route');
 const settingRoutes=require('./setting.route');
 const profileRoutes=require('./profile.route');
 const uploadRoutes=require('./upload.route');
+const voucherRoutes=require('./voucher.route');
+const notificationRoutes=require('./notification.route');
+const articleRoutes=require('./article.route');
+const reviewRoutes=require('./review.route');
 router.use((req,res,next)=>{
     res.setHeader("Cache-Control","no-store");
     next();
 })
-router.use('/profile',authMiddleware.verifyToken, profileRoutes);
-router.use('/setting',authMiddleware.verifyToken,settingRoutes);
-router.use('/contact',authMiddleware.verifyToken,contactRoutes);
-router.use('/user',authMiddleware.verifyToken,userRoutes);
-router.use('/order',authMiddleware.verifyToken,orderRoutes);
-router.use('/tour',authMiddleware.verifyToken,tourRoutes);
 router.use('/account', accountRoutes);
-router.use('/dashboard',authMiddleware.verifyToken,dashboardRoutes);
-router.use('/category',authMiddleware.verifyToken,categoryRoutes);
-router.use('/upload',authMiddleware.verifyToken,uploadRoutes);
-router.use(authMiddleware.verifyToken,(req,res)=>{
+router.use(authMiddleware.verifyToken);
+router.use(permissionMiddleware.authorizeByPath);
+router.use('/profile',profileRoutes);
+router.use('/setting',settingRoutes);
+router.use('/contact',contactRoutes);
+router.use('/user',userRoutes);
+router.use('/order',orderRoutes);
+router.use('/tour',tourRoutes);
+router.use('/dashboard',dashboardRoutes);
+router.use('/category',categoryRoutes);
+router.use('/upload',uploadRoutes);
+router.use('/voucher',voucherRoutes);
+router.use('/notification',notificationRoutes);
+router.use('/article',articleRoutes);
+router.use('/review',reviewRoutes);
+router.use((req,res)=>{
     res.render("admin/pages/error-404",{
         pageTitle:"Không tìm thấy trang"
     })

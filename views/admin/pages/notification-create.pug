@@ -1,0 +1,34 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Gửi thông báo
+
+  .section-8
+    form(data-admin-form data-method="POST" data-api=`/${pathAdmin}/notification/create` data-redirect=`/${pathAdmin}/notification/list`)
+      .inner-group
+        label.inner-label(for="userId") Người nhận
+        select#userId(name="userId")
+          option(value="all") Tất cả tài khoản đang hoạt động
+          each user in userList
+            option(value=user._id) #{user.fullName} - #{user.email}
+      .inner-group
+        label.inner-label(for="type") Loại thông báo
+        select#type(name="type")
+          option(value="system") Hệ thống
+          option(value="voucher") Voucher
+          option(value="order") Đơn hàng
+          option(value="review") Đánh giá
+          option(value="account") Tài khoản
+      .inner-group.inner-two-col
+        label.inner-label(for="title") Tiêu đề
+        input#title(type="text" name="title" required)
+      .inner-group.inner-two-col
+        label.inner-label(for="message") Nội dung
+        textarea#message(name="message" required)
+      .inner-group.inner-two-col
+        label.inner-label(for="link") Đường dẫn khi người dùng bấm thông báo
+        input#link(type="text" name="link" value="/account/notifications")
+      .inner-button.inner-two-col
+        button(type="submit") Gửi thông báo
+    .inner-back
+      a(href=`/${pathAdmin}/notification/list`) Quay lại danh sách

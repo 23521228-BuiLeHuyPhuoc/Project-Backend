@@ -39,7 +39,9 @@ const reviewSchema=new mongoose.Schema({
     type:Boolean,
     default:false
   },
-  deletedAt:Date
+  deletedAt:Date,
+  updatedBy:String,
+  deletedBy:String
 },{timestamps:true});
 
 reviewSchema.index({userId:1,tourId:1},{unique:true});

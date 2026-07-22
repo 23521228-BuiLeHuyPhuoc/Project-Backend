@@ -1,5 +1,6 @@
 const SettingWebsiteInfo=require('../../models/setting-website-info.model');
-const permissionConfig=require('../../config/permission');
+const Permission=require('../../models/permission.model');
+const {ensureDefaultPermissions}=require('../../helpers/permission-seed.helper');
 const Role=require('../../models/roles.model');
 const slugify=require('slugify');
 const bcrypt=require('bcrypt');
@@ -116,13 +117,37 @@ module.exports.roleList=async (req,res)=>{
         roleList:roleList
     })
 }
-module.exports.roleCreate=(req,res)=>{
+const getPermissionGroups=permissionList=>{
+    const groups=new Map();
+    permissionList.forEach(item=>{
+        const group=item.group || "Khác";
+        if(!groups.has(group)){
+            groups.set(group,[]);
+        }
+        groups.get(group).push(item);
+    });
+    return Array.from(groups,([name,permissions])=>({name,permissions}));
+};
+
+module.exports.roleCreate=async(req,res)=>{
+    await ensureDefaultPermissions();
+    const permissionList=await Permission.find({
+        deleted:false,
+        status:"active"
+    }).sort({group:1,label:1}).lean();
     res.render("admin/pages/setting-role-create",{
-        permissionList:permissionConfig.permissionList,
+        permissionGroups:getPermissionGroups(permissionList),
         pageTitle:"Tạo mới vai trò quản trị"
     })
 }
 module.exports.roleCreatePost=async (req,res)=>{
+    const requestedPermissions=Array.isArray(req.body.permissions) ? req.body.permissions : [];
+    const validPermissions=await Permission.find({
+        code:{$in:requestedPermissions},
+        deleted:false,
+        status:"active"
+    }).distinct("code");
+    req.body.permissions=validPermissions;
     req.body.createdBy=req.account.id;
     req.body.updatedBy=req.account.id;
     const newRecord=new Role(req.body);
@@ -138,8 +163,13 @@ module.exports.roleEdit=async (req,res)=>{
         _id:id,
         deleted:false
     })
+    await ensureDefaultPermissions();
+    const permissionList=await Permission.find({
+        deleted:false,
+        status:"active"
+    }).sort({group:1,label:1}).lean();
     res.render("admin/pages/setting-role-edit",{
-        permissionList:permissionConfig.permissionList,
+        permissionGroups:getPermissionGroups(permissionList),
         pageTitle:"Sửa vai trò quản trị",
         record:record
     })
@@ -147,6 +177,12 @@ module.exports.roleEdit=async (req,res)=>{
 }
 module.exports.roleEditPatch=async (req,res)=>{
     const id=req.params.id;
+    const requestedPermissions=Array.isArray(req.body.permissions) ? req.body.permissions : [];
+    req.body.permissions=await Permission.find({
+        code:{$in:requestedPermissions},
+        deleted:false,
+        status:"active"
+    }).distinct("code");
     req.body.updatedBy=req.account.id;
     req.body.updatedAt=Date.now();
     await Role.updateOne({

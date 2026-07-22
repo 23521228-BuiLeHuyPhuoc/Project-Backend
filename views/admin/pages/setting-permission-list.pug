@@ -1,0 +1,74 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Quản lý quyền theo đường dẫn
+
+  .section-4
+    .inner-wrap
+      .inner-item.inner-label
+        i.fa-solid.fa-filter
+        |  Bộ lọc
+      .inner-item
+        select(data-query-filter="status")
+          option(value="") Trạng thái
+          option(value="active" selected=filters.status==="active") Hoạt động
+          option(value="inactive" selected=filters.status==="inactive") Tạm dừng
+      .inner-item
+        select(data-query-filter="method")
+          option(value="") Phương thức
+          each method in ["ALL","GET","POST","PATCH","PUT","DELETE"]
+            option(value=method selected=filters.method===method)=method
+      a.inner-item.inner-reset(href=`/${pathAdmin}/setting/permission/list`)
+        i.fa-solid.fa-rotate-left
+        |  Xóa bộ lọc
+
+  .section-5
+    .inner-wrap
+      .inner-search
+        i.fa-solid.fa-magnifying-glass
+        input(type="text" value=filters.search placeholder="Tìm tên, mã hoặc đường dẫn" data-query-search)
+      .inner-button-create
+        a(href=`/${pathAdmin}/setting/permission/create`) + Tạo quyền mới
+
+  .section-6
+    .table-2
+      table
+        thead
+          tr
+            th Tên quyền
+            th Nhóm
+            th Mã quyền
+            th Đường dẫn
+            th Phương thức
+            th Trạng thái
+            th Hành động
+        tbody
+          if permissionList.length
+            each item in permissionList
+              tr
+                td
+                  strong=item.label
+                  if item.isSystem
+                    div
+                      small Quyền hệ thống
+                td=item.group
+                td
+                  code=item.code
+                td
+                  code=item.path
+                td=item.method
+                td
+                  if item.status==="active"
+                    .badge.badge-green Hoạt động
+                  else
+                    .badge.badge-red Tạm dừng
+                td
+                  .inner-buttons
+                    a.inner-edit(href=`/${pathAdmin}/setting/permission/edit/${item._id}` title="Sửa quyền")
+                      i.fa-regular.fa-pen-to-square
+                    if !item.isSystem
+                      button.inner-delete(type="button" data-delete-api=`/${pathAdmin}/setting/permission/delete/${item._id}` title="Xóa quyền")
+                        i.fa-regular.fa-trash-can
+          else
+            tr
+              td.inner-center(colspan="7") Chưa có quyền phù hợp.
