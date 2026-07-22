@@ -13,6 +13,25 @@ const passwordSchema=joi.string()
     "string.pattern.name":"Mật khẩu phải chứa ít nhất một {#name}!"
   });
 
+const emailSchema=joi.string().trim().lowercase().required().email().messages({
+  "string.empty":"Vui lòng nhập email!",
+  "string.email":"Email không đúng định dạng!"
+});
+
+const validateRequest=schema=>(req,res,next)=>{
+  const {value,error}=schema.validate(req.body,{abortEarly:false});
+
+  if(error){
+    return res.status(400).json({
+      code:"error",
+      message:error.details.map(item=>item.message).join("\n")
+    });
+  }
+
+  req.body=value;
+  next();
+};
+
 module.exports.registerPost=(req,res,next)=>{
   const schema=joi.object({
     fullName:joi.string().trim().required().min(2).max(50).messages({
@@ -87,3 +106,23 @@ module.exports.loginPost=(req,res,next)=>{
   req.body=value;
   next();
 };
+
+module.exports.forgotPasswordPost=validateRequest(joi.object({
+  email:emailSchema
+}));
+
+module.exports.otpPasswordPost=validateRequest(joi.object({
+  email:emailSchema,
+  otp:joi.string().required().pattern(/^\d{6}$/).messages({
+    "string.empty":"Vui lòng nhập mã OTP!",
+    "string.pattern.base":"Mã OTP phải gồm đúng 6 chữ số!"
+  })
+}));
+
+module.exports.resetPasswordPost=validateRequest(joi.object({
+  password:passwordSchema,
+  confirmPassword:joi.any().valid(joi.ref("password")).required().messages({
+    "any.only":"Mật khẩu nhập lại không khớp!",
+    "any.required":"Vui lòng nhập lại mật khẩu!"
+  })
+}));

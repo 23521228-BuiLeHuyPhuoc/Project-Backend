@@ -1,28 +1,51 @@
-// Box Contact
-.box-contact
-  ul
-    li
+//- Floating Contact Button
+.box-contact(floating-contact)
+  ul#floating-contact-menu.inner-list(aria-hidden="true")
+    li.inner-item(style="--fab-index: 0")
       a(
+        aria-label="Facebook"
         target="_blank" 
+        rel="noopener noreferrer"
         href="#"
         )
+        span.inner-label Facebook
         i.fa-brands.fa-facebook-f
-    li
+    li.inner-item(style="--fab-index: 1")
       a(
+        aria-label="Instagram"
         target="_blank" 
+        rel="noopener noreferrer"
         href="#"
         )
+        span.inner-label Instagram
         i.fa-brands.fa-instagram
-    li
+    li.inner-item(style="--fab-index: 2")
       a(
+        aria-label="Viber"
         target="_blank" 
+        rel="noopener noreferrer"
         href="#"
         )
+        span.inner-label Viber
         i.fa-brands.fa-viber
-    li
+    li.inner-item(style="--fab-index: 3")
       a(
+        aria-label="YouTube"
         target="_blank" 
+        rel="noopener noreferrer"
         href="#"
         )
+        span.inner-label YouTube
         i.fa-brands.fa-youtube
-// End Box Contact
+  button.inner-toggle(
+    type="button"
+    aria-label="Mở menu liên hệ"
+    aria-expanded="false"
+    aria-controls="floating-contact-menu"
+    floating-contact-toggle
+  )
+    i.fa-solid.fa-headset.inner-icon-open(aria-hidden="true")
+    i.fa-solid.fa-xmark.inner-icon-close(aria-hidden="true")
+
+script(type="module" src="/assets/js/box-contact.js")
+//- End Floating Contact Button

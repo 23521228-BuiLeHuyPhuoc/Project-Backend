@@ -13,14 +13,20 @@ const categoryMiddleware=require('../../middlewares/client/category.middleware')
 const searchRoutes=require('./search.route');
 const orderRoutes=require('./order.route');
 const authRoutes=require('./auth.route');
+const newsRoutes=require('./news.route');
 const authMiddleware=require('../../middlewares/client/auth.middleware');
 router.use(settingMiddleware.websiteInfo);
 router.use(categoryMiddleware.list);
 router.use(authMiddleware.optionalAuth);
+router.use((req,res,next)=>{
+  res.locals.currentPath=req.path;
+  next();
+});
 router.use('/auth',authRoutes);
 router.get('/login',(req,res)=>res.redirect('/auth/login'));
 router.get('/register',(req,res)=>res.redirect('/auth/register'));
 router.use('/', homeRoutes );
+router.use('/tin-tuc',newsRoutes);
 router.use('/cart', cartRoutes );
 router.use('/category', categoryRoutes );
 router.use('/tour', tourRoutes );

@@ -321,56 +321,33 @@ block main
                 data-aos-duration="800" 
                 data-aos="fade-up"
                 )
-                .blog-item
-                    a(href="#")
-                        .inner-image
-                            img(
-                                alt="" 
-                                src="assets/images/blog-1.jpg"
-                                )
-                        .inner-content
-                            .inner-date 23/05/2024
-                            h3.inner-title Homestay “cổ tích” giữa Đà Lạt mộng mơ
-                .blog-item-2
-                    a(href="#")
-                        .inner-image
-                            img(
-                                alt="" 
-                                src="assets/images/blog-2.jpg"
-                                )
-                        .inner-content
-                            .inner-date 23/05/2024
-                            h3.inner-title Top 5 điểm check in độc đáo tại Singapore
-                            .inner-desc
-                                | Nếu bạn nghĩ du lịch Singapore rất nhàm chán vì chỉ mãi quanh quẩn trong những khối bê tông vô cảm thì bạn “chắc chưa?”. Tuy đảo quốc Sư Tử không phải là một quốc gia rộng lớn nhưng các địa điểm du lịch tại Singapore chưa từng đánh mất sức hút đối với cộng đồng xê dịch quốc tế.
-                .blog-item
-                    a(href="#")
-                        .inner-image
-                            img(
-                                alt="" 
-                                src="assets/images/blog-3.jpg"
-                                )
-                        .inner-content
-                            .inner-date 23/05/2024
-                            h3.inner-title Đặc sản không thể bỏ qua khi đến với Đà Nẵng - Hội An
-                .blog-item
-                    a(href="#")
-                        .inner-image
-                            img(
-                                alt="" 
-                                src="assets/images/blog-4.jpg"
-                                )
-                        .inner-content
-                            .inner-date 23/05/2024
-                            h3.inner-title Đảo Phú Quý Bình Thuận hot trend năm 2024
-                .blog-item
-                    a(href="#")
-                        .inner-image
-                            img(
-                                alt="" 
-                                src="assets/images/blog-5.jpg"
-                                )
-                        .inner-content
-                            .inner-date 23/05/2024
-                            h3.inner-title Trekking cắm trại tại Đà Lạt- Cảm nhận Đà Lạt qua từng bước chân
+                each article in newsList
+                    if article.featured
+                        .blog-item-2
+                            a(href=`/tin-tuc#${article.slug}`)
+                                .inner-image
+                                    img(
+                                        alt=article.title
+                                        src=article.image
+                                        )
+                                .inner-content
+                                    .inner-date #{article.date}
+                                    h3.inner-title #{article.title}
+                                    .inner-desc #{article.description}
+                    else
+                        .blog-item
+                            a(href=`/tin-tuc#${article.slug}`)
+                                .inner-image
+                                    img(
+                                        alt=article.title
+                                        src=article.image
+                                        )
+                                .inner-content
+                                    .inner-date #{article.date}
+                                    h3.inner-title #{article.title}
+            .inner-button(
+                data-aos-duration="700"
+                data-aos="fade-up"
+                )
+                a.button-outline(href="/tin-tuc") Xem tất cả tin tức
     // End Section 8

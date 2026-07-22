@@ -1,6 +1,7 @@
 const Tour=require('../../models/tour.model');
 const moment=require('moment');
 const FamilyHelper=require('../../helpers/category.helper');
+const newsList=require('../../data/news.data');
 module.exports.home=async(req, res) => {
   const tourList=await Tour.find({
           deleted:false, 
@@ -45,6 +46,7 @@ module.exports.home=async(req, res) => {
     pageTitle:"Trang chủ",
     tourListSection2:tourList,
     tourListSection4:tourListSection4,
-    tourListSection6:tourListSection6
+    tourListSection6:tourListSection6,
+    newsList:newsList
   })
 }

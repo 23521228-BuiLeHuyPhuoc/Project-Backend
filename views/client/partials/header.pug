@@ -30,7 +30,10 @@ header.header
       nav.inner-menu
         ul
           li
-            a.active(href="/") Trang chủ
+            a(
+              class=currentPath === "/" ? "active" : ""
+              href="/"
+              ) Trang chủ
           each item in categoryTree
             li
               a(href=`/category/${item.slug}`) #{item.name}
@@ -41,7 +44,10 @@ header.header
                   li
                     a(href=`/category/${child.slug}`) #{child.name}
           li
-            a(href="#") Tin tức
+            a(
+              class=currentPath && currentPath.startsWith("/tin-tuc") ? "active" : ""
+              href="/tin-tuc"
+              ) Tin tức
           li
             a(href="#") Liên hệ
         .inner-overlay

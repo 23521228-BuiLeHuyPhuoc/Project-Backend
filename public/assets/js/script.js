@@ -1090,3 +1090,102 @@ if(clientRegisterForm){
       });
     });
 }
+
+// Client forgot password form
+const clientForgotPasswordForm=document.querySelector("#client-forgot-password-form");
+if(clientForgotPasswordForm){
+  const validation=new JustValidate("#client-forgot-password-form");
+  validation
+    .addField("#forgot-password-email",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập email!"
+      },
+      {
+        rule:"email",
+        errorMessage:"Email không đúng định dạng!"
+      }
+    ])
+    .onSuccess(event=>{
+      submitClientAuth(clientForgotPasswordForm,"/auth/forgot-password",{
+        email:event.target.email.value
+      });
+    });
+}
+
+// Client OTP form
+const clientOtpPasswordForm=document.querySelector("#client-otp-password-form");
+if(clientOtpPasswordForm){
+  const otpInput=clientOtpPasswordForm.querySelector("#otp-password-code");
+  otpInput.addEventListener("input",()=>{
+    otpInput.value=otpInput.value.replace(/\D/g,"").slice(0,6);
+  });
+
+  const validation=new JustValidate("#client-otp-password-form");
+  validation
+    .addField("#otp-password-code",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập mã OTP!"
+      },
+      {
+        validator:value=>/^\d{6}$/.test(value),
+        errorMessage:"Mã OTP phải gồm đúng 6 chữ số!"
+      }
+    ])
+    .onSuccess(event=>{
+      submitClientAuth(clientOtpPasswordForm,"/auth/otp-password",{
+        email:event.target.email.value,
+        otp:event.target.otp.value
+      });
+    });
+}
+
+// Client reset password form
+const clientResetPasswordForm=document.querySelector("#client-reset-password-form");
+if(clientResetPasswordForm){
+  const validation=new JustValidate("#client-reset-password-form");
+  validation
+    .addField("#reset-password-new",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập mật khẩu!"
+      },
+      {
+        validator:value=>value.length>=8,
+        errorMessage:"Mật khẩu phải có ít nhất 8 ký tự!"
+      },
+      {
+        validator:value=>/[A-Z]/.test(value),
+        errorMessage:"Mật khẩu phải có ít nhất một chữ hoa!"
+      },
+      {
+        validator:value=>/[a-z]/.test(value),
+        errorMessage:"Mật khẩu phải có ít nhất một chữ thường!"
+      },
+      {
+        validator:value=>/[0-9]/.test(value),
+        errorMessage:"Mật khẩu phải có ít nhất một chữ số!"
+      },
+      {
+        validator:value=>/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]/.test(value),
+        errorMessage:"Mật khẩu phải có ít nhất một ký tự đặc biệt!"
+      }
+    ])
+    .addField("#reset-password-confirm",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập lại mật khẩu!"
+      },
+      {
+        validator:(value,fields)=>value===fields["#reset-password-new"].elem.value,
+        errorMessage:"Mật khẩu nhập lại không khớp!"
+      }
+    ])
+    .onSuccess(event=>{
+      submitClientAuth(clientResetPasswordForm,"/auth/reset-password",{
+        password:event.target.password.value,
+        confirmPassword:event.target.confirmPassword.value
+      });
+    });
+}

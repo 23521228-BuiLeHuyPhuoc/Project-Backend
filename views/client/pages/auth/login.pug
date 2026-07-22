@@ -44,6 +44,7 @@ block main
               label.inner-remember(for="remember-password-client")
                 input#remember-password-client(type="checkbox" name="rememberPassword")
                 span Ghi nhớ đăng nhập
+              a.inner-forgot-link(href="/auth/forgot-password") Quên mật khẩu?
 
             .inner-message(auth-message hidden)
             button.inner-submit(type="submit")
