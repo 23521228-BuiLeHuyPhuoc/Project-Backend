@@ -174,5 +174,9 @@ block main
                             .inner-total-price 
                               span(total-price) #{tour.priceNewAdult.toLocaleString("vi-VN")}
                               span đ
-                        button.inner-button-add-cart(tour-id=tour._id) Thêm Vào Giỏ Hàng
+                        button.inner-button-add-cart(
+                            type="button"
+                            tour-id=tour._id
+                            data-authenticated=user ? "true" : "false"
+                        )= user ? "Thêm Vào Giỏ Hàng" : "Đăng Nhập Để Đặt Tour"
     // End Section 10

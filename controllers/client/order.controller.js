@@ -9,82 +9,160 @@ require('dotenv').config();
 const sortHelper=require('../../helpers/sort.helper');
 const Notification=require('../../models/notification.model');
 module.exports.createPost=async(req,res)=>{
-   try{
-    let subTotal=0;
-    for(const item of req.body.items)
-    {
-        const infoTour=await Tour.findOne({
-            _id:item.tourId,
-            status:"active",
-            deleted:false
-        })
-        if(infoTour){
-            item.priceNewAdult=infoTour.priceNewAdult;
-            item.priceNewChildren=infoTour.priceNewChildren;
-            item.priceNewBaby=infoTour.priceNewBaby;
-            item.departureDate=infoTour.departureDate;
-            item.avatar=infoTour.avatar;
-            await Tour.updateOne({
-                _id:item.tourId
-            },{
-                stockAdult:infoTour.stockAdult-item.quantityAdult,
-                stockChildren:infoTour.stockChildren-item.quantityChildren,
-                stockBaby:infoTour.stockBaby-item.quantityBaby
-            })
-            subTotal+=item.priceNewAdult*item.quantityAdult+item.priceNewChildren*item.quantityChildren+item.priceNewBaby*item.quantityBaby;
-       
-      
-        }
+  const reservedItems=[];
+  let order=null;
 
+  try{
+    const fullName=typeof req.body.fullName==='string' ? req.body.fullName.trim() : '';
+    const phone=typeof req.body.phone==='string' ? req.body.phone.replace(/[\s.-]/g,'') : '';
+    const note=typeof req.body.note==='string' ? req.body.note.trim() : '';
+    const paymentMethod=req.body.paymentMethod;
+    const paymentMethods=['money','bank','zalopay','vnpay'];
+
+    if(fullName.length<2 || fullName.length>50){
+      return res.status(400).json({code:'error',message:'Họ tên không hợp lệ!'});
     }
-        req.body.orderCode="OD"+Date.now();
-        
-        req.body.discount=0;
-        req.body.total=subTotal-req.body.discount;
-        req.body.paymentStatus="unpaid";
-        req.body.status="initial";
-        req.body.userId=req.user ? req.user.id : null;
-        const order=new Order(req.body);
-        await order.save();
+    if(!/^(?:\+84|0)\d{8,10}$/.test(phone)){
+      return res.status(400).json({code:'error',message:'Số điện thoại không đúng định dạng!'});
+    }
+    if(!paymentMethods.includes(paymentMethod)){
+      return res.status(400).json({code:'error',message:'Phương thức thanh toán không hợp lệ!'});
+    }
 
-        if(req.user){
-            await Notification.create({
-                userId:req.user.id,
-                title:"Đặt tour thành công",
-                message:`Đơn ${order.orderCode} đã được tạo và đang chờ xác nhận.`,
-                type:"order",
-                link:`/account/orders/${order.id}`
-            });
+    const selectedCartItems=req.user.cart.filter(item=>
+      item.checked && (item.quantityAdult+item.quantityChildren+item.quantityBaby)>0
+    );
+    if(!selectedCartItems.length){
+      return res.status(400).json({code:'error',message:'Vui lòng chọn ít nhất một tour!'});
+    }
+
+    const tourIds=[...new Set(selectedCartItems.map(item=>String(item.tourId)))];
+    const tours=await Tour.find({
+      _id:{$in:tourIds},
+      status:'active',
+      deleted:false
+    });
+    const tourMap=new Map(tours.map(tour=>[String(tour._id),tour]));
+    const items=[];
+    let subTotal=0;
+
+    for(const cartItem of selectedCartItems){
+      const tour=tourMap.get(String(cartItem.tourId));
+      const supportsLocation=tour && tour.locations.some(location=>String(location)===String(cartItem.locationFrom));
+      if(!tour || !supportsLocation){
+        return res.status(409).json({
+          code:'error',
+          message:'Có tour trong giỏ không còn khả dụng. Vui lòng tải lại giỏ hàng!'
+        });
+      }
+
+      const item={
+        tourId:tour._id,
+        locationFrom:cartItem.locationFrom,
+        quantityAdult:cartItem.quantityAdult,
+        quantityChildren:cartItem.quantityChildren,
+        quantityBaby:cartItem.quantityBaby,
+        priceNewAdult:tour.priceNewAdult,
+        priceNewChildren:tour.priceNewChildren,
+        priceNewBaby:tour.priceNewBaby,
+        departureDate:tour.departureDate,
+        avatar:tour.avatar
+      };
+      items.push(item);
+      subTotal+=(item.priceNewAdult*item.quantityAdult)
+        +(item.priceNewChildren*item.quantityChildren)
+        +(item.priceNewBaby*item.quantityBaby);
+    }
+
+    for(const item of items){
+      const reservedTour=await Tour.findOneAndUpdate({
+        _id:item.tourId,
+        status:'active',
+        deleted:false,
+        stockAdult:{$gte:item.quantityAdult},
+        stockChildren:{$gte:item.quantityChildren},
+        stockBaby:{$gte:item.quantityBaby}
+      },{
+        $inc:{
+          stockAdult:-item.quantityAdult,
+          stockChildren:-item.quantityChildren,
+          stockBaby:-item.quantityBaby
         }
+      });
+      if(!reservedTour){
+        const stockError=new Error('Số chỗ của một tour vừa thay đổi. Vui lòng kiểm tra lại giỏ hàng!');
+        stockError.status=409;
+        throw stockError;
+      }
+      reservedItems.push(item);
+    }
 
+    const discount=0;
+    order=await Order.create({
+      orderCode:`OD${Date.now()}`,
+      userId:req.user.id,
+      fullName,
+      phone,
+      note,
+      items,
+      subTotal,
+      discount,
+      total:subTotal-discount,
+      paymentMethod,
+      paymentStatus:'unpaid',
+      status:'initial'
+    });
 
+    req.user.cart.pull(...selectedCartItems.map(item=>item._id));
+    await req.user.save();
 
-res.json({
-        code:"success",
-        message:"Đặt hàng thành công",
-        orderId:order._id
-    })
-}catch(error)
-{
-    res.json({
-        code:"error",
-        message:error.message
-    })
-}
+    try{
+      await Notification.create({
+        userId:req.user.id,
+        title:'Đặt tour thành công',
+        message:`Đơn ${order.orderCode} đã được tạo và đang chờ xác nhận.`,
+        type:'order',
+        link:`/account/orders/${order.id}`
+      });
+    }
+    catch(error){
+      console.error('Create order notification error:',error.message);
+    }
 
-    
-    
-    
-    
-    
+    res.status(201).json({
+      code:'success',
+      message:'Đặt tour thành công',
+      orderId:order._id
+    });
+  }
+  catch(error){
+    if(order){
+      await Order.deleteOne({_id:order._id}).catch(()=>{});
+    }
+    await Promise.all(reservedItems.map(reserved=>Tour.updateOne(
+      {_id:reserved.tourId},
+      {$inc:{
+        stockAdult:reserved.quantityAdult,
+        stockChildren:reserved.quantityChildren,
+        stockBaby:reserved.quantityBaby
+      }}
+    ).catch(()=>{})));
+    res.status(error.status || 500).json({
+      code:'error',
+      message:error.status===409 ? error.message : 'Không thể đặt tour lúc này!'
+    });
+  }
 }
 module.exports.success=async(req,res)=>{
     const orderId=req.query.orderId;
-    const phone=req.query.phone;
     const order=await Order.findOne({
         _id:orderId,
-        phone:phone
+        userId:req.user.id,
+        deleted:false
     })
+    if(!order){
+        return res.redirect('/account/orders');
+    }
     const tourList=await Tour.find({
         deleted:false
     })
@@ -103,7 +181,7 @@ module.exports.success=async(req,res)=>{
         }
         item.formatDepartureDate=moment(item.departureDate).format("DD/MM/YYYY");
         const findcity=city.find(c=>c._id==item.locationFrom);
-        item.cityName=findcity.name;
+        item.cityName=findcity ? findcity.name : "";
     }
     if(order)
     {
@@ -117,14 +195,6 @@ module.exports.success=async(req,res)=>{
         order:order
     })
     }
-    else{
-        res.json({
-            code:"error",
-            message:"Không tìm thấy đơn hàng"
-        })
-    }
-    
-
 }
 module.exports.paymentZaloPay=async(req,res)=>{
     try{
@@ -132,8 +202,12 @@ module.exports.paymentZaloPay=async(req,res)=>{
         const orderDetail=await Order.findOne({
             deleted:false,
             paymentStatus:"unpaid",
-            _id:orderId
+            _id:orderId,
+            userId:req.user.id
         });
+        if(!orderDetail){
+            return res.redirect('/cart');
+        }
         const config = {
     app_id: process.env.ZALOPAY_APPID,
     key1: process.env.ZALOPAY_KEY1,
@@ -236,7 +310,8 @@ module.exports.paymentVnPay=async(req,res)=>{
         const orderDetail=await Order.findOne({
             deleted:false,
             paymentStatus:"unpaid",
-            _id:OrderId
+            _id:OrderId,
+            userId:req.user.id
         });
         if(!orderDetail)        {
            res.redirect("/");

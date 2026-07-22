@@ -163,8 +163,62 @@ input, button, textarea {
   color: #fff;
   background-color: var(--color-primary);
 }
-.header .inner-cart{
-  display:none;
+.header .inner-client-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.header .inner-notification a {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 1px solid #E4E0EC;
+  border-radius: 50%;
+  background-color: #fff;
+  color: var(--color-primary);
+  transition: 0.2s ease;
+}
+
+.header .inner-notification a:hover {
+  border-color: var(--color-primary);
+  background-color: #F4EEFF;
+}
+
+.header .inner-notification i {
+  font-size: 18px;
+}
+
+.header .inner-notification span {
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -6px;
+  right: -5px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background-color: #FF3904;
+  padding: 0 4px;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.header .inner-notification span[hidden] {
+  display: none;
+}
+
+.header .inner-cart {
+  display: inline-flex;
+  align-items: center;
 }
 .header .inner-cart a {
   display: inline-flex;
@@ -227,15 +281,23 @@ input, button, textarea {
 }
 
 .inner-user-menu .inner-user-trigger {
+  width: 42px;
+  height: 42px;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  justify-content: center;
   border: 1px solid #E4E0EC;
-  border-radius: 999px;
+  border-radius: 50%;
   background-color: #fff;
-  padding: 5px 10px 5px 5px;
+  padding: 4px;
   cursor: pointer;
   color: #25282B;
+  transition: 0.2s ease;
+}
+
+.inner-user-menu .inner-user-trigger:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px #4502C712;
 }
 
 .inner-user-menu .inner-avatar {
@@ -247,11 +309,6 @@ input, button, textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.inner-user-menu .inner-user-trigger > i {
-  color: #828282;
-  font-size: 11px;
 }
 
 .inner-user-menu .inner-user-dropdown {
@@ -388,13 +445,23 @@ input, button, textarea {
     gap: 5px;
   }
 
+  .header .inner-client-actions {
+    gap: 8px;
+  }
+
+  .header .inner-notification a {
+    width: 34px;
+    height: 34px;
+  }
+
   .inner-athentication > a {
     padding: 7px 8px;
     font-size: 11px;
   }
 
-  .inner-user-menu .inner-user-name {
-    display: none;
+  .inner-user-menu .inner-user-trigger {
+    width: 38px;
+    height: 38px;
   }
 }
 /* End Header */
@@ -2840,6 +2907,43 @@ input, button, textarea {
   color: var(--color-primary);
 }
 
+.section-11 .cart-empty {
+  padding: 52px 20px;
+  text-align: center;
+  border: 1px dashed #d9d2e8;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #faf8ff 0%, #fff 60%, #fff6f2 100%);
+}
+
+.section-11 .cart-empty i {
+  font-size: 42px;
+  color: var(--color-primary);
+  margin-bottom: 16px;
+}
+
+.section-11 .cart-empty h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #25282b;
+}
+
+.section-11 .cart-empty p {
+  margin: 0 0 22px;
+  color: #777b80;
+}
+
+.section-11 .cart-empty a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 22px;
+  border-radius: 8px;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
 .section-11 .inner-coupon {
   display: flex;
   justify-content: flex-end;
@@ -3417,6 +3521,12 @@ input, button, textarea {
   background-color: transparent;
   color: #777B7E;
   cursor: pointer;
+}
+
+.section-12 .inner-button button:disabled,
+.box-tour-detail .inner-button-add-cart:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .auth-form .just-validate-error-label {

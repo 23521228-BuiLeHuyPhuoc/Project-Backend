@@ -1,5 +1,5 @@
 mixin account-sidebar(activePage)
-  aside.account-sidebar
+  aside.account-sidebar(data-account-sidebar)
     .account-user-card
       if user.avatar
         img.account-user-avatar(src=user.avatar alt=user.fullName)
@@ -8,34 +8,46 @@ mixin account-sidebar(activePage)
       .account-user-copy
         strong= user.fullName
         span= user.email
-    nav.account-nav(aria-label="Quản lý tài khoản")
-      a(class=activePage === 'dashboard' ? 'active' : '' href="/account")
+    nav.account-nav(aria-label="Quản lý tài khoản" data-account-sidebar-nav)
+      a(class=activePage === 'dashboard' ? 'active' : '' href="/account" data-account-sidebar-item="dashboard")
         i.fa-solid.fa-table-cells-large
         span Tổng quan
-      a(class=activePage === 'orders' ? 'active' : '' href="/account/orders")
+      a(class=activePage === 'orders' ? 'active' : '' href="/account/orders" data-account-sidebar-item="orders")
         i.fa-solid.fa-suitcase-rolling
         span Đơn hàng
-        if accountMeta && accountMeta.orderCount
-          em= accountMeta.orderCount
-      a(class=activePage === 'vouchers' ? 'active' : '' href="/account/vouchers")
+        em.account-nav-badge.account-nav-badge-orders(
+          data-account-sidebar-badge="orders"
+          hidden=!(accountMeta && accountMeta.orderCount)
+          aria-label="Số đơn hàng"
+        )= accountMeta ? accountMeta.orderCount : 0
+      a(class=activePage === 'vouchers' ? 'active' : '' href="/account/vouchers" data-account-sidebar-item="vouchers")
         i.fa-solid.fa-ticket
         span Voucher
-        if accountMeta && accountMeta.voucherCount
-          em= accountMeta.voucherCount
-      a(class=activePage === 'notifications' ? 'active' : '' href="/account/notifications")
+        em.account-nav-badge.account-nav-badge-vouchers(
+          data-account-sidebar-badge="vouchers"
+          hidden=!(accountMeta && accountMeta.voucherCount)
+          aria-label="Số voucher"
+        )= accountMeta ? accountMeta.voucherCount : 0
+      a(class=activePage === 'notifications' ? 'active' : '' href="/account/notifications" data-account-sidebar-item="notifications")
         i.fa-regular.fa-bell
         span Thông báo
-        if accountMeta && accountMeta.unreadCount
-          em= accountMeta.unreadCount
-      a(class=activePage === 'reviews' ? 'active' : '' href="/account/reviews")
+        em.account-nav-badge.account-nav-badge-notifications(
+          data-account-sidebar-badge="notifications"
+          hidden=!(accountMeta && accountMeta.unreadCount)
+          aria-label="Số thông báo chưa đọc"
+        )= accountMeta ? accountMeta.unreadCount : 0
+      a(class=activePage === 'reviews' ? 'active' : '' href="/account/reviews" data-account-sidebar-item="reviews")
         i.fa-regular.fa-star
         span Đánh giá
-      a(class=activePage === 'favorites' ? 'active' : '' href="/account/favorites")
+      a(class=activePage === 'favorites' ? 'active' : '' href="/account/favorites" data-account-sidebar-item="favorites")
         i.fa-regular.fa-heart
         span Yêu thích
-        if accountMeta && accountMeta.favoriteCount
-          em= accountMeta.favoriteCount
-      a(class=activePage === 'profile' ? 'active' : '' href="/account/profile")
+        em.account-nav-badge.account-nav-badge-favorites(
+          data-account-sidebar-badge="favorites"
+          hidden=!(accountMeta && accountMeta.favoriteCount)
+          aria-label="Số tour yêu thích"
+        )= accountMeta ? accountMeta.favoriteCount : 0
+      a(class=activePage === 'profile' ? 'active' : '' href="/account/profile" data-account-sidebar-item="profile")
         i.fa-regular.fa-user
         span Thông tin tài khoản
     form.account-logout(action="/auth/logout" method="post")

@@ -73,7 +73,7 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 250px minmax(0, 1fr);
+  grid-template-columns: 270px minmax(0, 1fr);
   gap: 28px;
   align-items: start;
 }
@@ -135,12 +135,12 @@
 }
 
 .account-user-copy strong {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .account-user-copy span {
   color: #E7DCFF;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .account-nav {
@@ -159,7 +159,7 @@
   border-radius: 10px;
   padding: 0 12px;
   color: #625B69;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   transition: 0.18s ease;
 }
@@ -173,7 +173,7 @@
 
 .account-nav i {
   text-align: center;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .account-nav em {
@@ -183,11 +183,20 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background-color: #fff;
   padding: 0 6px;
-  color: var(--color-primary);
-  font-size: 10px;
+  color: var(--account-soft);
+  background-color:#5A20C8;
+  font-size: 11px;
   font-style: normal;
+}
+
+.account-nav-badge[hidden] {
+  display: none;
+}
+
+.account-nav-badge-notifications {
+  background-color: #FF3904;
+  color: #fff;
 }
 
 .account-logout {
@@ -205,7 +214,7 @@
   background-color: transparent;
   padding: 11px 12px;
   color: var(--account-red);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -228,7 +237,7 @@
   display: block;
   margin-bottom: 6px;
   color: var(--color-primary);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 1.3px;
   text-transform: uppercase;
@@ -237,7 +246,7 @@
 .account-heading h1 {
   margin: 0 0 8px;
   color: var(--account-ink);
-  font-size: 30px;
+  font-size: 34px;
   line-height: 1.2;
   letter-spacing: -0.7px;
 }
@@ -246,7 +255,7 @@
   max-width: 660px;
   margin: 0;
   color: var(--account-muted);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.7;
 }
 
@@ -294,7 +303,7 @@
 
 .account-welcome-copy > span {
   color: #DCCEFF;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -302,14 +311,14 @@
 
 .account-welcome h1 {
   margin: 7px 0 9px;
-  font-size: 28px;
+  font-size: 32px;
 }
 
 .account-welcome p {
   max-width: 520px;
   margin: 0;
   color: #EEE7FF;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.65;
 }
 
@@ -328,7 +337,7 @@
   border: 1px solid transparent;
   border-radius: 9px;
   padding: 0 15px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 750;
   cursor: pointer;
   transition: 0.18s ease;
@@ -399,7 +408,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .account-stat-orange { background-color: #FFF1D9; color: #C87800; }
@@ -414,12 +423,12 @@
 }
 
 .account-stat-copy strong {
-  font-size: 21px;
+  font-size: 24px;
 }
 
 .account-stat-copy span {
   color: var(--account-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .account-grid-two,
@@ -467,13 +476,13 @@
 .account-order-summary h2 {
   margin: 0;
   color: var(--account-ink);
-  font-size: 17px;
+  font-size: 20px;
 }
 
 .account-panel-head > a,
 .account-section-head > strong {
   color: var(--color-primary);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 750;
 }
 
@@ -523,7 +532,7 @@
 .account-notification-mini-copy strong {
   overflow: hidden;
   color: var(--account-ink);
-  font-size: 11px;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -531,7 +540,7 @@
 .account-order-mini-copy span,
 .account-notification-mini-copy span {
   color: var(--account-muted);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .account-order-mini-meta {
@@ -539,7 +548,7 @@
 }
 
 .account-order-mini-meta strong {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .account-order-mini-meta span,
@@ -549,7 +558,7 @@
   align-items: center;
   border-radius: 999px;
   padding: 4px 8px;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 750;
 }
 
@@ -599,7 +608,7 @@
   background-color: #FFFFFFB8;
   padding: 8px 13px;
   color: #6E6675;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -647,12 +656,12 @@
 .account-order-code span,
 .account-order-total span {
   color: var(--account-muted);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .account-order-code strong {
   color: var(--account-ink);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .account-order-statuses,
@@ -695,13 +704,13 @@
 .account-order-item-copy strong,
 .account-order-item-copy a {
   color: var(--account-ink);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 750;
 }
 
 .account-order-item-copy span {
   color: var(--account-muted);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .account-order-foot {
@@ -715,7 +724,7 @@
 
 .account-order-total strong {
   color: var(--color-primary);
-  font-size: 17px;
+  font-size: 20px;
 }
 
 .account-back {
@@ -727,7 +736,7 @@
   align-items: center;
   gap: 7px;
   color: var(--account-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -755,7 +764,7 @@
 .account-order-summary dt,
 .account-order-summary dd {
   margin: 0;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .account-order-summary dt { color: var(--account-muted); }
@@ -774,7 +783,7 @@
   gap: 12px;
   padding: 5px 0;
   color: var(--account-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .account-price-lines .account-price-total {
@@ -786,7 +795,7 @@
 
 .account-price-total strong {
   color: var(--color-primary);
-  font-size: 16px;
+  font-size: 19px;
 }
 
 .account-voucher-grid {
@@ -843,12 +852,12 @@
 
 .account-voucher-value span {
   color: #E8DAFF;
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
 }
 
 .account-voucher-value strong {
-  font-size: 24px;
+  font-size: 27px;
 }
 
 .account-voucher-copy {
@@ -869,7 +878,7 @@
 
 .account-voucher-code strong {
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.8px;
 }
 
@@ -878,7 +887,7 @@
   background-color: #EEE7FA;
   padding: 4px 7px;
   color: var(--color-primary);
-  font-size: 7px;
+  font-size: 9px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -886,14 +895,14 @@
 .account-voucher-copy h3 {
   margin: 9px 0 5px;
   color: var(--account-ink);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .account-voucher-copy p,
 .account-voucher-copy small {
   margin: 0;
   color: var(--account-muted);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.5;
 }
 
@@ -901,7 +910,7 @@
   min-height: 32px;
   margin-top: 10px;
   padding: 0 11px;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .account-link-danger {
@@ -910,7 +919,7 @@
   margin-top: 8px;
   padding: 0;
   color: var(--account-red);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -934,7 +943,6 @@
 .account-notification-card.unread {
   border-color: #D7C4F0;
   background-color: #F7F1FF;
-  box-shadow: inset 3px 0 0 var(--color-primary);
 }
 
 .account-notification-main {
@@ -978,7 +986,7 @@
 
 .account-notification-title strong {
   color: var(--account-ink);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .account-notification-title span {
@@ -989,13 +997,13 @@
 .account-notification-copy p {
   margin: 5px 0;
   color: var(--account-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
 .account-notification-copy small {
   color: #A099A5;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .account-icon-button {
@@ -1052,7 +1060,7 @@
   background-color: #F39A15;
   padding: 5px 9px;
   color: #fff;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
 }
 
@@ -1088,7 +1096,7 @@
 
 .account-favorite-copy small {
   color: var(--color-primary);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 750;
   text-transform: uppercase;
 }
@@ -1096,7 +1104,7 @@
 .account-favorite-copy h2 {
   min-height: 38px;
   margin: 7px 0 10px;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.45;
 }
 
@@ -1113,12 +1121,12 @@
 
 .account-favorite-price del {
   color: #A69FA9;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .account-favorite-price strong {
   color: var(--color-primary);
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .account-review-eligible-list,
@@ -1159,7 +1167,7 @@
 
 .account-review-tour-copy small {
   color: var(--color-primary);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 700;
 }
 
@@ -1167,7 +1175,7 @@
 .account-review-card-title h3 {
   margin: 5px 0 0;
   color: var(--account-ink);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .account-review-card-title h3 a { color: inherit; }
@@ -1178,13 +1186,13 @@
   gap: 3px;
   margin-top: 5px;
   color: #F2A10C;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .account-review-stars span {
   margin-left: 6px;
   color: var(--account-muted);
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .account-review-form {
@@ -1202,7 +1210,7 @@
 
 .account-rating-field > span {
   color: var(--account-muted);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 650;
 }
 
@@ -1220,7 +1228,7 @@
 .account-stars label {
   padding: 0 2px;
   color: #D8D1DA;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
 }
 
@@ -1240,7 +1248,7 @@
   outline: none;
   color: var(--account-ink);
   font: inherit;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.55;
 }
 
@@ -1284,12 +1292,12 @@
 
 .account-profile-avatar strong {
   color: var(--account-ink);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .account-profile-avatar span {
   color: var(--account-muted);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .account-form-grid {
@@ -1306,7 +1314,7 @@
   display: block;
   margin-bottom: 7px;
   color: #4D4653;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -1320,7 +1328,7 @@
   left: 13px;
   transform: translateY(-50%);
   color: #928B97;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .account-control input {
@@ -1332,7 +1340,7 @@
   padding: 0 13px 0 38px;
   outline: none;
   color: var(--account-ink);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .account-control input:focus {
@@ -1349,7 +1357,7 @@
   display: block;
   margin-bottom: 9px;
   color: #4E4754;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .account-chip-list {
@@ -1372,7 +1380,7 @@
   background-color: #fff;
   padding: 8px 11px;
   color: #6E6674;
-  font-size: 9px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -1393,7 +1401,7 @@
   background-color: #FFF0F2;
   padding: 10px 12px;
   color: #B52B43;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -1428,20 +1436,20 @@
   border-radius: 15px;
   background-color: #EEE7FA;
   color: var(--color-primary);
-  font-size: 19px;
+  font-size: 22px;
 }
 
 .account-empty h3 {
   margin: 13px 0 6px;
   color: var(--account-ink);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .account-empty p {
   max-width: 360px;
   margin: 0 0 13px;
   color: var(--account-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.55;
 }
 
@@ -1459,7 +1467,7 @@
   box-shadow: 0 16px 42px #140A1D40;
   padding: 12px 15px;
   color: #fff;
-  font-size: 11px;
+  font-size: 13px;
   animation: account-toast-in 0.25s ease;
 }
 
@@ -1600,7 +1608,7 @@
 }
 
 @media (max-width: 1199.98px) {
-  .account-layout { grid-template-columns: 225px minmax(0, 1fr); gap: 20px; }
+  .account-layout { grid-template-columns: 240px minmax(0, 1fr); gap: 20px; }
   .account-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .account-favorite-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -1623,7 +1631,7 @@
   .account-nav a { min-width: max-content; grid-template-columns: 18px auto auto; padding: 0 11px; }
   .account-nav a.active { box-shadow: inset 0 -3px 0 var(--color-primary); }
   .account-welcome { min-height: 0; align-items: flex-start; flex-direction: column; padding: 28px; }
-  .account-welcome h1 { font-size: 24px; }
+  .account-welcome h1 { font-size: 28px; }
   .account-grid-two { grid-template-columns: 1fr; }
   .account-heading-row { display: block; }
   .account-heading-row .account-button { margin: -12px 0 20px; }
@@ -1639,7 +1647,7 @@
   .account-page { padding: 25px 0 48px; }
   .account-sidebar { border-radius: 16px; }
   .account-user-card { display: none; }
-  .account-heading h1 { font-size: 25px; }
+  .account-heading h1 { font-size: 29px; }
   .account-stats { grid-template-columns: 1fr 1fr; gap: 9px; }
   .account-stat { align-items: flex-start; flex-direction: column; padding: 13px; }
   .account-panel,
@@ -1653,7 +1661,7 @@
   .account-voucher-card { grid-template-columns: 92px 1fr; }
   .account-voucher-card::before,
   .account-voucher-card::after { left: 82px; }
-  .account-voucher-value strong { font-size: 19px; }
+  .account-voucher-value strong { font-size: 22px; }
   .account-notification-main { grid-template-columns: 38px 1fr; }
   .account-notification-icon { width: 38px; height: 38px; }
   .account-rating-field { align-items: flex-start; flex-direction: column; gap: 6px; }

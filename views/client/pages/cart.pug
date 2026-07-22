@@ -1,110 +1,150 @@
 extends ../layouts/default.pug
-block main 
-    // Section 11
-    .section-11(page-cart)
-        .container
-            .inner-wrap
-                .inner-head
-                    .inner-title Giỏ Hàng
-                    a.inner-back(href="/")
-                        | Quay lại mua hàng
-                        i.fa-solid.fa-angle-right
-                .inner-tour-list(cart-list)
 
-                    // Tour Item
-                    // Nhân bản Tour Item
-                    // End Tour Item
-                .inner-coupon
-                    form#coupon-form(action="")
-                        input#coupon-input(
-                            name="coupon" 
-                            placeholder="Nhập mã giảm giá" 
-                            type="text"
-                            )
-                        button(type="submit") Dùng Mã
-                .inner-list-price
+block main
+  .section-11(page-cart)
+    .container
+      .inner-wrap
+        .inner-head
+          .inner-title Giỏ Hàng
+          a.inner-back(href="/")
+            | Tiếp tục chọn tour
+            i.fa-solid.fa-angle-right
+
+        .inner-tour-list(cart-list)
+          if cartData.cart.length
+            each item in cartData.cart
+              .inner-tour-item(data-cart-item=item.id)
+                .inner-actions
+                  button.inner-delete(type="button" data-cart-delete=item.id aria-label="Xóa tour")
+                    i.fa-solid.fa-xmark
+                  input.inner-check(
+                    type="checkbox"
+                    checked=item.checked
+                    data-cart-checked=item.id
+                    aria-label="Chọn tour để thanh toán"
+                  )
+                .inner-product
+                  .inner-image
+                    a(href=`/tour/detail/${item.slug}`)
+                      img(alt=item.name src=item.avatar)
+                  .inner-content
+                    .inner-title
+                      a(href=`/tour/detail/${item.slug}`)= item.name
+                    .inner-meta
+                      .inner-meta-item Ngày Khởi Hành:
+                        b= item.departureDateFormat
+                      .inner-meta-item Khởi Hành Tại:
+                        b= item.locationFromName
+                .inner-quantity
+                  label.inner-label Số Lượng Hành Khách
+                  .inner-list
                     .inner-item
-                        .inner-label Tổng tiền:
-                        .inner-price
-                            span(cart-sub-total) 0 
-                            span đ
+                      .inner-item-label Người lớn:
+                      .inner-item-input
+                        input(
+                          value=item.quantityAdult
+                          min="0"
+                          max=item.stockAdult
+                          type="number"
+                          data-cart-quantity="quantityAdult"
+                          data-cart-item-id=item.id
+                        )
+                      .inner-item-price
+                        span #{item.quantityAdult} x
+                        span.inner-highlight #{item.priceNewAdult.toLocaleString('vi-VN')}đ
                     .inner-item
-                        .inner-label Giảm:
-                        .inner-price -0 đ
+                      .inner-item-label Trẻ em:
+                      .inner-item-input
+                        input(
+                          value=item.quantityChildren
+                          min="0"
+                          max=item.stockChildren
+                          type="number"
+                          data-cart-quantity="quantityChildren"
+                          data-cart-item-id=item.id
+                        )
+                      .inner-item-price
+                        span #{item.quantityChildren} x
+                        span.inner-highlight #{item.priceNewChildren.toLocaleString('vi-VN')}đ
                     .inner-item
-                        .inner-label Thanh toán:
-                        .inner-price-highlight 
-                            span(cart-total) 0 
-                            span đ
-    // End Section 11
-    // Section 12
+                      .inner-item-label Em bé:
+                      .inner-item-input
+                        input(
+                          value=item.quantityBaby
+                          min="0"
+                          max=item.stockBaby
+                          type="number"
+                          data-cart-quantity="quantityBaby"
+                          data-cart-item-id=item.id
+                        )
+                      .inner-item-price
+                        span #{item.quantityBaby} x
+                        span.inner-highlight #{item.priceNewBaby.toLocaleString('vi-VN')}đ
+          else
+            .cart-empty
+              i.fa-solid.fa-suitcase-rolling
+              h2 Giỏ hàng đang trống
+              p Chọn một hành trình phù hợp để bắt đầu chuyến đi của bạn.
+              a(href="/") Khám phá tour
+
+        if cartData.cart.length
+          .inner-list-price
+            .inner-item
+              .inner-label Tổng tiền tour đã chọn:
+              .inner-price
+                span(cart-sub-total)= cartData.subTotal.toLocaleString('vi-VN')
+                span  đ
+            .inner-item
+              .inner-label Giảm:
+              .inner-price -#{cartData.discount.toLocaleString('vi-VN')} đ
+            .inner-item
+              .inner-label Thanh toán:
+              .inner-price-highlight
+                span(cart-total)= cartData.total.toLocaleString('vi-VN')
+                span  đ
+
+  if cartData.cart.length
     .section-12
-        .container
-            .inner-wrap
-                form#order-form(action="")
-                    .inner-info
-                        .inner-title-main Thông Tin Khách Hàng
-                        .inner-inputs
-                            .inner-input
-                                input#full-name-input(
-                                    placeholder="Họ và tên" 
-                                    name="fullName" 
-                                    type="text"
-                                    )
-                            .inner-input
-                                input#phone-input(
-                                    placeholder="Số điện thoại" 
-                                    name="phone" 
-                                    type="text"
-                                    )
-                        textarea(
-                            placeholder="Ghi chú" 
-                            name="note"
-                            )
-                    .inner-method
-                        .inner-title-main Chọn phương thức thanh toán
-                        .inner-list
-                            .inner-item
-                                input#methodMoney(
-                                    checked="" 
-                                    value="money" 
-                                    name="method" 
-                                    type="radio"
-                                    )
-                                label(for="methodMoney") Thanh toán tiền mặt khi đi tour
-                            .inner-item
-                                input#methodMomo(
-                                    value="momo" 
-                                    name="method" 
-                                    type="radio"
-                                    )
-                                label(for="methodMomo") Ví MoMo
-                            .inner-item
-                                input#methodZaloPay(
-                                    value="zalopay" 
-                                    name="method" 
-                                    type="radio"
-                                    )
-                                label(for="methodZaloPay") Ví ZaloPay
-                            .inner-item
-                                input#methodVNPay(
-                                    value="vnpay" 
-                                    name="method" 
-                                    type="radio"
-                                    )
-                                label(for="methodVNPay") Ví VNPay
-                            .inner-item
-                                input#methodBank(
-                                    value="bank" 
-                                    name="method" 
-                                    type="radio"
-                                    )
-                                label(for="methodBank") Chuyển khoản ngân hàng
-                        .inner-info-bank
-                            .inner-title Thông tin chuyển khoản
-                            .inner-text Ngân hàng : Vietcombank
-                            .inner-text Tên tài khoản: Le Van A
-                            .inner-text STK: 0123456789
-                    .inner-button
-                        button(type="submit") ĐẶT TOUR
-    // End Section 12
+      .container
+        .inner-wrap
+          form#order-form(novalidate)
+            .inner-info
+              .inner-title-main Thông Tin Khách Hàng
+              .inner-inputs
+                .inner-input
+                  input#full-name-input(
+                    placeholder="Họ và tên"
+                    name="fullName"
+                    type="text"
+                    value=user.fullName
+                  )
+                .inner-input
+                  input#phone-input(
+                    placeholder="Số điện thoại"
+                    name="phone"
+                    type="text"
+                    value=user.phone
+                  )
+              textarea(placeholder="Ghi chú" name="note")
+            .inner-method
+              .inner-title-main Chọn phương thức thanh toán
+              .inner-list
+                .inner-item
+                  input#methodMoney(checked value="money" name="method" type="radio")
+                  label(for="methodMoney") Thanh toán tiền mặt khi đi tour
+                .inner-item
+                  input#methodZaloPay(value="zalopay" name="method" type="radio")
+                  label(for="methodZaloPay") Ví ZaloPay
+                .inner-item
+                  input#methodVNPay(value="vnpay" name="method" type="radio")
+                  label(for="methodVNPay") Ví VNPay
+                .inner-item
+                  input#methodBank(value="bank" name="method" type="radio")
+                  label(for="methodBank") Chuyển khoản ngân hàng
+              .inner-info-bank
+                .inner-title Thông tin chuyển khoản
+                .inner-text Ngân hàng: Vietcombank
+                .inner-text Tên tài khoản: Le Van A
+                .inner-text STK: 0123456789
+            .inner-button
+              button(type="submit") ĐẶT TOUR

@@ -92,7 +92,8 @@ module.exports.loginPost=(req,res,next)=>{
     password:joi.string().required().messages({
       "string.empty":"Vui lòng nhập mật khẩu!"
     }),
-    rememberPassword:joi.boolean().default(false)
+    rememberPassword:joi.boolean().default(false),
+    returnTo:joi.string().allow('').max(500).default('')
   });
   const {value,error}=schema.validate(req.body,{abortEarly:false});
 

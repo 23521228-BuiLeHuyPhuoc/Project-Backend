@@ -371,87 +371,53 @@ if(orderForm) {
         errorMessage: 'Số điện thoại không đúng định dạng!'
       },
     ])
-    .onSuccess((event) => {
+    .onSuccess(async(event) => {
       const fullName = event.target.fullName.value;
       const phone = event.target.phone.value;
       const note = event.target.note.value;
       const method = event.target.method.value;
-      let cart=JSON.parse(localStorage.getItem("cart"));
-      cart=cart.filter(item=>{
-       return item.checked==true&&(item.quantityAdult+item.quantityChildren+item.quantityBaby)>0
-      });
-      cart=cart.map(item=>{
-        return {
-          tourId:item.tourId,
-          locationFrom:item.locationFrom,
-          quantityAdult:item.quantityAdult,
-          quantityChildren:item.quantityChildren,
-          quantityBaby:item.quantityBaby
-        }
-      })
-      if(cart.length>0)
-      {
-        const dataFinal={
-          fullName:fullName,
-          phone:phone,
-          note:note,
-          paymentMethod:method,
-          items:cart
-        }
-        console.log(dataFinal);
-        fetch(`/order/create`,{
+      const submitButton=event.target.querySelector('button[type="submit"]');
+      submitButton.disabled=true;
+
+      try{
+        const response=await fetch(`/order/create`,{
           method:"POST",
           headers:{
             "Content-Type":"application/json"
           },
-          body:JSON.stringify(dataFinal)
-        }).then(res=>res.json())
-        .then(data=>{
-          if(data.code=="success")
-          {
+          body:JSON.stringify({
+            fullName,
+            phone,
+            note,
+            paymentMethod:method
+          })
+        });
+        const data=await response.json();
+        if(response.status===401 && data.redirect){
+          window.location.href=data.redirect;
+          return;
+        }
+        if(data.code!=="success"){
+          alert(data.message || "Không thể đặt tour lúc này!");
+          return;
+        }
 
-            let cart=JSON.parse(localStorage.getItem("cart"));
-            cart=cart.filter(item=>item.checked==false);
-            localStorage.setItem("cart",JSON.stringify(cart));
-            switch(method){
-              case "money":
-              case "bank":
-              window.location.href=`/order/success?orderId=${data.orderId}&phone=${phone}`;
-                break;
-              case "zalopay":
-                window.location.href=`/order/payment-zalopay/${data.orderId}`;
-                break;
-              case "momo":
-                window.location.href=`/order/payment-momo/${data.orderId}`;
-                break;
-              case "vnpay":
-                window.location.href=`/order/payment-vnpay/${data.orderId}`;
-              break;
-            
-            
-            }
-            
-            
-
-          }
-          if(data.code=="error")
-          {
-            alert(data.message);
-          }
-        })
+        if(method==="zalopay"){
+          window.location.href=`/order/payment-zalopay/${data.orderId}`;
+        }
+        else if(method==="vnpay"){
+          window.location.href=`/order/payment-vnpay/${data.orderId}`;
+        }
+        else{
+          window.location.href=`/order/success?orderId=${data.orderId}`;
+        }
       }
-      else{
-        alert("Vui lòng đặt ít nhất 1 tour!");
-        
+      catch(error){
+        alert("Không thể kết nối đến máy chủ!");
       }
-
-
-
-
-
-
-
-      
+      finally{
+        submitButton.disabled=false;
+      }
     })
   ;
 
@@ -629,263 +595,132 @@ inputStockAdult.addEventListener("change",drawBoxDetail);
 inputStockChildren.addEventListener("change",drawBoxDetail);
 inputStockBaby.addEventListener("change",drawBoxDetail);
 const buttonAddToCart=boxTourDetail.querySelector(".inner-button-add-cart");
-buttonAddToCart.addEventListener("click",()=>{
+buttonAddToCart.addEventListener("click",async()=>{
+  if(buttonAddToCart.dataset.authenticated!=="true"){
+    window.location.href=`/auth/login?returnTo=${encodeURIComponent(window.location.pathname)}`;
+    return;
+  }
+
   const tourId=buttonAddToCart.getAttribute("tour-id");
   const quantityAdult=parseInt(inputStockAdult.value);
   const quantityChildren=parseInt(inputStockChildren.value);
   const quantityBaby=parseInt(inputStockBaby.value);
   const locationFrom=boxTourDetail.querySelector("[location-from]").value;
-  if(quantityAdult>0||quantityChildren>0||quantityBaby>0)
-  {
-    const cartItem={
-      tourId:tourId,
-      quantityAdult:quantityAdult,
-      quantityChildren:quantityChildren,
-      quantityBaby:quantityBaby,
-      locationFrom:locationFrom,
-      checked:true
-    }
-    const cart=JSON.parse(localStorage.getItem("cart"));
-    const indexItemExist=cart.findIndex(item=>item.tourId==tourId);
-    if(indexItemExist!=-1)
-    {
-      if(cart[indexItemExist].stockAdult && cart[indexItemExist].quantityAdult + cartItem.quantityAdult > parseInt(cart[indexItemExist].stockAdult)
-      || cart[indexItemExist].stockChildren && cart[indexItemExist].quantityChildren + cartItem.quantityChildren > parseInt(cart[indexItemExist].stockChildren)
-      || cart[indexItemExist].stockBaby && cart[indexItemExist].quantityBaby + cartItem.quantityBaby > parseInt(cart[indexItemExist].stockBaby)
-      )
-      {
-        alert("Số lượng Tour trong giỏ vượt quá số lượng hiện có!");
-        return;
-      }
-       if(cart[indexItemExist].locationFrom==locationFrom) {
-      
-      cart[indexItemExist].quantityAdult+=cartItem.quantityAdult;
-      cart[indexItemExist].quantityChildren+=cartItem.quantityChildren;
-      cart[indexItemExist].quantityBaby+=cartItem.quantityBaby;
-      localStorage.setItem("cart",JSON.stringify(cart));
-      window.location.href="/cart";
-      }
-      else if(cart[indexItemExist].locationFrom!=locationFrom){
-
-        cart.push(cartItem);
-    localStorage.setItem("cart",JSON.stringify(cart));
-    window.location.href="/cart";
-      }
-    }
-    else{
-       cart.push(cartItem);
-    localStorage.setItem("cart",JSON.stringify(cart));
-    window.location.href="/cart";
-    }
-   
+  if(!(quantityAdult>0||quantityChildren>0||quantityBaby>0)){
+    alert("Vui lòng chọn ít nhất một hành khách!");
+    return;
   }
-})
+
+  buttonAddToCart.disabled=true;
+  try{
+    const response=await fetch('/cart/add',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        tourId,
+        locationFrom,
+        quantityAdult,
+        quantityChildren,
+        quantityBaby
+      })
+    });
+    const result=await response.json();
+    if(response.status===401 && result.redirect){
+      window.location.href=result.redirect;
+      return;
+    }
+    if(result.code!=="success"){
+      alert(result.message || "Không thể thêm tour vào giỏ hàng!");
+      return;
+    }
+    window.location.href=result.redirect || '/cart';
+  }
+  catch(error){
+    alert("Không thể kết nối đến máy chủ!");
+  }
+  finally{
+    buttonAddToCart.disabled=false;
+  }
+});
 
 }
 
 //End Box Tour Detail
-//Initial Cart
-const cart=localStorage.getItem("cart");
-if(!cart)
-{
-  localStorage.setItem("cart",JSON.stringify([]));
-}
-//End Initial Cart
-//Mini Cart
-const miniCart=document.querySelector("[mini-cart]");
-if(miniCart){
-  const cart=JSON.parse(localStorage.getItem("cart"));
-  miniCart.innerHTML=cart.length;
-
-}
-//End Mini Cart
-//Draw Cart
-const drawCart=()=>{
-  
-  const cart=JSON.parse(localStorage.getItem("cart"));
-  fetch(`/cart/detail`,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({cart:cart})
-  }).then(res=>res.json())
-  .then(data=>{
-    if(data.code=="success"){
-      const htmlCart=data.cart.map(item=>
-        `
-    <div class="inner-tour-item">
-      <div class="inner-actions">
-        <button class="inner-delete">
-          <i class="fa-solid fa-xmark" tour-id=${item.tourId} location-from="${item.locationFrom}" button-delete></i>
-        </button>
-        <input class="inner-check" type="checkbox" ${item.checked?'checked':""} checkbox-tour-id=${item.tourId} location-from="${item.locationFrom}">
-      </div>
-      <div class="inner-product">
-        <div class="inner-image">
-          <a href="/tour/detail/${item.slug}">
-            <img alt="" src=${item.avatar}>
-          </a>
-        </div>
-        <div class="inner-content">
-          <div class="inner-title">
-            <a href="/tour/detail/${item.slug}">${item.name}</a>
-          </div>
-          <div class="inner-meta">
-            <div class="inner-meta-item">Mã Tour: <b>123456789</b>
-            </div>
-            <div class="inner-meta-item">Ngày Khởi Hành: <b>${item.departureDateFormat}</b>
-            </div>
-            <div class="inner-meta-item">Khởi Hành Tại: <b>${item.locationFromName}</b>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="inner-quantity">
-        <label class="inner-label">Số Lượng Hành Khách</label>
-        <div class="inner-list">
-          <div class="inner-item">
-            <div class="inner-item-label">Người lớn:</div>
-            <div class="inner-item-input">
-              <input value=${item.quantityAdult} 
-              min="0" 
-              max="${item.stockAdult}"
-              type="number"
-              input-quantity="quantityAdult"
-              tour-id="${item.tourId}"
-              location-from="${item.locationFrom}"
-              >
-            </div>
-            <div class="inner-item-price">
-              <span>${item.quantityAdult}</span>
-              <span>x</span>
-              <span class="inner-highlight">${item.priceNewAdult.toLocaleString('vi-VN')}</span>
-            </div>
-          </div>
-          <div class="inner-item">
-            <div class="inner-item-label">Trẻ em:</div>
-            <div class="inner-item-input">
-              <input value=${item.quantityChildren}
-               min="0" 
-               max="${item.stockChildren}"
-               type="number"
-               input-quantity="quantityChildren"
-              tour-id="${item.tourId}"
-              location-from="${item.locationFrom}"
-               >
-            </div>
-            <div class="inner-item-price">
-              <span>${item.quantityChildren}</span>
-              <span>x</span>
-              <span class="inner-highlight">${item.priceNewChildren.toLocaleString('vi-VN')}</span>
-            </div>
-          </div>
-          <div class="inner-item">
-            <div class="inner-item-label">Em bé:</div>
-            <div class="inner-item-input">
-              <input value=${item.quantityBaby} 
-              min="0" 
-              max="${item.stockBaby}"
-              type="number"
-              input-quantity="quantityBaby"
-              tour-id="${item.tourId}"
-              location-from="${item.locationFrom}"
-              >
-            </div>
-            <div class="inner-item-price">
-              <span>${item.quantityBaby}</span>
-              <span>x</span>
-              <span class="inner-highlight">${item.priceNewBaby.toLocaleString('vi-VN')}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- End Tour Item-->
-  `);
-      const cartlist=document.querySelector("[cart-list]");
-      cartlist.innerHTML=htmlCart.join("");
-      localStorage.setItem("cart",JSON.stringify(data.cart));
-      miniCart.innerHTML=data.cart.length;
-      //Tính tổng tiền
-      let totalPrice=0;
-      for(const item of data.cart){
-        if(item.checked==true)
-        {
-        const priceAdult=item.quantityAdult*item.priceNewAdult;
-        const priceChildren=item.quantityChildren*item.priceNewChildren;
-        const priceBaby=item.quantityBaby*item.priceNewBaby;
-        totalPrice += priceAdult + priceChildren + priceBaby;
-        }
-      }        
-      const elementTotalPrice=document.querySelector(`[cart-sub-total]`);
-      elementTotalPrice.innerHTML=totalPrice.toLocaleString("vi-VN");
-      const elementCartTotal=document.querySelector(`[cart-total]`);
-      const discount=0;
-      const priceTotal=totalPrice-discount;
-      elementCartTotal.innerHTML=priceTotal.toLocaleString("vi-VN");
-    //Sự kiện cập nhật số lượng
-    const listInputQuantity=document.querySelectorAll('[input-quantity]');
-    listInputQuantity.forEach(input=>{
-      input.addEventListener("change",()=>{
-          const value=parseInt(input.value);
-          const tourId=input.getAttribute("tour-id");
-          const locationFrom=input.getAttribute("location-from");
-          const type=input.getAttribute("input-quantity");
-          const cart=JSON.parse(localStorage.getItem("cart"));
-          const itemUpdate=cart.find(item=>item.tourId==tourId && item.locationFrom==locationFrom);
-          if(itemUpdate){
-            itemUpdate[type]=value;
-          }
-          localStorage.setItem("cart",JSON.stringify(cart));
-          drawCart();
-      
-      })
-    })
-
-    //sự kiện xoá item
-    const listButtonDelete=document.querySelectorAll("[button-delete]");
-    listButtonDelete.forEach(button=>{
-      button.addEventListener("click",()=>{
-        const tourId=button.getAttribute("tour-id");
-        const locationFrom=button.getAttribute("location-from");
-        const cart=JSON.parse(localStorage.getItem("cart"));
-        const indexItem=cart.findIndex(item=>item.tourId==tourId && item.locationFrom==locationFrom);
-        cart.splice(indexItem,1);
-        localStorage.setItem("cart",JSON.stringify(cart));
-        drawCart();
-      })
-    })
-    //CHecked item
-    const checkBoxTourId=document.querySelectorAll("[checkbox-tour-id]");
-    checkBoxTourId.forEach(item=>{
-      item.addEventListener("change",()=>{
-        const tourId=item.getAttribute("checkbox-tour-id");
-        const locationFrom=item.getAttribute("location-from");
-        const status=item.checked;
-        const cart=JSON.parse(localStorage.getItem("cart"));
-        const updateOne=cart.find(cartItem=>cartItem.tourId==tourId && cartItem.locationFrom==locationFrom);
-        updateOne["checked"]=status;
-        localStorage.setItem("cart",JSON.stringify(cart));
-        drawCart();
-      })
-    })
-    }
-  })
-}
-//End Draw Cart
-//Page Cart
+// Page Cart
 const pageCart=document.querySelector("[page-cart]");
 if(pageCart){
-  drawCart();
-}   
+  const cartRequest=async(url,options={})=>{
+    const response=await fetch(url,{
+      ...options,
+      headers:{
+        'Content-Type':'application/json',
+        ...(options.headers || {})
+      }
+    });
+    const result=await response.json();
+    if(response.status===401 && result.redirect){
+      window.location.href=result.redirect;
+      return null;
+    }
+    if(result.code!=="success"){
+      throw new Error(result.message || "Không thể cập nhật giỏ hàng!");
+    }
+    return result;
+  };
 
+  document.querySelectorAll('[data-cart-quantity]').forEach(input=>{
+    input.addEventListener('change',async()=>{
+      const value=Number(input.value);
+      input.disabled=true;
+      try{
+        await cartRequest(`/cart/items/${input.dataset.cartItemId}`,{
+          method:'PATCH',
+          body:JSON.stringify({[input.dataset.cartQuantity]:value})
+        });
+        window.location.reload();
+      }
+      catch(error){
+        alert(error.message);
+        window.location.reload();
+      }
+    });
+  });
 
+  document.querySelectorAll('[data-cart-checked]').forEach(checkbox=>{
+    checkbox.addEventListener('change',async()=>{
+      checkbox.disabled=true;
+      try{
+        await cartRequest(`/cart/items/${checkbox.dataset.cartChecked}`,{
+          method:'PATCH',
+          body:JSON.stringify({checked:checkbox.checked})
+        });
+        window.location.reload();
+      }
+      catch(error){
+        alert(error.message);
+        window.location.reload();
+      }
+    });
+  });
 
-
-
-
-//End Page Cart
+  document.querySelectorAll('[data-cart-delete]').forEach(button=>{
+    button.addEventListener('click',async()=>{
+      if(!window.confirm('Bạn muốn xóa tour này khỏi giỏ hàng?')){
+        return;
+      }
+      button.disabled=true;
+      try{
+        await cartRequest(`/cart/items/${button.dataset.cartDelete}`,{method:'DELETE'});
+        window.location.reload();
+      }
+      catch(error){
+        alert(error.message);
+        button.disabled=false;
+      }
+    });
+  });
+}
+// End Page Cart
 
 // Client auth menu
 const userMenuTrigger=document.querySelector("[user-menu-trigger]");
@@ -977,7 +812,8 @@ if(clientLoginForm){
       submitClientAuth(clientLoginForm,"/auth/login",{
         email:event.target.email.value,
         password:event.target.password.value,
-        rememberPassword:event.target.rememberPassword.checked
+        rememberPassword:event.target.rememberPassword.checked,
+        returnTo:event.target.returnTo.value
       });
     });
 }

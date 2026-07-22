@@ -40,6 +40,37 @@ const userSchema=new mongoose.Schema({
       default:[]
     }
   },
+  cart:[{
+    tourId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"Tour",
+      required:true
+    },
+    locationFrom:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"City",
+      required:true
+    },
+    quantityAdult:{
+      type:Number,
+      min:0,
+      default:0
+    },
+    quantityChildren:{
+      type:Number,
+      min:0,
+      default:0
+    },
+    quantityBaby:{
+      type:Number,
+      min:0,
+      default:0
+    },
+    checked:{
+      type:Boolean,
+      default:true
+    }
+  }],
   status:{
     type:String,
     enum:["active","inactive"],

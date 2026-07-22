@@ -26,6 +26,7 @@ block main
             p Nhập thông tin để tiếp tục khám phá những điểm đến mới.
 
           form.auth-form#client-login-form(novalidate)
+            input(type="hidden" name="returnTo" value=returnTo)
             .inner-field
               label(for="login-email") Email
               .inner-control

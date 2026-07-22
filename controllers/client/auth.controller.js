@@ -11,6 +11,20 @@ const otpLifetime=5*60*1000;
 const resetLifetime=10*60*1000;
 const maxOtpAttempts=5;
 
+const getSafeReturnTo=value=>{
+  if(typeof value!=='string' || !value.startsWith('/')){
+    return '/';
+  }
+  try{
+    const baseUrl='http://localhost';
+    const url=new URL(value,baseUrl);
+    return url.origin===baseUrl ? `${url.pathname}${url.search}${url.hash}` : '/';
+  }
+  catch(error){
+    return '/';
+  }
+};
+
 const budgetRanges={
   "under-2":{min:0,max:2000000},
   "2-5":{min:2000000,max:5000000},
@@ -47,8 +61,10 @@ module.exports.login=(req,res)=>{
   if(req.user){
     return res.redirect('/');
   }
+  const returnTo=typeof req.query.returnTo==='string' ? req.query.returnTo : '';
   res.render('client/pages/auth/login',{
-    pageTitle:'Đăng nhập'
+    pageTitle:'Đăng nhập',
+    returnTo
   });
 };
 
@@ -147,9 +163,10 @@ module.exports.loginPost=async(req,res)=>{
       secure:process.env.NODE_ENV==='production'
     });
     req.flash('success','Đăng nhập thành công!');
+    const returnTo=getSafeReturnTo(req.body.returnTo);
     res.json({
       code:'success',
-      redirect:'/'
+      redirect:returnTo
     });
   }
   catch(error){

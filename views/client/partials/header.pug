@@ -51,21 +51,29 @@ header.header
           li
             a(href="#") Liên hệ
         .inner-overlay
-      // Cart
-      .inner-cart
-        a(href="/cart")
-          img(
-            alt="Cart" 
-            src="/assets/images/icon-cart.svg"
-            )
-          span(mini-cart) 0
+      // Client actions
+      if user
+        .inner-client-actions
+          .inner-notification
+            a(href="/account/notifications" aria-label="Thông báo" title="Thông báo" data-header-notification)
+              i.fa-regular.fa-bell
+              span(
+                data-header-notification-badge
+                hidden=!notificationUnreadCount
+                aria-label="Số thông báo chưa đọc"
+              )= notificationUnreadCount
+          .inner-cart
+            a(href="/cart" aria-label="Giỏ hàng")
+              img(
+                alt="Cart"
+                src="/assets/images/icon-cart.svg"
+                )
+              span(mini-cart)= cartCount
       .inner-athentication
         if user
           .inner-user-menu
-            button.inner-user-trigger(type="button" user-menu-trigger)
+            button.inner-user-trigger(type="button" user-menu-trigger aria-label="Mở menu tài khoản" title=user.fullName)
               span.inner-avatar #{user.fullName.charAt(0).toUpperCase()}
-              span.inner-user-name #{user.fullName}
-              i.fa-solid.fa-chevron-down
             .inner-user-dropdown
               a(href="/account")
                 i.fa-solid.fa-table-cells-large
