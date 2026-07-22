@@ -11,8 +11,6 @@ const app = express()
 const variableconfig=require('./config/variable');
 const port = 3000
 const cookieParser=require('cookie-parser');
-const {ensureDefaultPermissions}=require('./helpers/permission-seed.helper');
-const {ensureDefaultArticles}=require('./helpers/article-seed.helper');
 //sử dụng flash
 app.use(cookieParser("builehuyphuoc"));
 app.use(session({secret:"builehuyphuoc", resave:false, saveUninitialized:true, cookie:{maxAge:60000}}));
@@ -36,8 +34,6 @@ app.use(`/${variableconfig.pathAdmin}`, adminRoutes);
 
 const start=async()=>{
   await connect.connect();
-  await ensureDefaultPermissions();
-  await ensureDefaultArticles();
   app.listen(port, () => {
     console.log(`Website đang chạy trên cổng ${port}`)
   });

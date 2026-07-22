@@ -1,7 +1,6 @@
 const Permission=require("../../models/permission.model");
 const Role=require("../../models/roles.model");
 const {normalizePath,buildCode}=require("../../helpers/permission.helper");
-const {ensureDefaultPermissions}=require("../../helpers/permission-seed.helper");
 
 const allowedMethods=["ALL","GET","POST","PATCH","PUT","DELETE"];
 
@@ -36,7 +35,6 @@ const validatePayload=payload=>{
 };
 
 module.exports.list=async(req,res)=>{
-  await ensureDefaultPermissions();
   const find={deleted:false};
   const filters={
     status:req.query.status || "",

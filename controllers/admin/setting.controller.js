@@ -1,6 +1,5 @@
 const SettingWebsiteInfo=require('../../models/setting-website-info.model');
 const Permission=require('../../models/permission.model');
-const {ensureDefaultPermissions}=require('../../helpers/permission-seed.helper');
 const Role=require('../../models/roles.model');
 const slugify=require('slugify');
 const bcrypt=require('bcrypt');
@@ -130,7 +129,6 @@ const getPermissionGroups=permissionList=>{
 };
 
 module.exports.roleCreate=async(req,res)=>{
-    await ensureDefaultPermissions();
     const permissionList=await Permission.find({
         deleted:false,
         status:"active"
@@ -163,7 +161,6 @@ module.exports.roleEdit=async (req,res)=>{
         _id:id,
         deleted:false
     })
-    await ensureDefaultPermissions();
     const permissionList=await Permission.find({
         deleted:false,
         status:"active"
