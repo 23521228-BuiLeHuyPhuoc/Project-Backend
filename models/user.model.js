@@ -1,0 +1,57 @@
+const mongoose=require('mongoose');
+
+const userSchema=new mongoose.Schema({
+  fullName:{
+    type:String,
+    required:true,
+    trim:true
+  },
+  email:{
+    type:String,
+    required:true,
+    unique:true,
+    lowercase:true,
+    trim:true
+  },
+  password:{
+    type:String,
+    required:true,
+    select:false
+  },
+  phone:{
+    type:String,
+    default:""
+  },
+  avatar:{
+    type:String,
+    default:""
+  },
+  preferences:{
+    tourTypes:{
+      type:[String],
+      default:[]
+    },
+    budgetRange:{
+      min:{type:Number,default:0},
+      max:{type:Number,default:0}
+    },
+    locations:{
+      type:[String],
+      default:[]
+    }
+  },
+  status:{
+    type:String,
+    enum:["active","inactive"],
+    default:"active"
+  },
+  deleted:{
+    type:Boolean,
+    default:false
+  },
+  deletedAt:Date
+},{
+  timestamps:true
+});
+
+module.exports=mongoose.model('User',userSchema,'users');

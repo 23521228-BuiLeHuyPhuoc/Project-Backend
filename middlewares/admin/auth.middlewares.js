@@ -13,7 +13,8 @@ module.exports.verifyToken=async (req,res,next)=>{
     const existAccount=await AccountAdmin.findOne({
         _id: id,
         email: email,
-        status: "active"
+        status: "active",
+        deleted:false
     })
     if(!existAccount){
         res.clearCookie("token");

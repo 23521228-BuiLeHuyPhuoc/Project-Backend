@@ -895,4 +895,198 @@ if(pageCart){
 
 
 
-//End Page Cart 
+//End Page Cart
+
+// Client auth menu
+const userMenuTrigger=document.querySelector("[user-menu-trigger]");
+if(userMenuTrigger){
+  const userMenu=userMenuTrigger.closest(".inner-user-menu");
+  userMenuTrigger.addEventListener("click",event=>{
+    event.stopPropagation();
+    userMenu.classList.toggle("active");
+  });
+  document.addEventListener("click",event=>{
+    if(!userMenu.contains(event.target)){
+      userMenu.classList.remove("active");
+    }
+  });
+}
+
+// Show or hide password
+const passwordToggleList=document.querySelectorAll("[password-toggle]");
+passwordToggleList.forEach(button=>{
+  button.addEventListener("click",()=>{
+    const input=button.parentElement.querySelector("input");
+    const icon=button.querySelector("i");
+    const isHidden=input.type==="password";
+    input.type=isHidden ? "text" : "password";
+    icon.classList.toggle("fa-eye",!isHidden);
+    icon.classList.toggle("fa-eye-slash",isHidden);
+    button.setAttribute("aria-label",isHidden ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+  });
+});
+
+const showClientAuthMessage=(form,message)=>{
+  const messageElement=form.querySelector("[auth-message]");
+  messageElement.textContent=message;
+  messageElement.hidden=false;
+};
+
+const submitClientAuth=async(form,url,data)=>{
+  const button=form.querySelector(".inner-submit");
+  const messageElement=form.querySelector("[auth-message]");
+  button.disabled=true;
+  messageElement.hidden=true;
+
+  try{
+    const response=await fetch(url,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(data)
+    });
+    const result=await response.json();
+
+    if(result.code==="success"){
+      window.location.href=result.redirect;
+      return;
+    }
+    showClientAuthMessage(form,result.message || "Có lỗi xảy ra, vui lòng thử lại!");
+  }
+  catch(error){
+    showClientAuthMessage(form,"Không thể kết nối đến máy chủ, vui lòng thử lại!");
+  }
+  finally{
+    button.disabled=false;
+  }
+};
+
+// Client login form
+const clientLoginForm=document.querySelector("#client-login-form");
+if(clientLoginForm){
+  const validation=new JustValidate("#client-login-form");
+  validation
+    .addField("#login-email",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập email!"
+      },
+      {
+        rule:"email",
+        errorMessage:"Email không đúng định dạng!"
+      }
+    ])
+    .addField("#login-password",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập mật khẩu!"
+      }
+    ])
+    .onSuccess(event=>{
+      submitClientAuth(clientLoginForm,"/auth/login",{
+        email:event.target.email.value,
+        password:event.target.password.value,
+        rememberPassword:event.target.rememberPassword.checked
+      });
+    });
+}
+
+// Client register form
+const clientRegisterForm=document.querySelector("#client-register-form");
+if(clientRegisterForm){
+  const validation=new JustValidate("#client-register-form");
+  validation
+    .addField("#register-full-name",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập họ tên!"
+      },
+      {
+        rule:"minLength",
+        value:2,
+        errorMessage:"Họ tên phải có ít nhất 2 ký tự!"
+      }
+    ])
+    .addField("#register-phone",[
+      {
+        validator:value=>{
+          if(!value){
+            return true;
+          }
+          return /^(?:\+84|0)\d{8,10}$/.test(value.replace(/[\s.-]/g,""));
+        },
+        errorMessage:"Số điện thoại không đúng định dạng!"
+      }
+    ])
+    .addField("#register-email",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập email!"
+      },
+      {
+        rule:"email",
+        errorMessage:"Email không đúng định dạng!"
+      }
+    ])
+    .addField("#register-password",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập mật khẩu!"
+      },
+      {
+        validator:value=>value.length>=8,
+        errorMessage:"Mật khẩu phải có ít nhất 8 ký tự!"
+      },
+      {
+        validator:value=>/[A-Z]/.test(value),
+        errorMessage:"Mật khẩu phải có ít nhất một chữ hoa!"
+      },
+      {
+        validator:value=>/[a-z]/.test(value),
+        errorMessage:"Mật khẩu phải có ít nhất một chữ thường!"
+      },
+      {
+        validator:value=>/[0-9]/.test(value),
+        errorMessage:"Mật khẩu phải có ít nhất một chữ số!"
+      },
+      {
+        validator:value=>/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]/.test(value),
+        errorMessage:"Mật khẩu phải có ít nhất một ký tự đặc biệt!"
+      }
+    ])
+    .addField("#register-confirm-password",[
+      {
+        rule:"required",
+        errorMessage:"Vui lòng nhập lại mật khẩu!"
+      },
+      {
+        validator:(value,fields)=>value===fields["#register-password"].elem.value,
+        errorMessage:"Mật khẩu nhập lại không khớp!"
+      }
+    ])
+    .addField("#register-agree",[
+      {
+        rule:"required",
+        errorMessage:"Bạn cần đồng ý với điều khoản sử dụng!"
+      }
+    ])
+    .onSuccess(event=>{
+      const checkedValues=name=>Array.from(
+        clientRegisterForm.querySelectorAll(`input[name="${name}"]:checked`)
+      ).map(input=>input.value);
+      const selectedBudget=clientRegisterForm.querySelector('input[name="budgetRange"]:checked');
+
+      submitClientAuth(clientRegisterForm,"/auth/register",{
+        fullName:event.target.fullName.value,
+        phone:event.target.phone.value,
+        email:event.target.email.value,
+        password:event.target.password.value,
+        confirmPassword:event.target.confirmPassword.value,
+        tourTypes:checkedValues("tourTypes"),
+        budgetRange:selectedBudget ? selectedBudget.value : "",
+        locations:checkedValues("locations"),
+        agree:event.target.agree.checked
+      });
+    });
+}

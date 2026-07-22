@@ -1,0 +1,29 @@
+extends ../layouts/default.pug
+
+block main
+  h1.box-title Sửa người dùng
+
+  .section-8
+    form#user-edit-form(user-id=user._id)
+      .inner-group
+        label.inner-label(for="fullName") Họ tên
+        input(type="text" id="fullName" name="fullName" value=user.fullName)
+      .inner-group
+        label.inner-label(for="email") Email
+        input(type="email" id="email" name="email" value=user.email)
+      .inner-group
+        label.inner-label(for="phone") Số điện thoại
+        input(type="text" id="phone" name="phone" value=user.phone)
+      .inner-group
+        label.inner-label(for="address") Địa chỉ
+        input(type="text" id="address" name="address" value=user.address)
+      .inner-group
+        label.inner-label(for="status") Trạng thái
+        select(id="status" name="status")
+          option(value="initial" selected=user.status==="initial") Khởi tạo
+          option(value="active" selected=user.status==="active") Hoạt động
+          option(value="inactive" selected=user.status==="inactive") Tạm dừng
+      .inner-button.inner-two-col
+        button(type="submit") Cập nhật
+    .inner-back
+      a(href=`/${pathAdmin}/user/list`) Quay lại danh sách

@@ -1,0 +1,141 @@
+extends ../../layouts/default.pug
+
+block main
+  section.auth-page.auth-register
+    .container
+      .auth-shell(data-aos="fade-up" data-aos-duration="650")
+        .auth-visual
+          .inner-visual-content
+            .inner-kicker
+              i.fa-solid.fa-compass
+              | Thành viên 28.TRAVEL
+            h1 Mỗi tài khoản, một hành trình riêng.
+            p Cho chúng tôi biết điều bạn yêu thích để những chuyến đi sau này gần với bạn hơn.
+            ul.inner-benefits
+              li
+                i.fa-solid.fa-check
+                | Lưu tour và lịch sử hành trình
+              li
+                i.fa-solid.fa-check
+                | Nhận gợi ý phù hợp sở thích
+              li
+                i.fa-solid.fa-check
+                | Đặt tour nhanh hơn
+
+        .auth-panel
+          .inner-heading
+            span.inner-eyebrow Bắt đầu khám phá
+            h2 Tạo tài khoản mới
+            p Thông tin sở thích là tùy chọn và giúp chúng tôi gợi ý tour tốt hơn.
+
+          form.auth-form#client-register-form(novalidate)
+            .inner-grid
+              .inner-field
+                label(for="register-full-name") Họ và tên
+                .inner-control
+                  i.fa-regular.fa-user
+                  input#register-full-name(type="text" name="fullName" placeholder="Nguyễn Văn A" autocomplete="name")
+
+              .inner-field
+                label(for="register-phone") Số điện thoại
+                .inner-control
+                  i.fa-solid.fa-phone
+                  input#register-phone(type="tel" name="phone" placeholder="0912 345 678" autocomplete="tel")
+
+            .inner-field
+              label(for="register-email") Email
+              .inner-control
+                i.fa-regular.fa-envelope
+                input#register-email(type="email" name="email" placeholder="ban@example.com" autocomplete="email")
+
+            .inner-grid
+              .inner-field
+                label(for="register-password") Mật khẩu
+                .inner-control
+                  i.fa-solid.fa-lock
+                  input#register-password(type="password" name="password" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password")
+                  button.inner-password-toggle(type="button" password-toggle aria-label="Hiện mật khẩu")
+                    i.fa-regular.fa-eye
+
+              .inner-field
+                label(for="register-confirm-password") Nhập lại mật khẩu
+                .inner-control
+                  i.fa-solid.fa-shield-halved
+                  input#register-confirm-password(type="password" name="confirmPassword" placeholder="Nhập lại mật khẩu" autocomplete="new-password")
+                  button.inner-password-toggle(type="button" password-toggle aria-label="Hiện mật khẩu")
+                    i.fa-regular.fa-eye
+
+            .inner-preferences
+              .inner-preference-head
+                div
+                  h3 Sở thích du lịch
+                  p Có thể bỏ qua và cập nhật sau.
+                span Tùy chọn
+
+              .inner-preference-group
+                .inner-preference-label Loại hành trình yêu thích
+                .inner-chip-list
+                  label.inner-chip
+                    input(type="checkbox" name="tourTypes" value="beach")
+                    span Biển đảo
+                  label.inner-chip
+                    input(type="checkbox" name="tourTypes" value="mountain")
+                    span Núi rừng
+                  label.inner-chip
+                    input(type="checkbox" name="tourTypes" value="city")
+                    span Thành phố
+                  label.inner-chip
+                    input(type="checkbox" name="tourTypes" value="culture")
+                    span Văn hóa
+                  label.inner-chip
+                    input(type="checkbox" name="tourTypes" value="adventure")
+                    span Phiêu lưu
+
+              .inner-preference-group
+                .inner-preference-label Ngân sách thường chọn
+                .inner-budget-list
+                  label.inner-budget
+                    input(type="radio" name="budgetRange" value="under-2")
+                    span Dưới 2 triệu
+                  label.inner-budget
+                    input(type="radio" name="budgetRange" value="2-5")
+                    span 2–5 triệu
+                  label.inner-budget
+                    input(type="radio" name="budgetRange" value="5-10")
+                    span 5–10 triệu
+                  label.inner-budget
+                    input(type="radio" name="budgetRange" value="above-10")
+                    span Trên 10 triệu
+
+              .inner-preference-group
+                .inner-preference-label Điểm đến quan tâm
+                .inner-chip-list
+                  label.inner-chip
+                    input(type="checkbox" name="locations" value="da-lat")
+                    span Đà Lạt
+                  label.inner-chip
+                    input(type="checkbox" name="locations" value="nha-trang")
+                    span Nha Trang
+                  label.inner-chip
+                    input(type="checkbox" name="locations" value="phu-quoc")
+                    span Phú Quốc
+                  label.inner-chip
+                    input(type="checkbox" name="locations" value="ha-noi")
+                    span Hà Nội
+                  label.inner-chip
+                    input(type="checkbox" name="locations" value="da-nang")
+                    span Đà Nẵng
+
+            .inner-terms
+              label(for="register-agree")
+                input#register-agree(type="checkbox" name="agree")
+                span Tôi đồng ý với điều khoản sử dụng và chính sách bảo mật.
+
+            .inner-message(auth-message hidden)
+            button.inner-submit(type="submit")
+              span Tạo tài khoản
+              i.fa-solid.fa-arrow-right
+
+          .inner-switch
+            span Đã có tài khoản?
+            a(href="/auth/login") Đăng nhập

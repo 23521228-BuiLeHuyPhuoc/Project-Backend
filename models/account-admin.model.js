@@ -8,6 +8,7 @@ const schema=new mongoose.Schema({
   status: String,
   password:String,
   avatar:String,
+  address:String,
   createdBy:String,
   updatedBy:String,
   deleted:{
@@ -16,6 +17,8 @@ const schema=new mongoose.Schema({
   },
   deletedBy:String,
   deletedAt:Date
+}, {
+  timestamps:true
 })
 const AccountAdmin=mongoose.model('AccountAdmin',schema,"accounts-admin");
 module.exports = AccountAdmin;

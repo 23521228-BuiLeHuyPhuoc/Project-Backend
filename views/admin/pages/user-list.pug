@@ -9,15 +9,16 @@ block main
       .inner-item.inner-label
         <i class="fa-solid fa-filter"></i> Bộ lọc
       .inner-item
-        select
+        select(filter-user-status)
           option(value="") Trạng thái
-          option(value="") Hoạt động
-          option(value="") Tạm dừng
+          option(value="initial" selected=filters.status==="initial") Khởi tạo
+          option(value="active" selected=filters.status==="active") Hoạt động
+          option(value="inactive" selected=filters.status==="inactive") Tạm dừng
       .inner-item.inner-date
-        input(type="date")
+        input(type="date" value=filters.startDate filter-user-start-date)
         span -
-        input(type="date")
-      .inner-item.inner-reset
+        input(type="date" value=filters.endDate filter-user-end-date)
+      a.inner-item.inner-reset(href=`/${pathAdmin}/user/list`)
         <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
   //- End Section 4
 
@@ -26,16 +27,16 @@ block main
     .inner-wrap
       .inner-change-status
         .inner-item
-          select
+          select(change-status-user)
             option(value="") -- Hành động --
-            option(value="") Hoạt động
-            option(value="") Dừng hoạt động
-            option(value="") Xóa
+            option(value="active") Hoạt động
+            option(value="inactive") Dừng hoạt động
+            option(value="delete") Xóa
         .inner-item
-          button Áp dụng
+          button(type="button" apply-change-status-user) Áp dụng
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
-        input(type="text" placeholder="Tìm kiếm")
+        input(type="text" placeholder="Tìm theo họ tên, email, số điện thoại..." value=filters.search filter-user-search)
   //- End Section 5
 
   //- Section 6
@@ -45,7 +46,7 @@ block main
         thead
           tr
             th(class="inner-center")
-              input(type="checkbox" class="inner-check")
+              input(type="checkbox" class="inner-check" check-all-user)
             th Họ tên
             th(class="inner-center") Ảnh đại diện
             th Email
@@ -54,28 +55,40 @@ block main
             th Trạng thái
             th Hành động
         tbody
-          tr
-            td(class="inner-center")
-              input(type="checkbox" class="inner-check")
-            td Lê Văn A
-            td(class="inner-center")
-              img(src="/admin/assets/images/avatar.jpg" class="inner-avatar")
-            td levana@gmail.com
-            td 01234567890
-            td Số 123, đường ABC,...
-            td
-              .badge.badge-green Hoạt động
-            td
-              .inner-buttons
-                button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
-                button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
+          if userList.length>0
+            each user in userList
+              tr
+                td(class="inner-center")
+                  input(type="checkbox" class="inner-check" check-user=user._id)
+                td #{user.fullName}
+                td(class="inner-center")
+                  img(src=user.avatar || "/admin/assets/images/avatar.jpg" class="inner-avatar")
+                td #{user.email}
+                td #{user.phone || "-"}
+                td #{user.address || "-"}
+                td
+                  if(user.status === 'active')
+                    .badge.badge-green Hoạt động
+                  else if(user.status === 'inactive')
+                    .badge.badge-red Tạm dừng
+                  else
+                    .badge.badge-orange Khởi tạo
+                td
+                  .inner-buttons
+                    a.inner-edit(href=`/${pathAdmin}/user/edit/${user._id}` title="Sửa người dùng")
+                      i.fa-regular.fa-pen-to-square
+                    a.inner-delete(href="#" user-delete data-api=`/${pathAdmin}/user/delete/${user._id}` title="Xóa người dùng")
+                      i.fa-regular.fa-trash-can
+          else
+            tr
+              td(colspan="8" class="inner-center") Không tìm thấy người dùng phù hợp.
   //- End Section 6
 
   //- Section 7
   .section-7
-    span(class="inner-label") Hiển thị 1 - 9 của 78
-    select(class="inner-pagination")
-      option Trang 1
-      option Trang 2
-      option Trang 3
+    span(class="inner-label") Hiển thị #{pagination.start} - #{pagination.end} của #{pagination.totalRecord}
+    if pagination.totalPage>0
+      select(class="inner-pagination" pagination-user)
+        - for(var i=1;i<=pagination.totalPage;i++)
+          option(value=i selected=i===pagination.currentPage) Trang #{i}
   //- End Section 7

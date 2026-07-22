@@ -54,6 +54,18 @@ header.header
             )
           span(mini-cart) 0
       .inner-athentication
-        a(href="/login") Đăng nhập
-        a(href="/register") Đăng ký
+        if user
+          .inner-user-menu
+            button.inner-user-trigger(type="button" user-menu-trigger)
+              span.inner-avatar #{user.fullName.charAt(0).toUpperCase()}
+              span.inner-user-name #{user.fullName}
+              i.fa-solid.fa-chevron-down
+            .inner-user-dropdown
+              form(action="/auth/logout" method="post")
+                button(type="submit")
+                  i.fa-solid.fa-arrow-right-from-bracket
+                  |  Đăng xuất
+        else
+          a(href="/auth/login") Đăng nhập
+          a(href="/auth/register") Đăng ký
 // End Header

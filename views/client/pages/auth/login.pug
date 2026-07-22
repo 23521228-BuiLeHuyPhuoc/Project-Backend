@@ -1,0 +1,55 @@
+extends ../../layouts/default.pug
+
+block main
+  section.auth-page.auth-login
+    .container
+      .auth-shell(data-aos="fade-up" data-aos-duration="650")
+        .auth-visual
+          .inner-visual-content
+            .inner-kicker
+              i.fa-solid.fa-location-dot
+              | Hành trình bắt đầu từ đây
+            h1 Đi xa hơn, trải nghiệm nhiều hơn.
+            p Đăng nhập để lưu hành trình yêu thích và tiếp tục chuyến đi của bạn cùng 28.TRAVEL.
+            .inner-trust
+              .inner-trust-item
+                strong 100+
+                span Hành trình chọn lọc
+              .inner-trust-item
+                strong 24/7
+                span Đồng hành hỗ trợ
+
+        .auth-panel
+          .inner-heading
+            span.inner-eyebrow Chào mừng trở lại
+            h2 Đăng nhập tài khoản
+            p Nhập thông tin để tiếp tục khám phá những điểm đến mới.
+
+          form.auth-form#client-login-form(novalidate)
+            .inner-field
+              label(for="login-email") Email
+              .inner-control
+                i.fa-regular.fa-envelope
+                input#login-email(type="email" name="email" placeholder="ban@example.com" autocomplete="email")
+
+            .inner-field
+              label(for="login-password") Mật khẩu
+              .inner-control
+                i.fa-solid.fa-lock
+                input#login-password(type="password" name="password" placeholder="Nhập mật khẩu" autocomplete="current-password")
+                button.inner-password-toggle(type="button" password-toggle aria-label="Hiện mật khẩu")
+                  i.fa-regular.fa-eye
+
+            .inner-options
+              label.inner-remember(for="remember-password-client")
+                input#remember-password-client(type="checkbox" name="rememberPassword")
+                span Ghi nhớ đăng nhập
+
+            .inner-message(auth-message hidden)
+            button.inner-submit(type="submit")
+              span Đăng nhập
+              i.fa-solid.fa-arrow-right
+
+          .inner-switch
+            span Chưa có tài khoản?
+            a(href="/auth/register") Đăng ký ngay

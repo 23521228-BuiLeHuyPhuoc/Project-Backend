@@ -2118,3 +2118,163 @@ if(searchRoleList){
   }
 }
 //End Search Role List
+
+// User list filters
+const filterUserStatus=document.querySelector("[filter-user-status]");
+const filterUserStartDate=document.querySelector("[filter-user-start-date]");
+const filterUserEndDate=document.querySelector("[filter-user-end-date]");
+const filterUserSearch=document.querySelector("[filter-user-search]");
+const paginationUser=document.querySelector("[pagination-user]");
+
+const updateUserListQuery=(key,value)=>{
+  const url=new URL(window.location.href);
+  if(value){
+    url.searchParams.set(key,value);
+  }
+  else{
+    url.searchParams.delete(key);
+  }
+  url.searchParams.delete("page");
+  window.location.href=url.href;
+};
+
+if(filterUserStatus){
+  filterUserStatus.addEventListener("change",()=>{
+    updateUserListQuery("status",filterUserStatus.value);
+  });
+}
+
+if(filterUserStartDate){
+  filterUserStartDate.addEventListener("change",()=>{
+    updateUserListQuery("startDate",filterUserStartDate.value);
+  });
+}
+
+if(filterUserEndDate){
+  filterUserEndDate.addEventListener("change",()=>{
+    updateUserListQuery("endDate",filterUserEndDate.value);
+  });
+}
+
+if(filterUserSearch){
+  filterUserSearch.addEventListener("keyup",event=>{
+    if(event.key==="Enter"){
+      updateUserListQuery("search",filterUserSearch.value.trim());
+    }
+  });
+}
+
+if(paginationUser){
+  paginationUser.addEventListener("change",()=>{
+    const url=new URL(window.location.href);
+    url.searchParams.set("page",paginationUser.value);
+    window.location.href=url.href;
+  });
+}
+
+// Change status for selected users
+const checkAllUser=document.querySelector("[check-all-user]");
+const checkUserList=document.querySelectorAll("[check-user]");
+const changeStatusUser=document.querySelector("[change-status-user]");
+const applyChangeStatusUser=document.querySelector("[apply-change-status-user]");
+
+if(checkAllUser){
+  checkAllUser.addEventListener("change",()=>{
+    checkUserList.forEach(checkbox=>{
+      checkbox.checked=checkAllUser.checked;
+    });
+  });
+
+  checkUserList.forEach(checkbox=>{
+    checkbox.addEventListener("change",()=>{
+      const checkedCount=document.querySelectorAll("[check-user]:checked").length;
+      checkAllUser.checked=checkedCount===checkUserList.length;
+      checkAllUser.indeterminate=checkedCount>0 && checkedCount<checkUserList.length;
+    });
+  });
+}
+
+if(applyChangeStatusUser){
+  applyChangeStatusUser.addEventListener("click",()=>{
+    const status=changeStatusUser.value;
+    const checkedUsers=document.querySelectorAll("[check-user]:checked");
+    const idList=Array.from(checkedUsers).map(checkbox=>checkbox.getAttribute("check-user"));
+
+    if(!status){
+      alert("Vui lòng chọn hành động!");
+      return;
+    }
+    if(idList.length===0){
+      alert("Vui lòng chọn ít nhất một người dùng!");
+      return;
+    }
+    if(status==="delete" && !confirm("Bạn có chắc muốn xóa các người dùng đã chọn?")){
+      return;
+    }
+
+    fetch(`/${pathAdmin}/user/change-status`,{
+      method:"PATCH",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({status,idList})
+    })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.code==="success"){
+          window.location.reload();
+          return;
+        }
+        alert(data.message);
+      });
+  });
+}
+
+// Edit user
+const userEditForm=document.querySelector("#user-edit-form");
+if(userEditForm){
+  userEditForm.addEventListener("submit",event=>{
+    event.preventDefault();
+    const userId=userEditForm.getAttribute("user-id");
+    const data=Object.fromEntries(new FormData(userEditForm));
+
+    fetch(`/${pathAdmin}/user/edit/${userId}`,{
+      method:"PATCH",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(data)
+    })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.code==="success"){
+          window.location.href=`/${pathAdmin}/user/list`;
+          return;
+        }
+        alert(data.message);
+      });
+  });
+}
+
+// Delete user
+const deleteUserButtons=document.querySelectorAll("[user-delete]");
+deleteUserButtons.forEach(button=>{
+  button.addEventListener("click",event=>{
+    event.preventDefault();
+    if(!confirm("Bạn có chắc muốn xóa người dùng này?")){
+      return;
+    }
+
+    fetch(button.getAttribute("data-api"),{
+      method:"PATCH"
+    })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.code==="success"){
+          window.location.reload();
+          return;
+        }
+        alert(data.message);
+      });
+  });
+});
