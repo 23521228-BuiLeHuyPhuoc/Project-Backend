@@ -1,0 +1,76 @@
+const mongoose=require('mongoose');
+
+const userInteractionSchema=new mongoose.Schema({
+  userId:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'User',
+    index:true,
+    default:null
+  },
+  tourId:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'Tour',
+    required:function(){
+      return this.type!=="search";
+    },
+    default:null,
+    index:true
+  },
+  type:{
+    type:String,
+    enum:[
+      "view",
+      "favorite",
+      "cart_add",
+      "purchase",
+      "rating",
+      "search",
+      "click_recommendation"
+    ],
+    required:true
+  },
+  value:{
+    type:Number,
+    default:1
+  },
+  metadata:{
+    clientEventId:String,
+    interactionKind:{
+      type:String,
+      enum:["detail_engagement","hover","recommendation_click"]
+    },
+    searchQuery:String,
+    viewDuration:Number,
+    scrollDepth:Number,
+    hoverDuration:Number,
+    reviewViewed:Boolean,
+    clickEvents:[String],
+    pagePath:String,
+    occurredAt:Date,
+    source:{
+      type:String,
+      enum:[
+        "home",
+        "category",
+        "search",
+        "recommendation",
+        "favorite",
+        "direct"
+      ]
+    },
+    deviceType:String
+  },
+  sessionId:String
+},{timestamps:true});
+
+userInteractionSchema.index({userId:1,tourId:1,type:1});
+userInteractionSchema.index(
+  {'metadata.clientEventId':1},
+  {unique:true,sparse:true}
+);
+
+module.exports=mongoose.model(
+  'UserInteraction',
+  userInteractionSchema,
+  'user-interactions'
+);

@@ -3,6 +3,10 @@ const mongoose=require('mongoose');
 const Favorite=require('../../models/favorite.model');
 const Tour=require('../../models/tour.model');
 const User=require('../../models/user.model');
+const {
+  removeFavoriteInteraction,
+  syncFavoriteInteraction
+}=require('../../helpers/user-interaction.helper');
 
 module.exports.list=async(req,res)=>{
   const viewedAt=new Date();
@@ -63,6 +67,7 @@ module.exports.toggle=async(req,res)=>{
     });
     if(favorite){
       await favorite.deleteOne();
+      await removeFavoriteInteraction({userId:req.user.id,tourId:tour.id});
       return res.json({
         code:'success',
         favorited:false,
@@ -71,6 +76,7 @@ module.exports.toggle=async(req,res)=>{
     }
 
     await Favorite.create({userId:req.user.id,tourId:tour.id});
+    await syncFavoriteInteraction({userId:req.user.id,tourId:tour.id});
     res.json({
       code:'success',
       favorited:true,
@@ -79,6 +85,7 @@ module.exports.toggle=async(req,res)=>{
   }
   catch(error){
     if(error && error.code===11000){
+      await syncFavoriteInteraction({userId:req.user.id,tourId:req.params.tourId});
       return res.json({
         code:'success',
         favorited:true,

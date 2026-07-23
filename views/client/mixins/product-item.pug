@@ -1,5 +1,5 @@
 mixin product-item(item)
-    .product-item
+    .product-item(data-tour-card data-tour-id=item._id)
         .inner-image
             a(href=`/tour/detail/${item.slug}`)
                 img(

@@ -5,6 +5,7 @@ const {createNotificationSafe}=require("../../helpers/notification.helper");
 const moment=require("moment");
 const mongoose=require("mongoose");
 const {cancelOrderAndRelease}=require("../../helpers/order.helper");
+const {recordCompletedOrderInteractions}=require("../../helpers/user-interaction.helper");
 
 const statusLabels={
   initial:"Chờ xác nhận",
@@ -212,6 +213,9 @@ module.exports.editPatch=async(req,res)=>{
     updateData.status=nextStatus;
     updateData.paymentStatus=nextPaymentStatus;
     await Order.updateOne({_id:order.id},updateData);
+    if(order.status!=="completed" && nextStatus==="completed"){
+      await recordCompletedOrderInteractions(order);
+    }
     req.flash("success","Cập nhật đơn hàng thành công");
     res.json({code:"success"});
   }

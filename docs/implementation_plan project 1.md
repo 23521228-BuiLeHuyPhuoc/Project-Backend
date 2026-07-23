@@ -1,444 +1,237 @@
-# 🎯 Kế Hoạch Triển Khai Recommender System — Đề Xuất Tour Du Lịch Thông Minh
+# 🎯 Kế Hoạch Triển Khai Recommender System — Phiên Bản Cập Nhật
 
 ## Tổng Quan
 
-Xây dựng hệ thống đề xuất tour du lịch thông minh kết hợp **Collaborative Filtering** (lọc cộng tác) và **Content-Based Filtering** (lọc dựa trên nội dung), sử dụng **Matrix Factorization (ALS/SVD)** trên server Node.js và **TensorFlow.js** để dự đoán hành vi người dùng trên trình duyệt. Đồng thời xây dựng **hệ thống Đăng ký/Đăng nhập khách hàng** và **tính năng đánh giá tour (1-5 sao)** làm nền tảng dữ liệu cho recommender.
+Xây dựng hệ thống đề xuất tour du lịch thông minh kết hợp **Collaborative Filtering** + **Content-Based Filtering**, sử dụng **Matrix Factorization (ALS/SVD)** trên server Node.js và **TensorFlow.js** trên trình duyệt.
 
-### Phân tích hiện trạng project
-
-| Thành phần | Hiện trạng |
-|---|---|
-| **Backend** | Express.js + Mongoose + MongoDB |
-| **View Engine** | Pug (server-side rendering) |
-| **Sản phẩm** | Tour du lịch (`Tour` model) với category, giá, địa điểm, thời gian |
-| **Đơn hàng** | `Order` model lưu lịch sử đặt tour |
-| **Giỏ hàng** | Xử lý phía client (gửi JSON lên server) |
-| **Tài khoản người dùng client** | ❌ **Chưa có** — hiện chỉ có `account-admin` |
-| **Đánh giá tour** | ❌ **Chưa có** |
-| **Dữ liệu hành vi người dùng** | ❌ **Chưa có** — chưa track view, click, rating |
+> [!TIP]
+> Project đã được nâng cấp đáng kể so với lần phân tích trước. Nhiều nền tảng cần thiết cho Recommender System **đã có sẵn**, giúp rút ngắn đáng kể thời gian triển khai.
 
 ---
 
-## 📋 Danh Sách Công Việc Theo Thứ Tự
+## 📊 Phân Tích Hiện Trạng Project (Cập nhật 23/07/2026)
+
+### ✅ Những gì ĐÃ CÓ (không cần làm lại)
+
+| # | Tính năng | Trạng thái | Chi tiết |
+|---|---|---|---|
+| 1 | **Hệ thống Auth (JWT)** | ✅ Hoàn chỉnh | Đăng ký (có preferences), đăng nhập (remember me), quên MK (OTP hash + rate limit), JWT token, `requireAuth` + `optionalAuth` middleware |
+| 2 | **User model** | ✅ Hoàn chỉnh | Có `preferences` (tourTypes, budgetRange, locations), `cart` embedded, `accountSeenAt`, password select:false |
+| 3 | **Review/Rating (1-5 sao)** | ✅ Hoàn chỉnh | CRUD review, chỉ user đã mua + hoàn thành tour mới được đánh giá, compound unique index `{userId, tourId}`, admin management |
+| 4 | **Favorite (Tour yêu thích)** | ✅ Hoàn chỉnh | Toggle yêu thích, danh sách yêu thích, compound unique index `{userId, tourId}` |
+| 5 | **Notification** | ✅ Hoàn chỉnh | CRUD, đánh dấu đã đọc, đếm unread, nhiều loại (order, voucher, review, account, system) |
+| 6 | **Voucher system** | ✅ Hoàn chỉnh | Ví voucher, claim/remove, validate + apply khi đặt hàng, atomic operations |
+| 7 | **Order model** | ✅ Có userId | Liên kết với User, có `voucherCode`, `cancelledAt`, thanh toán ZaloPay + VnPay, rollback khi lỗi |
+| 8 | **Account management** | ✅ Hoàn chỉnh | Dashboard, profile, orders, favorites, reviews, vouchers, notifications — tất cả trong `/account/*` |
+| 9 | **Forgot Password (User)** | ✅ Bảo mật cao | OTP hash (bcrypt), rate limit (5 lần), JWT reset token, TTL index tự xóa |
+| 10 | **Permission system (Admin)** | ✅ Hoàn chỉnh | RBAC dựa trên path + method, `authorizeByPath` middleware, quản lý quyền động |
+| 11 | **Article/News** | ✅ Có | Static data (`data/news.data.js`) + views, tin tức du lịch |
+| 12 | **Contact** | ✅ Nâng cấp | Hỗ trợ `message` + `newsletter`, status tracking, admin management |
+| 13 | **Admin Dashboard** | ✅ Có | Dashboard tổng quan, quản lý review, voucher, order, contact, article... |
+| 14 | **UI/Styling** | ✅ TailwindCSS v4 + DaisyUI | Không còn dùng Vanilla CSS/Pug inline, có design system |
+
+### ❌ Những gì CÒN THIẾU cho Recommender System
+
+| # | Tính năng | Trạng thái | Mức quan trọng |
+|---|---|---|---|
+| 1 | **UserInteraction model** | ❌ Chưa có | 🔴 Bắt buộc — nguồn dữ liệu chính cho ML |
+| 2 | **Tracking middleware** (server-side) | ❌ Chưa có | 🔴 Bắt buộc — ghi nhận hành vi tự động |
+| 3 | **Behavior tracker** (client-side JS) | ❌ Chưa có | 🟡 Quan trọng — view duration, scroll, hover |
+| 4 | **Content-Based Filtering engine** | ❌ Chưa có | 🔴 Bắt buộc — engine đề xuất thứ 1 |
+| 5 | **Collaborative Filtering engine** | ❌ Chưa có | 🔴 Bắt buộc — engine đề xuất thứ 2 |
+| 6 | **Matrix Factorization (SVD/ALS)** | ❌ Chưa có | 🔴 Bắt buộc — core algorithm |
+| 7 | **Hybrid Recommender engine** | ❌ Chưa có | 🔴 Bắt buộc — kết hợp 2 engine |
+| 8 | **TensorFlow.js client-side** | ❌ Chưa có | 🟡 Nâng cao — real-time prediction trên browser |
+| 9 | **Recommendation API** | ❌ Chưa có | 🔴 Bắt buộc — endpoints phục vụ frontend |
+| 10 | **Tour model: ratingAvg/ratingCount** | ❌ Chưa có | 🟡 Quan trọng — feature cho Content-Based |
+| 11 | **Caching layer** | ❌ Chưa có | 🟡 Quan trọng — performance |
+| 12 | **Training scheduler** | ❌ Chưa có | 🟡 Quan trọng — cập nhật model |
+| 13 | **Seed data script** | ❌ Chưa có | 🟡 Cần cho testing |
 
 ---
 
-### 🔷 Giai Đoạn 1A: Hệ Thống Đăng Ký / Đăng Nhập Khách Hàng (Authentication)
+## 📋 Danh Sách Công Việc Theo Thứ Tự (Chỉ gồm phần CÒN THIẾU)
+
+---
+
+### 🔷 Giai Đoạn 1: Thu Thập Dữ Liệu Hành Vi (2-3 ngày)
 
 > [!IMPORTANT]
-> Giai đoạn này phải làm **đầu tiên** vì mọi tính năng phía sau (rating, tracking, recommendation) đều cần biết "ai là người dùng". Không có auth = không có userId = Collaborative Filtering không hoạt động.
+> Đây là giai đoạn nền tảng. Không có dữ liệu hành vi = không có Recommender System. Nhờ Auth + Review + Favorite + Order đều đã có sẵn `userId`, giai đoạn này chỉ cần thêm **lớp tracking tổng hợp**.
 
 ---
 
-#### ✅ Bước 1A.1 — Tạo Model `User` (Tài khoản khách hàng)
-
-**File mới:** `models/user.model.js`
-
-```js
-// Schema dự kiến
-{
-  fullName: String,
-  email: { type: String, unique: true },
-  password: String,                    // bcrypt hash
-  phone: String,
-  avatar: String,
-  preferences: {                       // sở thích khai báo khi đăng ký (phục vụ Cold Start)
-    tourTypes: [String],               // loại tour yêu thích
-    budgetRange: { min: Number, max: Number },
-    locations: [String]                // địa điểm yêu thích
-  },
-  status: { type: String, default: "active" },
-  tokenUser: String,                   // token xác thực (JWT hoặc random)
-  deleted: { type: Boolean, default: false },
-  deletedAt: Date
-}
-// timestamps: true
-```
-
-**📌 Lý do:**
-- Collaborative Filtering **yêu cầu bắt buộc** có danh tính người dùng (`userId`) để tạo ma trận User-Item
-- Trường `preferences` giúp giải quyết **Cold Start Problem** — khi user mới đăng ký, hệ thống dùng sở thích khai báo để đề xuất ngay mà không cần chờ thu thập dữ liệu hành vi
-- Tách biệt với `account-admin` hiện có vì khách hàng và admin có quyền hạn khác nhau hoàn toàn
-
----
-
-#### ✅ Bước 1A.2 — Tạo Model `ForgotPasswordUser` (Quên mật khẩu khách hàng)
-
-**File mới:** `models/forgot-password-user.model.js`
-
-```js
-{
-  email: String,
-  otp: String,
-  expireAt: { type: Date, expires: 180 }  // OTP hết hạn sau 3 phút
-}
-```
-
-**📌 Lý do:** Khách hàng cần có cơ chế khôi phục mật khẩu an toàn. Tách riêng model OTP khỏi User model vì TTL index (`expires`) sẽ tự động xóa document sau khi hết hạn — giữ database sạch. Thiết kế tương tự `forgot-password.model.js` hiện có của admin, đảm bảo nhất quán.
-
----
-
-#### ✅ Bước 1A.3 — Tạo Auth Controller & Routes cho khách hàng
-
-**File mới:** `controllers/client/auth.controller.js`
-**File mới:** `routes/client/auth.route.js`
-**File mới:** `validates/client/auth.validate.js`
-
-**Các endpoint:**
-```
-GET  /auth/register         → Trang đăng ký
-POST /auth/register         → Xử lý đăng ký (validate + hash password + tạo user)
-
-GET  /auth/login            → Trang đăng nhập
-POST /auth/login            → Xử lý đăng nhập (verify password + set cookie token)
-
-GET  /auth/logout           → Đăng xuất (xóa cookie)
-
-GET  /auth/forgot-password  → Trang quên mật khẩu
-POST /auth/forgot-password  → Gửi OTP qua email (dùng nodemailer đã có)
-
-GET  /auth/otp-password     → Trang nhập OTP
-POST /auth/otp-password     → Xác thực OTP
-
-GET  /auth/reset-password   → Trang đặt lại mật khẩu
-POST /auth/reset-password   → Cập nhật mật khẩu mới
-
-GET  /auth/profile          → Trang thông tin cá nhân (xem + sửa preferences)
-PATCH /auth/profile         → Cập nhật thông tin + preferences
-```
-
-**📌 Lý do:**
-- Đăng ký/đăng nhập là **luồng cơ bản nhất** mà mọi website thương mại cần có
-- Sử dụng **cookie-based auth** (set `tokenUser` vào cookie) thay vì session-based vì project đang dùng `cookie-parser` rồi, và cookie tồn tại lâu hơn session (quan trọng cho tracking dài hạn)
-- Validate input bằng `Joi` (đã có trong project) để đảm bảo data sạch
-- Hash password bằng `bcrypt` (đã có trong project)
-- Quên mật khẩu gửi OTP qua `nodemailer` (đã có trong project)
-- Trang **Profile** cho phép user chỉnh sửa `preferences` — đây là dữ liệu quý cho Content-Based Filtering
-
----
-
-#### ✅ Bước 1A.4 — Tạo Auth Middleware (Xác thực khách hàng)
-
-**File mới:** `middlewares/client/auth.middleware.js`
-
-```js
-// Luồng xử lý
-module.exports.requireAuth = async (req, res, next) => {
-  const tokenUser = req.cookies.tokenUser;
-  if (!tokenUser) return res.redirect("/auth/login");
-  
-  const user = await User.findOne({ tokenUser, status: "active", deleted: false });
-  if (!user) return res.redirect("/auth/login");
-  
-  res.locals.user = user;  // truyền user vào tất cả Pug templates
-  req.user = user;         // truyền user vào các controller phía sau
-  next();
-};
-
-module.exports.optionalAuth = async (req, res, next) => {
-  // Tương tự nhưng KHÔNG redirect — cho phép anonymous user xem trang
-  // Nếu có cookie → gắn user, nếu không → bỏ qua
-  next();
-};
-```
-
-**📌 Lý do:**
-- `requireAuth`: Bảo vệ các trang cần đăng nhập (profile, lịch sử đặt tour, rating)
-- `optionalAuth`: **Cực kỳ quan trọng cho Recommender** — cho phép hệ thống biết user là ai khi họ browse trang (home, tour detail) mà không bắt buộc phải login. Nếu có userId → track hành vi chính xác, nếu không → track bằng sessionId/cookie
-- Gắn `res.locals.user` để Pug template có thể hiển thị tên user, nút login/logout, v.v.
-
----
-
-#### ✅ Bước 1A.5 — Tạo giao diện Đăng ký / Đăng nhập (Pug templates)
-
-**Files mới:**
-- `views/client/pages/auth/register.pug`
-- `views/client/pages/auth/login.pug`
-- `views/client/pages/auth/forgot-password.pug`
-- `views/client/pages/auth/otp-password.pug`
-- `views/client/pages/auth/reset-password.pug`
-- `views/client/pages/auth/profile.pug`
-
-**📌 Lý do:**
-- Giao diện cần thiết để user tương tác với hệ thống auth
-- Trang **Register** sẽ có bước bổ sung hỏi `preferences` (loại tour yêu thích, ngân sách, địa điểm) — đây là nguồn dữ liệu ban đầu cho Content-Based Filtering khi user chưa có lịch sử
-- Trang **Profile** cho phép user cập nhật sở thích → cải thiện chất lượng recommendation theo thời gian
-
-**Trang Register sẽ có 2 bước:**
-```
-Bước 1: Thông tin cơ bản (Họ tên, Email, Mật khẩu, SĐT)
-Bước 2 (tuỳ chọn): Sở thích cá nhân
-  - Loại tour yêu thích: □ Biển đảo □ Núi rừng □ Thành phố □ Văn hoá □ Phiêu lưu
-  - Ngân sách: ○ < 2 triệu ○ 2-5 triệu ○ 5-10 triệu ○ > 10 triệu
-  - Địa điểm yêu thích: □ Đà Lạt □ Nha Trang □ Phú Quốc □ Hà Nội □ ...
-```
-
----
-
-#### ✅ Bước 1A.6 — Tích hợp Auth vào layout chung & liên kết Order
-
-**Sửa file:** `views/client/layouts/` (header layout)
-**Sửa file:** `routes/client/index.route.js`
-**Sửa file:** `models/order.model.js` (thêm trường `userId`)
-
-**📌 Lý do:**
-- Header cần hiển thị: nút **Đăng nhập/Đăng ký** (khi chưa login) hoặc **Avatar + Tên user + Dropdown** (khi đã login)
-- `index.route.js` cần đăng ký route mới `/auth` và áp dụng `optionalAuth` middleware cho các route browse (home, tour, category) để tracking
-- `Order` model cần thêm `userId` để liên kết đơn hàng với tài khoản → dữ liệu purchase cho Collaborative Filtering
-
----
-
-### 🔷 Giai Đoạn 1B: Xây Dựng Nền Tảng Dữ Liệu Hành Vi (Data Foundation)
-
----
-
-#### ✅ Bước 1B.1 — Tạo Model `UserInteraction` (Thu thập hành vi)
+#### ✅ Bước 1.1 — Tạo Model `UserInteraction`
 
 **File mới:** `models/user-interaction.model.js`
 
 ```js
-// Schema dự kiến
 {
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  tourId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tour' },
+  userId: { type: ObjectId, ref: 'User', index: true },
+  tourId: { type: ObjectId, ref: 'Tour', required: true, index: true },
   type: {
     type: String,
-    enum: ["view", "wishlist", "cart_add", "purchase", "rating", "search"]
+    enum: ["view", "favorite", "cart_add", "purchase", "rating", "search", "click_recommendation"],
+    required: true
   },
-  value: Number,           // rating (1-5), hoặc thời gian xem (giây), số lần view
+  value: { type: Number, default: 1 },      // rating 1-5, view duration (giây), implicit weight
   metadata: {
-    searchQuery: String,   // từ khóa nếu type = "search"
-    viewDuration: Number,  // thời gian xem trang (giây)
-    source: String         // nguồn: "home", "category", "search", "recommendation"
+    searchQuery: String,
+    viewDuration: Number,                     // giây
+    scrollDepth: Number,                      // 0-100%
+    source: {                                 // người dùng đến từ đâu
+      type: String,
+      enum: ["home", "category", "search", "recommendation", "favorite", "direct"]
+    },
+    deviceType: String                        // mobile/desktop/tablet
   },
-  sessionId: String,       // cho anonymous user tracking
-  deleted: { type: Boolean, default: false }
+  sessionId: String                           // cho anonymous user
 }
-// timestamps: true → tự động có createdAt, updatedAt
+// timestamps: true, compound index: { userId, tourId, type }
 ```
 
-**📌 Lý do:** Đây là **nguồn dữ liệu chính** cho toàn bộ hệ thống recommender. Mỗi tương tác được ghi lại sẽ trở thành một "tín hiệu" để thuật toán học hành vi người dùng. Các loại tương tác được đánh trọng số khác nhau:
+**📌 Lý do:** Đây là **bảng trung tâm** tổng hợp tất cả tương tác từ nhiều nguồn (view, favorite, order, review) vào 1 nơi. Tại sao không dùng trực tiếp bảng `Favorite` + `Review` + `Order`?
 
-| Hành vi | Trọng số (Implicit Rating) | Giải thích |
+1. **Thống nhất format**: ML model cần 1 data source nhất quán, không phải query 4 bảng rồi merge
+2. **Ghi nhận hành vi mà các model khác không capture**: `view` (xem trang), `search` (tìm kiếm), `click_recommendation` (click vào gợi ý), `cart_add` (thêm giỏ hàng)
+3. **Metadata bổ sung**: `viewDuration`, `scrollDepth`, `source` — những tín hiệu quan trọng cho ML mà Favorite/Review/Order không lưu
+4. **Hỗ trợ anonymous user**: Bằng `sessionId` cho user chưa đăng nhập (Favorite/Review yêu cầu login)
+
+**Trọng số implicit rating:**
+
+| Hành vi | Weight | Nguồn dữ liệu |
 |---|---|---|
-| `view` | 1 | Quan tâm nhẹ |
-| `wishlist` | 2 | Quan tâm mạnh |
-| `cart_add` | 3 | Có ý định mua |
-| `rating` | Giá trị thực (1-5) | **Explicit feedback** — nguồn data quý nhất |
-| `purchase` | 5 | Hành vi mạnh nhất |
+| `view` | 1 | Tracking middleware (MỚI) |
+| `search` | 1.5 | Tracking middleware (MỚI) |
+| `favorite` | 2 | Sync từ Favorite model (ĐÃ CÓ) |
+| `cart_add` | 3 | Tracking middleware (MỚI) |
+| `rating` | Giá trị 1-5 | Sync từ Review model (ĐÃ CÓ) |
+| `purchase` | 5 | Sync từ Order model (ĐÃ CÓ) |
+| `click_recommendation` | 2.5 | Client-side tracker (MỚI) |
 
 ---
 
-#### ✅ Bước 1B.2 — Tạo Model `Review` (Đánh giá tour 1-5 sao) ⭐ MỚI
-
-**File mới:** `models/review.model.js`
-
-```js
-{
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  tourId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tour', required: true },
-  rating: { type: Number, required: true, min: 1, max: 5 },  // 1-5 sao
-  title: String,                    // tiêu đề đánh giá (tùy chọn)
-  comment: String,                  // nội dung đánh giá
-  images: [String],                 // ảnh đánh giá (upload lên Cloudinary)
-  travelDate: Date,                 // ngày đi thực tế
-  travelType: {                     // loại hình đi
-    type: String,
-    enum: ["solo", "couple", "family", "friends", "business"]
-  },
-  isVerifiedPurchase: { type: Boolean, default: false },  // đã mua tour này chưa
-  helpfulCount: { type: Number, default: 0 },             // số lượt "hữu ích"
-  status: { type: String, default: "active", enum: ["active", "hidden", "pending"] },
-  adminReply: {                     // admin phản hồi đánh giá
-    content: String,
-    repliedAt: Date,
-    repliedBy: String
-  },
-  deleted: { type: Boolean, default: false },
-  deletedAt: Date,
-  deletedBy: String
-}
-// timestamps: true
-// Unique compound index: { userId, tourId } → mỗi user chỉ đánh giá 1 lần/tour
-```
-
-**📌 Lý do:**
-- **Explicit feedback** (đánh giá có ý thức) là nguồn dữ liệu **chất lượng cao nhất** cho Recommender System. So với implicit feedback (view, click), rating phản ánh chính xác mức độ hài lòng thực sự
-- Trường `isVerifiedPurchase` phân biệt đánh giá từ người đã mua vs chưa mua → rating từ verified purchase có trọng số cao hơn trong thuật toán
-- Trường `travelType` cung cấp **context** cho Content-Based Filtering (ví dụ: user đi gia đình thường thích tour khác với user đi solo)
-- Compound index `{userId, tourId}` đảm bảo 1 user chỉ rate 1 tour 1 lần, tránh spam/manipulation
-- Tách `Review` model riêng (không gộp vào `UserInteraction`) vì review có nhiều trường đặc thù (comment, images, reply) và cần query/hiển thị riêng
-
----
-
-#### ✅ Bước 1B.3 — Tạo Review Controller, Routes & API ⭐ MỚI
-
-**File mới:** `controllers/client/review.controller.js`
-**File mới:** `routes/client/review.route.js`
-
-```
-POST   /api/review/:tourId        → Tạo đánh giá mới (yêu cầu đăng nhập)
-PATCH  /api/review/:reviewId      → Sửa đánh giá của mình
-DELETE /api/review/:reviewId      → Xóa đánh giá của mình
-GET    /api/review/tour/:tourId   → Lấy danh sách đánh giá của tour (phân trang, sắp xếp)
-POST   /api/review/:reviewId/helpful → Đánh dấu "hữu ích"
-GET    /api/review/my-reviews     → Lấy tất cả đánh giá của user hiện tại
-```
-
-**📌 Lý do:**
-- API RESTful cho phép client gọi bằng AJAX — load reviews không cần reload trang
-- Phân trang (`?page=1&limit=10`) vì tour phổ biến có thể có hàng trăm đánh giá
-- Sắp xếp (`?sort=newest|highest|lowest|helpful`) cho phép user tìm review phù hợp
-- Nút "Hữu ích" giúp đẩy review chất lượng lên đầu → cải thiện trải nghiệm
-- `my-reviews` cho phép user quản lý đánh giá của mình trong trang Profile
-
----
-
-#### ✅ Bước 1B.4 — Tạo giao diện Rating & Review UI Component ⭐ MỚI
-
-**File mới:** `views/client/partials/review-section.pug` (component tái sử dụng)
-**File mới:** `public/js/review.js` (client-side logic)
-**File mới:** `public/css/review.css` (styling)
-
-**UI Component bao gồm:**
-
-```
-┌────────────────────────────────────────────────────────┐
-│  ⭐ Đánh giá & Nhận xét                               │
-│                                                        │
-│  ┌──────────────────────┐  ┌────────────────────────┐  │
-│  │ Rating tổng hợp      │  │ Phân bố rating         │  │
-│  │                      │  │ ★★★★★  ████████░░  65% │  │
-│  │     ⭐ 4.3 / 5       │  │ ★★★★☆  ███░░░░░░░  20% │  │
-│  │   (128 đánh giá)     │  │ ★★★☆☆  █░░░░░░░░░   8% │  │
-│  │                      │  │ ★★☆☆☆  ░░░░░░░░░░   4% │  │
-│  └──────────────────────┘  │ ★☆☆☆☆  ░░░░░░░░░░   3% │  │
-│                            └────────────────────────┘  │
-│                                                        │
-│  ┌─ Viết đánh giá ─────────────────────────────────┐   │
-│  │ Đánh giá của bạn: ☆ ☆ ☆ ☆ ☆  (click to rate)  │   │
-│  │ Tiêu đề: [________________________]             │   │
-│  │ Nhận xét: [________________________]            │   │
-│  │           [________________________]            │   │
-│  │ Loại chuyến đi: ○ Một mình ○ Cặp đôi           │   │
-│  │                 ○ Gia đình  ○ Bạn bè            │   │
-│  │ 📷 Thêm ảnh: [Chọn ảnh]                        │   │
-│  │                         [Gửi đánh giá]          │   │
-│  └─────────────────────────────────────────────────┘   │
-│                                                        │
-│  ── Sắp xếp: [Mới nhất ▼] ──────────────────────────  │
-│                                                        │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │ 👤 Nguyễn Văn A  ★★★★★  ✅ Đã mua tour         │   │
-│  │ 📅 15/07/2026 · Đi cùng gia đình               │   │
-│  │ "Tour rất tuyệt vời, hướng dẫn viên nhiệt..."  │   │
-│  │ 🖼️ [ảnh1] [ảnh2]                                │   │
-│  │ 👍 12 người thấy hữu ích                        │   │
-│  │                                                 │   │
-│  │ 💬 Phản hồi từ đơn vị: "Cảm ơn bạn đã..."      │   │
-│  └─────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────┘
-```
-
-**📌 Lý do:**
-- **Rating tổng hợp + biểu đồ phân bố**: Giúp user nhanh chóng đánh giá chất lượng tour tổng thể (giống Google Play Store, Amazon)
-- **Star rating interactive**: Click vào sao để rate — UX trực quan, quen thuộc
-- **Verified purchase badge** (✅ Đã mua tour): Tăng độ tin cậy → ảnh hưởng quyết định mua → tăng conversion rate
-- **Loại chuyến đi**: Dữ liệu `travelType` phục vụ Content-Based Filtering — hệ thống biết user thường đi style nào
-- **Upload ảnh**: Review có ảnh được tin tưởng hơn + tạo social proof
-- **Mỗi rating submit sẽ tự động tạo 1 record `UserInteraction` type="rating"** → feed trực tiếp vào Recommender engine
-
----
-
-#### ✅ Bước 1B.5 — Cập nhật Tour model & Tour detail page cho Rating ⭐ MỚI
-
-**Sửa file:** `models/tour.model.js` (thêm trường aggregated rating)
-**Sửa file:** `controllers/client/tour.controller.js`
-**Sửa file:** `views/client/pages/tour-detail.pug`
-
-```js
-// Thêm vào Tour schema
-{
-  // ... các trường hiện có ...
-  ratingAvg: { type: Number, default: 0 },     // điểm trung bình (tính lại khi có review mới)
-  ratingCount: { type: Number, default: 0 },    // tổng số đánh giá
-  ratingDistribution: {                         // phân bố theo sao
-    star1: { type: Number, default: 0 },
-    star2: { type: Number, default: 0 },
-    star3: { type: Number, default: 0 },
-    star4: { type: Number, default: 0 },
-    star5: { type: Number, default: 0 }
-  }
-}
-```
-
-**📌 Lý do:**
-- **Lưu aggregated rating vào Tour model** (denormalization) thay vì tính lại mỗi lần query vì: trang list tour cần hiển thị rating trung bình, nếu phải aggregate từ Review collection mỗi lần sẽ rất chậm
-- `ratingAvg` trở thành **feature quan trọng** cho Content-Based Filtering — tour rating cao → đề xuất nhiều hơn
-- `ratingDistribution` phục vụ hiển thị biểu đồ phân bố trên UI
-
----
-
-#### ✅ Bước 1B.6 — Quản lý Review cho Admin ⭐ MỚI
-
-**File mới:** `controllers/admin/review.controller.js`
-**File mới:** `routes/admin/review.route.js`
-**File mới:** `views/admin/pages/review-management.pug`
-
-**📌 Lý do:**
-- Admin cần khả năng **moderation** — ẩn review vi phạm, reply review, xem thống kê
-- Dashboard review cho admin xem: tour nào bị rating thấp, tour nào cần cải thiện
-- Phản hồi review (adminReply) tạo tương tác 2 chiều → tăng uy tín
-
----
-
-#### ✅ Bước 1B.7 — Tạo Middleware thu thập hành vi tự động
+#### ✅ Bước 1.2 — Tạo Tracking Middleware (server-side)
 
 **File mới:** `middlewares/client/tracking.middleware.js`
 
-**📌 Lý do:** Thay vì phải sửa từng controller để thêm code tracking, middleware sẽ **tự động** ghi nhận hành vi ở tầng trung gian. Điều này tuân thủ nguyên tắc **Separation of Concerns** — logic tracking tách biệt khỏi logic nghiệp vụ, dễ bảo trì và mở rộng.
+**📌 Lý do:** Middleware tự động ghi nhận hành vi mà **không cần sửa code** trong các controller hiện có. Tuân thủ nguyên tắc Open/Closed — mở rộng bằng cách thêm middleware, không sửa đổi logic nghiệp vụ hiện tại.
 
 **Công việc cụ thể:**
-- Track `view` khi user truy cập trang chi tiết tour (`/tour/detail/:slug`)
-- Track `cart_add` khi thêm vào giỏ hàng
-- Track `purchase` khi đặt hàng thành công
-- Track `search` khi tìm kiếm
-- Track `rating` khi user submit đánh giá (liên kết với Review)
-- Hỗ trợ cả **logged-in user** (dùng userId) và **anonymous user** (dùng sessionId/cookie)
+- Gắn vào `index.route.js` sau `optionalAuth` → có `req.user` hoặc `sessionId`
+- Track `view` khi user truy cập `/tour/detail/:slug` (dùng `res.on('finish')` để không block response)
+- Track `search` khi user truy cập `/search`
+- Track `cart_add` khi POST `/cart` (hook vào middleware chain)
+
+**Sync dữ liệu từ model đã có:**
+- Khi **Review** được tạo (bước 1B.3 cũ) → tự động tạo UserInteraction `type="rating"`
+- Khi **Favorite** toggle → tự động tạo/xóa UserInteraction `type="favorite"`
+- Khi **Order** hoàn thành → tự động tạo UserInteraction `type="purchase"`
+
+Cách sync: Thêm logic sync vào cuối các controller tương ứng (review.controller, favorite.controller, order process) — **chỉ thêm 1-2 dòng mỗi file, không refactor**.
 
 ---
 
-#### ✅ Bước 1B.8 — Tạo API endpoint thu thập hành vi phía client
+#### ✅ Bước 1.3 — Tạo Behavior Tracker (client-side JS)
+
+**File mới:** `public/assets/js/behavior-tracker.js`
+
+**📌 Lý do:** Server-side tracking chỉ biết "user đã mở trang". Client-side tracking biết **"user đã làm gì trên trang"**:
+
+| Hành vi client-side | Ý nghĩa cho Recommender |
+|---|---|
+| Thời gian xem trang tour | > 30s = quan tâm thật, < 5s = lướt qua |
+| Scroll depth trên tour detail | > 80% = đọc kỹ lịch trình |
+| Hover trên tour card (home/category) | Đang cân nhắc giữa các tour |
+| Tương tác với review section | Đọc review = gần quyết định mua |
+| Click vào tour từ section recommendation | Feedback trực tiếp cho Recommender |
+
+**Công việc cụ thể:**
+- Thu thập: `viewDuration`, `scrollDepth`, `clickEvents` trên trang tour detail
+- **Batch gửi** lên server mỗi 30 giây hoặc khi user rời trang (`beforeunload`/`visibilitychange`)
+- API endpoint: `POST /api/tracking/events` (gom nhiều event trong 1 request)
+- Lưu `sessionId` vào `localStorage` cho anonymous user
+
+---
+
+#### ✅ Bước 1.4 — Tạo Tracking API & Cập nhật Tour model
 
 **File mới:** `routes/client/tracking.route.js`
 **File mới:** `controllers/client/tracking.controller.js`
+**Sửa file:** `models/tour.model.js` — thêm `ratingAvg`, `ratingCount`
 
 ```
-POST /api/tracking/view      → Ghi nhận xem tour
-POST /api/tracking/wishlist   → Ghi nhận thêm wishlist
-POST /api/tracking/rating     → Ghi nhận đánh giá (trigger khi submit review)
-POST /api/tracking/event      → Ghi nhận sự kiện tổng quát (scroll, hover, duration)
+POST /api/tracking/events     → Batch nhận events từ client-side tracker
+GET  /api/tracking/stats      → (Admin) Thống kê tổng quan tracking data
 ```
 
-**📌 Lý do:** Một số hành vi xảy ra hoàn toàn ở phía client (ví dụ: thời gian xem trang, scroll depth, hover trên tour card). Cần API riêng để client-side JavaScript gửi dữ liệu tracking lên server bằng **AJAX** mà không cần reload trang. Đây cũng là tiền đề để TensorFlow.js ở client gửi dữ liệu về server.
+**Thêm vào Tour model:**
+```js
+{
+  ratingAvg: { type: Number, default: 0 },
+  ratingCount: { type: Number, default: 0 }
+}
+```
+
+**📌 Lý do về Tour model update:**
+- `review.controller.js` hiện có function `updateTourRating()` nhưng **chưa thực sự update Tour** — chỉ aggregate mà không save. Cần hoàn thiện để lưu `ratingAvg` + `ratingCount` vào Tour
+- `ratingAvg` trở thành **feature quan trọng** cho Content-Based Filtering
+- Cho phép hiển thị rating trên tour card mà không cần query Review collection
 
 ---
 
-### 🔷 Giai Đoạn 2: Xây Dựng Content-Based Filtering Engine
+#### ✅ Bước 1.5 — Tạo Script Seed Data
 
-#### ✅ Bước 2.1 — Tạo module trích xuất đặc trưng tour (Feature Extraction)
+**File mới:** `scripts/seed-interactions.js`
+
+**📌 Lý do:** Collaborative Filtering cần **ít nhất 50-100 user** và **vài trăm interaction records** để ma trận User-Item đủ "dày" cho Matrix Factorization. Script sẽ:
+
+- Tạo 100 user giả với preferences đa dạng
+- Tạo 500+ interaction records (view, favorite, cart_add, purchase) với **pattern rõ ràng**:
+  - Nhóm user A: thích tour biển → view/purchase nhiều tour biển
+  - Nhóm user B: thích tour núi → view/purchase nhiều tour núi
+  - Cross-group: một vài user thích cả 2 → tạo "cầu nối" cho Collaborative Filtering
+- Tạo 200+ review với rating 1-5 (phân bố realistic: bell curve quanh 4 sao)
+- Cập nhật `ratingAvg` + `ratingCount` cho mỗi Tour
+
+---
+
+### 🔷 Giai Đoạn 2: Content-Based Filtering Engine (2-3 ngày)
+
+---
+
+#### ✅ Bước 2.1 — Tạo Feature Extractor
 
 **File mới:** `services/recommendation/feature-extractor.js`
 
-**📌 Lý do:** Content-Based Filtering hoạt động bằng cách **so sánh đặc trưng giữa các tour với nhau**. Cần chuyển đổi thông tin tour (category, location, price, time, vehicle...) thành **vector số** để tính toán. Đây là bước xây dựng trước vì:
-1. **Không phụ thuộc vào dữ liệu người dùng** — có thể hoạt động ngay cả khi chưa có user nào
-2. Giải quyết bài toán **Cold Start cho item mới** — tour mới thêm vào vẫn được đề xuất
+**📌 Lý do:** Content-Based so sánh đặc trưng giữa các tour. Cần chuyển thông tin tour thành **vector số**. Đây là engine hoạt động **ngay lập tức** với dữ liệu hiện có — không cần chờ user data.
 
-**Công việc cụ thể:**
-- Trích xuất features: `category`, `price range`, `locations`, `duration`, `vehicle type`, `departure season`, **`ratingAvg`** ⭐ (dữ liệu mới từ tính năng đánh giá)
-- Chuẩn hóa (normalize) giá về khoảng [0, 1]
-- One-hot encoding cho category, vehicle, locations
-- Tính **Cosine Similarity** giữa các tour
+**Features sẽ trích xuất từ Tour model hiện tại:**
+
+| Feature | Nguồn | Encoding |
+|---|---|---|
+| `category` | `tour.category` (ObjectId) | One-hot |
+| `price range` | `tour.priceNewAdult` | Normalize [0, 1] |
+| `locations` | `tour.locations` (Array ObjectId) | Multi-hot |
+| `duration` | `tour.time` (String, ví dụ "3N2Đ") | Parse → Normalize |
+| `vehicle` | `tour.vehicle` (String) | One-hot |
+| `departure season` | `tour.departureDate` | Season encoding (xuân/hạ/thu/đông) |
+| `ratingAvg` ⭐ | `tour.ratingAvg` (MỚI từ Bước 1.4) | Normalize [0, 1] |
+| `ratingCount` ⭐ | `tour.ratingCount` (MỚI từ Bước 1.4) | Log normalize |
+
+**Cosine Similarity:**
+```
+similarity(A, B) = (A · B) / (||A|| × ||B||)
+
+Ví dụ:
+Tour Đà Lạt  = [0, 1, 0, 0.3, 1, 0, 0, 0.5, 0.8, 0.6]
+Tour Nha Trang = [1, 0, 0, 0.4, 0, 1, 0, 0.6, 0.9, 0.7]
+→ similarity = 0.42 (khác nhau nhiều)
+
+Tour Đà Lạt  = [0, 1, 0, 0.3, 1, 0, 0, 0.5, 0.8, 0.6]
+Tour Sapa     = [0, 1, 0, 0.35, 1, 0, 0, 0.4, 0.7, 0.5]
+→ similarity = 0.95 (rất giống nhau) ✅
+```
 
 ---
 
@@ -446,53 +239,54 @@ POST /api/tracking/event      → Ghi nhận sự kiện tổng quát (scroll, h
 
 **File mới:** `services/recommendation/content-based.js`
 
-**📌 Lý do:** Đây là **engine đề xuất đầu tiên** có thể hoạt động ngay lập tức với dữ liệu hiện có. Nó trả lời câu hỏi: *"Tour nào giống với tour mà user đang xem/đã mua?"*
+**📌 Lý do:** Trả lời 2 câu hỏi:
+1. *"Tour nào giống với tour user đang xem?"* → Dùng cho trang tour detail
+2. *"Tour nào phù hợp với sở thích của user?"* → Dùng cho trang home (personalized)
 
-**Thuật toán:**
-1. Lấy profile sở thích user (từ `preferences` + lịch sử tương tác + **rating history** ⭐)
-2. Tính vector đặc trưng trung bình của các tour user đã thích (Weighted User Profile)
-3. So sánh Cosine Similarity với tất cả tour khác
-4. Trả về top-N tour tương tự nhất
+**Thuật toán xây dựng User Profile:**
+```
+1. Lấy tất cả tour user đã tương tác (từ UserInteraction + Review + Favorite)
+2. Tính weighted average vector:
+   - Tour user rate 5★ → weight = 5
+   - Tour user rate 1★ → weight = 1
+   - Tour user favorite → weight = 2
+   - Tour user chỉ view → weight = 1
+3. Nếu user có preferences (từ đăng ký) → mix vào profile vector
+4. So sánh cosine similarity với tất cả tour chưa tương tác
+5. Trả về top-N
+```
 
-```
-Ví dụ luồng:
-User A đã mua: Tour Đà Lạt (3 ngày, xe bus, 2tr) + Tour Nha Trang (4 ngày, xe bus, 2.5tr)
-User A đánh giá: Tour Đà Lạt ⭐⭐⭐⭐⭐ (5 sao) → trọng số cao
-                 Tour Nha Trang ⭐⭐⭐ (3 sao) → trọng số thấp hơn
-→ User Profile Vector thiên về đặc trưng của Tour Đà Lạt
-→ Đề xuất: Tour tương tự Đà Lạt hơn Nha Trang
-```
+**Ưu điểm tận dụng dữ liệu hiện có:**
+- `user.preferences.tourTypes` → biết user thích loại tour gì (khai báo khi đăng ký)
+- `user.preferences.budgetRange` → biết ngân sách
+- `user.preferences.locations` → biết địa điểm yêu thích
+- `Review.rating` → explicit feedback chính xác
+- `Favorite` records → implicit positive signal
 
 ---
 
-### 🔷 Giai Đoạn 3: Xây Dựng Collaborative Filtering Engine
+### 🔷 Giai Đoạn 3: Collaborative Filtering + Matrix Factorization (3-4 ngày)
 
-#### ✅ Bước 3.1 — Xây dựng ma trận User-Item (Interaction Matrix)
+---
+
+#### ✅ Bước 3.1 — Xây dựng ma trận User-Item
 
 **File mới:** `services/recommendation/matrix-builder.js`
 
-**📌 Lý do:** Collaborative Filtering dựa trên nguyên lý *"Những người có hành vi tương tự trong quá khứ sẽ có sở thích tương tự trong tương lai"*. Ma trận User-Item là **cấu trúc dữ liệu trung tâm** của thuật toán, trong đó:
-- Hàng = User
-- Cột = Tour
-- Giá trị = Rating score (ưu tiên **explicit rating** ⭐ từ review, bổ sung bằng implicit rating từ hành vi)
+**📌 Lý do:** Ma trận User-Item là **cấu trúc dữ liệu trung tâm** của Collaborative Filtering. Nhờ project đã có `userId` ở Order, Review, Favorite, việc xây dựng ma trận trở nên thuận lợi hơn nhiều.
+
+**Nguồn dữ liệu (ưu tiên explicit > implicit):**
 
 ```
-Ma trận User-Item (kết hợp explicit + implicit):
-              Tour1  Tour2  Tour3  Tour4  Tour5
-User A    [   5★     3⚡     0      0      1⚡  ]     ★ = explicit rating
-User B    [   0      4★     0      5★     0    ]     ⚡ = implicit rating
-User C    [   3⚡     0      2★     0      4★   ]
-User D    [   0      5★     0      3⚡     0    ]
-
-→ User B và User D có pattern tương tự
-→ Nếu User D chưa xem Tour2, hệ thống sẽ đề xuất Tour2 cho User D
+Ưu tiên 1: Review.rating (1-5 ★)      → Explicit, chính xác nhất
+Ưu tiên 2: Order.status = "completed"  → Implicit, weight = 5
+Ưu tiên 3: Favorite records            → Implicit, weight = 2
+Ưu tiên 4: UserInteraction (view, search, cart_add) → Implicit, weight = 1-3
 ```
 
-**Công việc cụ thể:**
-- Query tất cả `UserInteraction` + **`Review`** ⭐ từ MongoDB
-- **Ưu tiên explicit rating** (1-5 sao) khi có, fallback sang implicit rating khi không có
-- Xây dựng Sparse Matrix (ma trận thưa) — vì hầu hết user chỉ tương tác với rất ít tour
-- Chuẩn hóa ma trận (mean normalization)
+**Xử lý ma trận thưa (Sparse Matrix):**
+- Dự kiến: 100 users × 50 tours = 5000 ô → 90%+ bằng 0
+- Sử dụng compressed format (chỉ lưu ô có giá trị) để tiết kiệm bộ nhớ
 
 ---
 
@@ -500,36 +294,33 @@ User D    [   0      5★     0      3⚡     0    ]
 
 **File mới:** `services/recommendation/matrix-factorization.js`
 
-**📌 Lý do:** Ma trận User-Item thường rất **thưa** (sparse) — hầu hết ô đều bằng 0 vì user chỉ tương tác với vài tour. Matrix Factorization **phân rã** ma trận lớn thành 2 ma trận nhỏ hơn, từ đó **dự đoán** giá trị cho các ô trống (= dự đoán user sẽ thích tour nào).
+**📌 Lý do:** Phân rã ma trận thưa thành 2 ma trận latent factors → dự đoán giá trị cho ô trống = dự đoán tour user sẽ thích.
 
-**Hai thuật toán sẽ triển khai:**
-
-**a) SVD (Singular Value Decomposition):**
+**SVD (Singular Value Decomposition):**
 ```
 R ≈ U × Σ × V^T
 
-R (m×n) = Ma trận User-Item gốc
-U (m×k) = Ma trận đặc trưng User (latent factors)
-Σ (k×k) = Ma trận giá trị riêng (singular values)
-V (n×k) = Ma trận đặc trưng Item (latent factors)
-
-k = số latent factors (thường 10-50)
+R (m×n): Ma trận User-Item
+U (m×k): Latent factors của User
+V (n×k): Latent factors của Tour
+k: số chiều ẩn (10-50)
 ```
-- Ưu điểm: Chính xác, có nền tảng toán học vững
-- Nhược điểm: Khó xử lý missing values, cần data đầy đủ
 
-**b) ALS (Alternating Least Squares):**
+**ALS (Alternating Least Squares):**
 ```
 R ≈ X × Y^T
 
-Bước 1: Cố định Y, tìm X tối ưu bằng Least Squares
-Bước 2: Cố định X, tìm Y tối ưu bằng Least Squares
-Lặp lại cho đến khi hội tụ
+Lặp lại cho đến khi hội tụ:
+  Bước 1: Cố định Y, giải X bằng Least Squares
+  Bước 2: Cố định X, giải Y bằng Least Squares
 ```
-- Ưu điểm: Xử lý tốt **implicit feedback** và **sparse matrix**, phù hợp hơn với project này
-- Nhược điểm: Chậm hơn SVD với data nhỏ
 
-**Triển khai bằng thư viện:** `ml-matrix` (cho phép toán ma trận trong Node.js)
+**Chọn ALS làm thuật toán chính** vì:
+- Xử lý tốt **implicit feedback** (phần lớn data từ view, favorite — không phải rating)
+- Xử lý tốt **sparse matrix** (ma trận rất thưa với ít user ban đầu)
+- SVD làm thuật toán phụ/so sánh
+
+**Thư viện:** `ml-matrix` cho phép toán ma trận, hoặc tự implement ALS (~200 dòng code)
 
 ---
 
@@ -537,358 +328,274 @@ Lặp lại cho đến khi hội tụ
 
 **File mới:** `services/recommendation/collaborative-filtering.js`
 
-**📌 Lý do:** Sau khi có ma trận factorized, cần module để **truy vấn và trả về kết quả đề xuất**. Module này sẽ:
+**📌 Lý do:** Module truy vấn kết quả từ model đã train.
 
-1. Lấy latent vector của user hiện tại
-2. Nhân với ma trận item latent factors
-3. Sắp xếp theo predicted rating giảm dần
-4. Lọc bỏ tour đã mua/đã xem
-5. Trả về top-N recommendations
+**Luồng xử lý:**
+```
+1. Nhận userId
+2. Lấy latent vector U[userId] từ model đã train
+3. Nhân U[userId] × V^T → predicted rating cho tất cả tour
+4. Lọc bỏ tour đã mua/xem/hết hạn/bị xóa
+5. Sắp xếp giảm dần
+6. Trả về top-N recommendations
+```
 
 ---
 
-### 🔷 Giai Đoạn 4: Hybrid Recommender — Kết Hợp 2 Engine
+### 🔷 Giai Đoạn 4: Hybrid Engine + TensorFlow.js (3-4 ngày)
+
+---
 
 #### ✅ Bước 4.1 — Xây dựng Hybrid Recommender Engine
 
 **File mới:** `services/recommendation/hybrid-engine.js`
 
-**📌 Lý do:** Mỗi phương pháp đều có **điểm yếu riêng**:
-
-| Phương pháp | Điểm yếu |
-|---|---|
-| Content-Based | Chỉ đề xuất tour giống với lịch sử → thiếu đa dạng (filter bubble) |
-| Collaborative | Cần nhiều data, không hoạt động với user/tour mới (cold start) |
-
-Hybrid kết hợp **ưu điểm của cả hai**, sử dụng chiến lược **Weighted Hybrid**:
+**📌 Lý do:** Kết hợp ưu điểm của cả 2 engine, bù đắp điểm yếu lẫn nhau.
 
 ```
 Score_final = α × Score_content + β × Score_collaborative + γ × Score_popularity
 
-Trong đó:
-- α, β, γ là trọng số (tổng = 1)
-- Khi user mới (ít data): α cao, β thấp → ưu tiên Content-Based
-- Khi user có nhiều data + nhiều rating: α thấp, β cao → ưu tiên Collaborative
-- Score_popularity: tính từ ratingAvg ⭐ + số booking + số lượt xem
+Chiến lược điều chỉnh trọng số tự động:
+┌─────────────────────────────────────────────────────────┐
+│ Loại user              │  α (CB)  │  β (CF)  │  γ (Pop) │
+│────────────────────────┼──────────┼──────────┼──────────│
+│ Mới, có preferences    │  0.6     │  0.1     │  0.3     │
+│ Mới, không preferences │  0.2     │  0.1     │  0.7     │
+│ Có 5-20 interactions   │  0.4     │  0.4     │  0.2     │
+│ Có 20+ interactions    │  0.2     │  0.7     │  0.1     │
+│ Anonymous (no login)   │  0.1     │  0.0     │  0.9     │
+└─────────────────────────────────────────────────────────┘
+
+Score_popularity tính từ:
+  - ratingAvg ⭐ (từ Review — ĐÃ CÓ)
+  - ratingCount (số lượt đánh giá — ĐÃ CÓ)
+  - Số lượt favorite (query Favorite — ĐÃ CÓ)
+  - Số lượt purchase (query Order — ĐÃ CÓ)
+  - Số lượt view (query UserInteraction — MỚI)
 ```
 
-**Công việc cụ thể:**
-- Chuẩn hóa score từ 2 engine về cùng thang đo [0, 1]
-- Tự động điều chỉnh trọng số (α, β, γ) dựa trên lượng data + **số lượng rating** ⭐ của user
-- Fallback sang popularity-based khi user hoàn toàn mới (cold start)
-- Áp dụng business rules: loại tour hết slot, tour đã expired, tour đã bị xóa
-- **Boost score cho tour có rating cao** ⭐ (quality signal)
+**Business rules filter:**
+- Loại tour `deleted: true`
+- Loại tour `status: "inactive"`
+- Loại tour đã hết `departureDate` (< ngày hiện tại)
+- Loại tour hết slot (`stockAdult <= 0`)
 
 ---
 
-#### ✅ Bước 4.2 — Tạo Scheduler để huấn luyện lại model định kỳ
+#### ✅ Bước 4.2 — Tạo Training Scheduler
 
 **File mới:** `services/recommendation/training-scheduler.js`
 
-**📌 Lý do:** Matrix Factorization là thuật toán **batch processing** — cần chạy lại trên toàn bộ dữ liệu để cập nhật model. Nếu chỉ train 1 lần, model sẽ lỗi thời khi có user/tour mới. Scheduler sẽ:
+**📌 Lý do:** Model ML cần được train lại định kỳ khi có dữ liệu mới.
 
-- **Chạy re-training** mỗi 6 giờ (hoặc configurable)
-- **Cache model** đã train vào bộ nhớ (in-memory) để truy vấn nhanh
-- **Log metrics**: RMSE, MAE, precision@K để đánh giá chất lượng model
-- Lưu model xuống file JSON để khôi phục khi server restart
-
----
-
-### 🔷 Giai Đoạn 5: Tích Hợp TensorFlow.js Phía Client (Browser)
-
-#### ✅ Bước 5.1 — Xây dựng module TensorFlow.js phía client
-
-**File mới:** `public/js/recommendation-engine.js`
-
-**📌 Lý do:** TensorFlow.js cho phép chạy mô hình ML **trực tiếp trên trình duyệt** của người dùng, mang lại 3 lợi ích lớn:
-
-1. **Real-time prediction**: Dự đoán ngay lập tức mà không cần gọi API → UX mượt mà
-2. **Giảm tải server**: Tính toán nặng được phân bổ sang client
-3. **Privacy**: Dữ liệu hành vi có thể xử lý cục bộ trước khi gửi lên server
-
-**Công việc cụ thể:**
-- Load pre-trained model (export từ server) vào browser
-- Dự đoán hành vi: *"User có khả năng click vào tour X không?"*
-- Re-rank kết quả recommendation từ server dựa trên **real-time context** (thời gian trong ngày, thiết bị, hành vi browsing hiện tại)
+- **Chạy re-training** mỗi 6 giờ (configurable qua `.env`)
+- **Cache model** trong memory → trả kết quả nhanh
+- **Log metrics:** RMSE, MAE, Precision@K
+- Lưu model xuống JSON file → khôi phục khi server restart
+- **Trigger re-train sớm** khi có > N interactions mới kể từ lần train trước
 
 ---
 
-#### ✅ Bước 5.2 — Xây dựng hệ thống thu thập hành vi real-time phía client
+#### ✅ Bước 4.3 — Tích hợp TensorFlow.js phía Client
 
-**File mới:** `public/js/behavior-tracker.js`
+**File mới:** `public/assets/js/recommendation-engine.js`
 
-**📌 Lý do:** Nhiều hành vi chỉ xảy ra ở client mà server không biết:
+**📌 Lý do:** Chạy ML **trực tiếp trên browser** để real-time re-ranking.
 
-| Hành vi client-side | Ý nghĩa |
-|---|---|
-| Thời gian xem trang | User đọc kỹ = quan tâm thật |
-| Scroll depth | Cuộn hết trang = quan tâm mạnh |
-| Mouse hover trên tour card | Phân vân giữa các lựa chọn |
-| Click vào ảnh/lịch trình | Đang tìm hiểu sâu |
-| **Tương tác với review section** ⭐ | Đọc review = đang cân nhắc mua |
+**Công việc:**
+1. Server export model sang format TensorFlow.js (`model.json` + weights)
+2. Client load model, nhận danh sách tour candidate từ API
+3. Re-rank dựa trên **real-time context:**
+   - Thời gian trong ngày (sáng → tour outdoor, tối → tour city)
+   - Hành vi session hiện tại (đã xem 3 tour biển → boost tour biển)
+   - Device type (mobile → tour ngắn ngày, desktop → tour dài ngày)
+4. Hiển thị kết quả đã re-rank
 
-**Công việc cụ thể:**
-- Thu thập: page view duration, scroll depth, click events, hover events, **review read time** ⭐
-- Batch gửi lên server mỗi 30 giây (hoặc khi rời trang) qua `POST /api/tracking/event`
-- Lưu local (localStorage) để tạo session profile cho anonymous user
-- Feed dữ liệu vào TensorFlow.js model ở client để real-time prediction
-
----
-
-#### ✅ Bước 5.3 — Tạo API export model từ server cho client
-
-**File mới:** `controllers/client/recommendation.controller.js` (thêm endpoint)
-
+**API mới cần thêm:**
 ```
-GET /api/recommendation/model    → Download TensorFlow.js model (model.json + weights)
-GET /api/recommendation/metadata → Metadata: feature names, normalization params
+GET /api/recommendation/model       → Download TF.js model files
+GET /api/recommendation/metadata    → Feature names, normalization params
 ```
 
-**📌 Lý do:** TensorFlow.js ở browser cần model đã được train ở server. API này phục vụ việc **đồng bộ model** giữa server và client. Model được convert sang format TensorFlow.js (`model.json` + binary weights) để browser tải về và chạy inference.
+---
+
+### 🔷 Giai Đoạn 5: API, Tích Hợp Giao Diện & Tối Ưu (2-3 ngày)
 
 ---
 
-### 🔷 Giai Đoạn 6: Tạo API & Tích Hợp Vào Giao Diện
-
-#### ✅ Bước 6.1 — Tạo Recommendation API endpoints
+#### ✅ Bước 5.1 — Tạo Recommendation API
 
 **File mới:** `routes/client/recommendation.route.js`
 **File mới:** `controllers/client/recommendation.controller.js`
 
 ```
-GET  /api/recommendation/personalized?userId=xxx&limit=10
-     → Tour đề xuất cá nhân hóa (Hybrid engine)
+GET  /api/recommendation/personalized?limit=10
+     → Tour đề xuất cá nhân hóa (Hybrid engine, dùng req.user từ optionalAuth)
 
 GET  /api/recommendation/similar/:tourId?limit=6
-     → Tour tương tự với tour đang xem (Content-Based)
+     → Tour tương tự (Content-Based, dùng trên trang tour detail)
 
 GET  /api/recommendation/trending?limit=8
-     → Tour đang trending (Popularity-based, weighted by ratingAvg ⭐)
+     → Tour trending (Popularity-based, dùng cho tất cả user)
 
-GET  /api/recommendation/top-rated?limit=8          ⭐ MỚI
-     → Tour được đánh giá cao nhất
-
-GET  /api/recommendation/category/:categoryId?userId=xxx&limit=8
-     → Tour đề xuất trong category cụ thể
+GET  /api/recommendation/top-rated?limit=8
+     → Tour rating cao nhất (dùng ratingAvg từ Review — ĐÃ CÓ)
 
 POST /api/recommendation/feedback
-     → User phản hồi về recommendation (thumbs up/down) để cải thiện model
+     → User click/ignore recommendation → feedback cho model
 ```
 
-**📌 Lý do:** Tách recommendation thành **API riêng** (không gộp vào controller hiện có) vì:
-1. **Tái sử dụng**: Có thể gọi từ nhiều trang (home, detail, category, cart)
-2. **Lazy loading**: Trang load nhanh trước, recommendation load sau bằng AJAX
+**📌 Lý do tách API riêng:**
+1. **Lazy loading**: Trang load trước, recommendation load sau bằng AJAX → UX nhanh
+2. **Caching riêng**: Cache recommendation response 15-30 phút
 3. **A/B testing**: Dễ thay đổi thuật toán mà không ảnh hưởng giao diện
-4. **Caching**: Có thể cache response riêng cho recommendation
-5. Endpoint `top-rated` ⭐ tận dụng dữ liệu rating để hiển thị tour chất lượng nhất
+4. **Reusable**: Gọi từ nhiều trang (home, detail, cart, order-success)
 
 ---
 
-#### ✅ Bước 6.2 — Tích hợp vào trang Home
+#### ✅ Bước 5.2 — Tích hợp vào giao diện
 
-**Sửa file:** `controllers/client/home.controller.js`
 **Sửa file:** `views/client/pages/home.pug`
+```
+Thêm 2 section mới (load bằng AJAX):
+- "Dành riêng cho bạn"     → GET /api/recommendation/personalized (nếu login)
+- "Tour được đánh giá cao" → GET /api/recommendation/top-rated
+```
 
-**📌 Lý do:** Trang Home là **điểm tiếp xúc đầu tiên** với user, nơi recommendation có tác động lớn nhất. Thêm section mới:
-
-- **"Dành riêng cho bạn"** — Personalized recommendations (nếu đã login)
-- **"Tour đang được quan tâm"** — Trending/Popular (cho tất cả user)
-- **"Tour được đánh giá cao nhất"** ⭐ — Top-rated tours (social proof mạnh)
-
----
-
-#### ✅ Bước 6.3 — Tích hợp vào trang Chi tiết Tour
-
-**Sửa file:** `controllers/client/tour.controller.js`
 **Sửa file:** `views/client/pages/tour-detail.pug`
+```
+Thêm 2 section cuối trang (load bằng AJAX):
+- "Tour tương tự"          → GET /api/recommendation/similar/:tourId
+- "Bạn có thể thích"       → GET /api/recommendation/personalized (nếu login)
+```
 
-**📌 Lý do:** Khi user đang xem chi tiết một tour, đây là **cơ hội tốt nhất** để đề xuất tour tương tự. Thêm section:
+**Sửa file:** `views/client/pages/order-success.pug`
+```
+Thêm 1 section (load bằng AJAX):
+- "Tour bạn có thể thích"  → GET /api/recommendation/personalized
+```
 
-- **"Tour tương tự"** — Content-Based (dựa trên tour đang xem)
-- **"Khách hàng cũng quan tâm"** — Collaborative Filtering
-- **Section Đánh giá & Nhận xét** ⭐ — Review component (từ Bước 1B.4)
+**File mới:** `views/client/partials/recommendation-section.pug` — Pug mixin tái sử dụng cho recommendation cards
+
+**📌 Lý do:** Dùng AJAX để load recommendation **không ảnh hưởng page load speed**. Section recommendation render sau 200-300ms, user không cảm thấy chậm.
 
 ---
 
-#### ✅ Bước 6.4 — Tích hợp vào trang Giỏ hàng & Sau Đặt hàng
-
-**Sửa file:** `views/client/pages/cart.pug`
-**Sửa file liên quan đến order success page**
-
-**📌 Lý do:** Cross-selling opportunity — *"Bạn có thể thích thêm..."*. Đề xuất tour bổ sung dựa trên tour đã có trong giỏ hàng. Sau khi đặt hàng thành công, **mời user đánh giá tour** ⭐ (sau ngày khởi hành).
-
----
-
-### 🔷 Giai Đoạn 7: Tối Ưu & Monitoring
-
-#### ✅ Bước 7.1 — Caching layer cho Recommendation
+#### ✅ Bước 5.3 — Caching Layer
 
 **File mới:** `services/recommendation/cache-manager.js`
 
-**📌 Lý do:** Recommendation engine tính toán nặng. Caching giúp:
-- **Giảm latency**: Trả kết quả trong < 50ms thay vì 200-500ms
-- **Giảm tải MongoDB**: Không query lại mỗi lần có request
-- **Chiến lược cache**: In-memory cache (Map/LRU) với TTL 30 phút, invalidate khi model re-train
-- **Cache invalidation khi có review mới** ⭐: Khi user submit rating → invalidate cache của tour đó
+**📌 Lý do:** Recommendation engine tính toán nặng (query + matrix operations). Cache giúp:
+- Trả kết quả < 50ms (thay vì 200-500ms)
+- Giảm tải MongoDB
+- TTL 15-30 phút, invalidate khi model re-train
+- **Invalidate cache cụ thể** khi user tạo review/favorite mới (thay vì clear all)
+
+**Thư viện:** `lru-cache` — lightweight, in-memory, có TTL
 
 ---
 
-#### ✅ Bước 7.2 — Dashboard & Metrics cho Admin
+#### ✅ Bước 5.4 — Admin Monitoring Dashboard
 
-**File mới:** `controllers/admin/recommendation.controller.js`
-**File mới:** `routes/admin/recommendation.route.js`
-**File mới:** `views/admin/pages/recommendation-dashboard.pug`
+**Sửa file:** `views/admin/pages/dashboard.pug` — thêm tab/section recommendation metrics
 
-**📌 Lý do:** Admin cần **đánh giá hiệu quả** hệ thống recommendation:
+**📌 Lý do:** Admin cần đánh giá hiệu quả Recommender:
 
-| Metric | Ý nghĩa |
-|---|---|
-| CTR (Click-Through Rate) | % user click vào tour được đề xuất |
-| Conversion Rate | % user đặt tour từ recommendation |
-| Coverage | % tour được recommend ít nhất 1 lần |
-| Diversity | Mức đa dạng của recommendations |
-| RMSE / MAE | Sai số dự đoán của model |
-| **Avg Rating Score** ⭐ | Điểm rating trung bình toàn hệ thống |
-| **Review Coverage** ⭐ | % tour đã có ít nhất 1 review |
+| Metric | Ý nghĩa | Nguồn |
+|---|---|---|
+| CTR | % click vào tour recommended | UserInteraction `type="click_recommendation"` |
+| Conversion Rate | % mua tour từ recommendation | Order + UserInteraction |
+| Avg Rating | Rating trung bình hệ thống | Review (ĐÃ CÓ) |
+| Review Coverage | % tour có ít nhất 1 review | Review (ĐÃ CÓ) |
+| Model RMSE/MAE | Sai số dự đoán | Training scheduler |
+| Last Training | Thời gian train gần nhất | Training scheduler |
 
 ---
 
-#### ✅ Bước 7.3 — Xử lý Cold Start Problem
-
-**Tích hợp vào:** `services/recommendation/hybrid-engine.js`
-
-**📌 Lý do:** Khi hệ thống mới deploy hoặc user mới đăng ký, chưa có đủ dữ liệu. Chiến lược fallback theo thứ tự ưu tiên:
-
-```
-1. User mới + Có preferences khai báo (từ trang đăng ký) → Content-Based từ preferences
-2. User mới + Không có preferences     → Tour rating cao nhất ⭐ + Popularity-based
-3. Tour mới (chưa ai tương tác)        → Content-Based (so sánh features với tour khác)
-4. Hệ thống mới (rất ít data)          → Editorial picks (admin chọn thủ công)
-```
-
----
-
-#### ✅ Bước 7.4 — Tạo Script Generate Fake Data để Test
-
-**File mới:** `scripts/seed-data.js`
-
-**📌 Lý do:** Collaborative Filtering cần **lượng dữ liệu tối thiểu** để hoạt động hiệu quả. Script sẽ tạo:
-- 100+ user giả với preferences ngẫu nhiên
-- 500+ interaction records (view, cart_add, purchase)
-- 200+ reviews ⭐ với rating 1-5 sao ngẫu nhiên (phân bố realistic: nhiều 4-5 sao, ít 1-2 sao)
-- Dữ liệu có pattern rõ ràng để verify thuật toán hoạt động đúng
-
----
-
-## 📦 Thư Viện Cần Cài Đặt
+## 📦 Thư Viện Cần Cài Thêm
 
 | Thư viện | Mục đích | Giai đoạn |
 |---|---|---|
-| `@tensorflow/tfjs-node` | Chạy TensorFlow trên server Node.js (train model) | GĐ 3, 5 |
-| `@tensorflow/tfjs` | Chạy TensorFlow trên browser (inference) | GĐ 5 |
-| `ml-matrix` | Phép toán ma trận (SVD, ALS) trong Node.js | GĐ 3 |
-| `node-cron` | Scheduler chạy re-training định kỳ | GĐ 4 |
-| `lru-cache` | In-memory LRU cache | GĐ 7 |
+| `ml-matrix` | Phép toán ma trận (SVD, ALS) | GĐ 3 |
+| `@tensorflow/tfjs-node` | Train model trên server | GĐ 3, 4 |
+| `@tensorflow/tfjs` | Inference trên browser (CDN) | GĐ 4 |
+| `node-cron` | Scheduler re-training | GĐ 4 |
+| `lru-cache` | In-memory cache | GĐ 5 |
 
 > [!NOTE]
-> Các thư viện `bcrypt`, `jsonwebtoken`, `cookie-parser`, `nodemailer`, `joi`, `cloudinary`, `multer` đã có sẵn trong project — sẽ tái sử dụng cho Auth và Review upload ảnh.
+> Tất cả thư viện khác đã có sẵn: `bcrypt`, `jsonwebtoken`, `mongoose`, `moment`, `joi`, `cloudinary`, `multer`, `nodemailer`, `axios`...
 
 ---
 
-## 📁 Cấu Trúc Thư Mục Mới (Đầy đủ)
+## 📁 Cấu Trúc File Mới (Chỉ phần thêm mới cho Recommender)
 
 ```
 project1/
 ├── models/
-│   ├── user.model.js                    ← [MỚI] Tài khoản khách hàng
-│   ├── forgot-password-user.model.js    ← [MỚI] OTP quên mật khẩu user
-│   ├── review.model.js                  ← [MỚI] ⭐ Đánh giá tour 1-5 sao
-│   ├── user-interaction.model.js        ← [MỚI] Lưu hành vi người dùng
-│   └── tour.model.js                    ← [SỬA] Thêm ratingAvg, ratingCount, ratingDistribution
+│   ├── user-interaction.model.js            ← [MỚI] Thu thập hành vi
+│   └── tour.model.js                        ← [SỬA] Thêm ratingAvg, ratingCount
 ├── services/
 │   └── recommendation/
-│       ├── feature-extractor.js         ← [MỚI] Trích xuất đặc trưng tour
-│       ├── content-based.js             ← [MỚI] Content-Based engine
-│       ├── matrix-builder.js            ← [MỚI] Xây dựng ma trận User-Item
-│       ├── matrix-factorization.js      ← [MỚI] SVD/ALS algorithms
-│       ├── collaborative-filtering.js   ← [MỚI] Collaborative engine
-│       ├── hybrid-engine.js             ← [MỚI] Kết hợp 2 engine
-│       ├── training-scheduler.js        ← [MỚI] Scheduler train lại model
-│       └── cache-manager.js             ← [MỚI] Cache layer
+│       ├── feature-extractor.js             ← [MỚI] Trích xuất đặc trưng tour
+│       ├── content-based.js                 ← [MỚI] Content-Based engine
+│       ├── matrix-builder.js                ← [MỚI] Xây dựng ma trận User-Item
+│       ├── matrix-factorization.js          ← [MỚI] SVD/ALS algorithms
+│       ├── collaborative-filtering.js       ← [MỚI] Collaborative engine
+│       ├── hybrid-engine.js                 ← [MỚI] Kết hợp 2 engine
+│       ├── training-scheduler.js            ← [MỚI] Scheduler re-train
+│       └── cache-manager.js                 ← [MỚI] LRU cache layer
 ├── controllers/
-│   ├── client/
-│   │   ├── auth.controller.js           ← [MỚI] Đăng ký/Đăng nhập
-│   │   ├── review.controller.js         ← [MỚI] ⭐ API đánh giá tour
-│   │   ├── tracking.controller.js       ← [MỚI] API thu thập hành vi
-│   │   └── recommendation.controller.js ← [MỚI] API đề xuất
-│   └── admin/
-│       ├── review.controller.js         ← [MỚI] ⭐ Quản lý đánh giá
-│       └── recommendation.controller.js ← [MỚI] Dashboard admin
-├── routes/
-│   ├── client/
-│   │   ├── auth.route.js                ← [MỚI] Routes đăng ký/đăng nhập
-│   │   ├── review.route.js              ← [MỚI] ⭐ Routes đánh giá
-│   │   ├── tracking.route.js            ← [MỚI]
-│   │   └── recommendation.route.js      ← [MỚI]
-│   └── admin/
-│       ├── review.route.js              ← [MỚI] ⭐ Routes quản lý review
-│       └── recommendation.route.js      ← [MỚI]
-├── validates/
 │   └── client/
-│       └── auth.validate.js             ← [MỚI] Validate đăng ký/đăng nhập
+│       ├── tracking.controller.js           ← [MỚI] API tracking events
+│       ├── recommendation.controller.js     ← [MỚI] API recommendation
+│       ├── review.controller.js             ← [SỬA] Sync → UserInteraction
+│       ├── favorite.controller.js           ← [SỬA] Sync → UserInteraction
+│       └── order.controller.js              ← [SỬA] Sync → UserInteraction
+├── routes/
+│   └── client/
+│       ├── tracking.route.js                ← [MỚI]
+│       ├── recommendation.route.js          ← [MỚI]
+│       └── index.route.js                   ← [SỬA] Thêm tracking + recommendation routes
 ├── middlewares/
 │   └── client/
-│       ├── auth.middleware.js            ← [MỚI] Xác thực user (requireAuth, optionalAuth)
-│       └── tracking.middleware.js        ← [MỚI] Auto-tracking
+│       └── tracking.middleware.js           ← [MỚI] Auto-tracking views/search
 ├── public/
-│   ├── js/
-│   │   ├── recommendation-engine.js     ← [MỚI] TensorFlow.js client
-│   │   ├── behavior-tracker.js          ← [MỚI] Thu thập hành vi client
-│   │   └── review.js                    ← [MỚI] ⭐ Client-side review logic
-│   └── css/
-│       └── review.css                   ← [MỚI] ⭐ Review component styling
+│   └── assets/js/
+│       ├── behavior-tracker.js              ← [MỚI] Client-side hành vi tracking
+│       └── recommendation-engine.js         ← [MỚI] TensorFlow.js client-side
 ├── views/
-│   ├── client/
-│   │   ├── pages/
-│   │   │   ├── auth/
-│   │   │   │   ├── register.pug         ← [MỚI] Trang đăng ký
-│   │   │   │   ├── login.pug            ← [MỚI] Trang đăng nhập
-│   │   │   │   ├── forgot-password.pug  ← [MỚI] Trang quên mật khẩu
-│   │   │   │   ├── otp-password.pug     ← [MỚI] Trang nhập OTP
-│   │   │   │   ├── reset-password.pug   ← [MỚI] Trang đặt lại mật khẩu
-│   │   │   │   └── profile.pug          ← [MỚI] Trang thông tin cá nhân
-│   │   │   ├── home.pug                 ← [SỬA] Thêm section đề xuất + top rated
-│   │   │   └── tour-detail.pug          ← [SỬA] Thêm tour tương tự + review section
-│   │   └── partials/
-│   │       └── review-section.pug       ← [MỚI] ⭐ Component đánh giá (tái sử dụng)
-│   └── admin/pages/
-│       ├── recommendation-dashboard.pug ← [MỚI] Dashboard metrics
-│       └── review-management.pug        ← [MỚI] ⭐ Quản lý đánh giá
+│   └── client/
+│       ├── partials/
+│       │   └── recommendation-section.pug   ← [MỚI] Mixin hiển thị tour gợi ý
+│       └── pages/
+│           ├── home.pug                     ← [SỬA] Thêm section đề xuất
+│           ├── tour-detail.pug              ← [SỬA] Thêm tour tương tự
+│           └── order-success.pug            ← [SỬA] Thêm gợi ý sau đặt hàng
 ├── scripts/
-│   └── seed-data.js                     ← [MỚI] Script tạo fake data để test
-└── models/
-    └── order.model.js                   ← [SỬA] Thêm trường userId
+│   └── seed-interactions.js                 ← [MỚI] Generate fake data để test
+└── views/admin/pages/
+    └── dashboard.pug                        ← [SỬA] Thêm metrics recommendation
 ```
 
 ---
 
-## ⏱ Ước Tính Thời Gian
+## ⏱ Ước Tính Thời Gian (Cập nhật)
 
-| Giai đoạn | Công việc | Thời gian |
-|---|---|---|
-| **GĐ 1A** | Đăng ký/Đăng nhập khách hàng (Auth) | 3-4 ngày |
-| **GĐ 1B** | Nền tảng dữ liệu (Interaction model, **Rating/Review ⭐**, Tracking) | 3-4 ngày |
-| **GĐ 2** | Content-Based Filtering | 2-3 ngày |
-| **GĐ 3** | Collaborative Filtering + Matrix Factorization | 3-4 ngày |
-| **GĐ 4** | Hybrid Engine + Scheduler | 2-3 ngày |
-| **GĐ 5** | TensorFlow.js client-side | 3-4 ngày |
-| **GĐ 6** | API + Tích hợp giao diện | 2-3 ngày |
-| **GĐ 7** | Caching + Monitoring + Cold Start + Seed Data | 2-3 ngày |
-| **Tổng** | | **~20-28 ngày** |
+| Giai đoạn | Công việc | Thời gian | So sánh trước |
+|---|---|---|---|
+| **GĐ 1** | Thu thập dữ liệu hành vi (UserInteraction, Tracking, Seed data) | 2-3 ngày | ~~6-8 ngày~~ → giảm nhờ Auth + Review + Favorite đã có |
+| **GĐ 2** | Content-Based Filtering | 2-3 ngày | Giữ nguyên |
+| **GĐ 3** | Collaborative Filtering + Matrix Factorization | 3-4 ngày | Giữ nguyên |
+| **GĐ 4** | Hybrid Engine + TensorFlow.js + Scheduler | 3-4 ngày | Gộp từ GĐ 4+5 cũ |
+| **GĐ 5** | API + Giao diện + Caching + Monitoring | 2-3 ngày | Gộp từ GĐ 6+7 cũ |
+| **Tổng** | | **~12-17 ngày** | ~~20-28 ngày~~ → **giảm ~40%** |
+
+> [!TIP]
+> Nhờ các nền tảng Auth, Review, Favorite, Order, Notification đã hoàn thiện, **thời gian triển khai giảm từ 20-28 ngày xuống còn 12-17 ngày**. Phần lớn công việc hiện tại là xây dựng thuật toán ML (GĐ 2-4).
 
 ---
 
 ## Open Questions
 
 > [!NOTE]
-> **Quy mô dữ liệu:** Hiện tại project có khoảng bao nhiêu tour và dự kiến bao nhiêu user? Điều này ảnh hưởng đến việc chọn thuật toán và chiến lược caching.
+> **Quy mô dữ liệu:** Hiện tại project có khoảng bao nhiêu tour trong database? Và dự kiến bao nhiêu user đăng ký? Điều này ảnh hưởng đến số lượng latent factors (k) trong Matrix Factorization và chiến lược caching.

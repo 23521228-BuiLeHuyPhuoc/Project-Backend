@@ -4,6 +4,10 @@ const {createNotificationSafe}=require('../../helpers/notification.helper');
 const Order=require('../../models/order.model');
 const Review=require('../../models/review.model');
 const Tour=require('../../models/tour.model');
+const {
+  removeRatingInteraction,
+  syncRatingInteraction
+}=require('../../helpers/user-interaction.helper');
 
 const getEligibleTours=async userId=>{
   const [orders,reviews]=await Promise.all([
@@ -110,6 +114,8 @@ module.exports.create=async(req,res)=>{
       });
     }
 
+    await syncRatingInteraction(review);
+
     await createNotificationSafe({
       userId:req.user.id,
       title:'Cảm ơn đánh giá của bạn',
@@ -150,6 +156,7 @@ module.exports.update=async(req,res)=>{
     if(!review){
       return res.status(404).json({code:'error',message:'Không tìm thấy đánh giá!'});
     }
+    await syncRatingInteraction(review);
     return res.json({code:'success',message:'Cập nhật đánh giá thành công!',redirect:'/account/reviews'});
   }
   catch(error){
@@ -162,18 +169,19 @@ module.exports.remove=async(req,res)=>{
     if(!mongoose.isValidObjectId(req.params.id)){
       return res.status(400).json({code:'error',message:'Đánh giá không hợp lệ!'});
     }
-    const result=await Review.updateOne({
+    const review=await Review.findOneAndUpdate({
       _id:req.params.id,
       userId:req.user.id,
       deleted:false
     },{
       deleted:true,
       deletedAt:new Date()
-    });
+    },{new:true});
 
-    if(!result.matchedCount){
+    if(!review){
       return res.status(404).json({code:'error',message:'Không tìm thấy đánh giá!'});
     }
+    await removeRatingInteraction(review);
     return res.json({code:'success',message:'Đã xóa đánh giá!',redirect:'/account/reviews'});
   }
   catch(error){

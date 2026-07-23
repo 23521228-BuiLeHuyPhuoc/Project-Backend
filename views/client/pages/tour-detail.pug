@@ -6,7 +6,7 @@ block main
     +box-breadcrumb(breadcrumb)
     // End Breadcrumb
     // Section 10
-    .section-10
+    .section-10(data-behavior-page="tour-detail" data-tour-id=tour._id)
         .container
             .inner-wrap
                 .inner-left
@@ -54,7 +54,7 @@ block main
                                           img(src=item.image alt=item.title loading="lazy")
                                       .inner-schedule-copy !{item.description}
 
-                    .tour-review-section
+                    .tour-review-section(data-review-section)
                         .tour-review-head
                             div
                                 span Cảm nhận thực tế
