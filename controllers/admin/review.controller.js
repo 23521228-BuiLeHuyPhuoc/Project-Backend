@@ -1,5 +1,7 @@
 const Review=require("../../models/review.model");
 const moment=require("moment");
+const {removeRatingInteraction}=require("../../helpers/user-interaction.helper");
+const {updateTourRatingSafe}=require("../../helpers/tour-rating.helper");
 
 module.exports.list=async(req,res)=>{
   const find={deleted:false};
@@ -25,26 +27,29 @@ module.exports.statusPatch=async(req,res)=>{
   if(!["published","hidden"].includes(req.body.status)){
     return res.status(400).json({code:"error",message:"Trạng thái đánh giá không hợp lệ!"});
   }
-  const result=await Review.updateOne({_id:req.params.id,deleted:false},{
+  const review=await Review.findOneAndUpdate({_id:req.params.id,deleted:false},{
     status:req.body.status,
     updatedBy:req.account.id
-  });
-  if(result.matchedCount===0){
+  },{new:true});
+  if(!review){
     return res.status(404).json({code:"error",message:"Không tìm thấy đánh giá!"});
   }
+  await updateTourRatingSafe(review.tourId);
   req.flash("success","Cập nhật trạng thái đánh giá thành công!");
   res.json({code:"success"});
 };
 
 module.exports.deletePatch=async(req,res)=>{
-  const result=await Review.updateOne({_id:req.params.id,deleted:false},{
+  const review=await Review.findOneAndUpdate({_id:req.params.id,deleted:false},{
     deleted:true,
     deletedBy:req.account.id,
     deletedAt:new Date()
-  });
-  if(result.matchedCount===0){
+  },{new:true});
+  if(!review){
     return res.status(404).json({code:"error",message:"Không tìm thấy đánh giá!"});
   }
+  await removeRatingInteraction(review);
+  await updateTourRatingSafe(review.tourId);
   req.flash("success","Xóa đánh giá thành công!");
   res.json({code:"success"});
 };

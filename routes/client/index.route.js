@@ -18,16 +18,16 @@ const accountRoutes=require('./account.route');
 const trackingRoutes=require('./tracking.route');
 const authMiddleware=require('../../middlewares/client/auth.middleware');
 const trackingMiddleware=require('../../middlewares/client/tracking.middleware');
+router.use(authMiddleware.optionalAuth);
+router.use('/api/tracking',trackingRoutes);
 router.use(settingMiddleware.websiteInfo);
 router.use(categoryMiddleware.list);
-router.use(authMiddleware.optionalAuth);
 router.use(trackingMiddleware.trackInteractions);
 router.use((req,res,next)=>{
   res.locals.currentPath=req.path;
   next();
 });
 router.use('/auth',authRoutes);
-router.use('/api/tracking',trackingRoutes);
 router.use('/account',accountRoutes);
 router.get('/login',(req,res)=>res.redirect('/auth/login'));
 router.get('/register',(req,res)=>res.redirect('/auth/register'));

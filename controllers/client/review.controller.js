@@ -8,6 +8,7 @@ const {
   removeRatingInteraction,
   syncRatingInteraction
 }=require('../../helpers/user-interaction.helper');
+const {updateTourRatingSafe}=require('../../helpers/tour-rating.helper');
 
 const getEligibleTours=async userId=>{
   const [orders,reviews]=await Promise.all([
@@ -115,6 +116,7 @@ module.exports.create=async(req,res)=>{
     }
 
     await syncRatingInteraction(review);
+    await updateTourRatingSafe(review.tourId);
 
     await createNotificationSafe({
       userId:req.user.id,
@@ -157,6 +159,7 @@ module.exports.update=async(req,res)=>{
       return res.status(404).json({code:'error',message:'Không tìm thấy đánh giá!'});
     }
     await syncRatingInteraction(review);
+    await updateTourRatingSafe(review.tourId);
     return res.json({code:'success',message:'Cập nhật đánh giá thành công!',redirect:'/account/reviews'});
   }
   catch(error){
@@ -182,6 +185,7 @@ module.exports.remove=async(req,res)=>{
       return res.status(404).json({code:'error',message:'Không tìm thấy đánh giá!'});
     }
     await removeRatingInteraction(review);
+    await updateTourRatingSafe(review.tourId);
     return res.json({code:'success',message:'Đã xóa đánh giá!',redirect:'/account/reviews'});
   }
   catch(error){

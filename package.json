@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "yarn nodemon --inspect index.js"
+    "start": "yarn nodemon --inspect index.js",
+    "sync:tour-ratings": "node scripts/sync-tour-ratings.js"
   },
   "dependencies": {
     "axios": "^1.13.6",

@@ -21,6 +21,17 @@ const schema=mongoose.Schema({
   time:String,
   vehicle:String,
   departureDate:Date,
+  ratingAvg:{
+    type:Number,
+    min:0,
+    max:5,
+    default:0
+  },
+  ratingCount:{
+    type:Number,
+    min:0,
+    default:0
+  },
   information:String,
   schedules:Array,
   createdBy:String,
