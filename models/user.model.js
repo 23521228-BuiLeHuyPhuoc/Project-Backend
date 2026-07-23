@@ -40,6 +40,16 @@ const userSchema=new mongoose.Schema({
       default:[]
     }
   },
+  accountSeenAt:{
+    orders:{
+      type:Date,
+      default:null
+    },
+    favorites:{
+      type:Date,
+      default:null
+    }
+  },
   cart:[{
     tourId:{
       type:mongoose.Schema.Types.ObjectId,

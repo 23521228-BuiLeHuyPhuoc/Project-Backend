@@ -1,8 +1,10 @@
 const moment=require('moment');
 const Favorite=require('../../models/favorite.model');
 const Tour=require('../../models/tour.model');
+const User=require('../../models/user.model');
 
 module.exports.list=async(req,res)=>{
+  const viewedAt=new Date();
   const favorites=await Favorite.find({userId:req.user.id})
     .populate({
       path:'tourId',
@@ -29,6 +31,10 @@ module.exports.list=async(req,res)=>{
     };
   });
 
+  await User.updateOne({_id:req.user.id},{
+    $set:{'accountSeenAt.favorites':viewedAt}
+  });
+  res.locals.accountMeta.favoriteBadgeCount=0;
   res.render('client/pages/account/favorites',{
     pageTitle:'Tour yêu thích',
     activeAccountPage:'favorites',

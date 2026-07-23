@@ -17,9 +17,9 @@ mixin account-sidebar(activePage)
         span Đơn hàng
         em.account-nav-badge.account-nav-badge-orders(
           data-account-sidebar-badge="orders"
-          hidden=!(accountMeta && accountMeta.orderCount)
+          hidden=!(accountMeta && accountMeta.orderBadgeCount)
           aria-label="Số đơn hàng"
-        )= accountMeta ? accountMeta.orderCount : 0
+        )= accountMeta ? accountMeta.orderBadgeCount : 0
       a(class=activePage === 'vouchers' ? 'active' : '' href="/account/vouchers" data-account-sidebar-item="vouchers")
         i.fa-solid.fa-ticket
         span Voucher
@@ -44,9 +44,9 @@ mixin account-sidebar(activePage)
         span Yêu thích
         em.account-nav-badge.account-nav-badge-favorites(
           data-account-sidebar-badge="favorites"
-          hidden=!(accountMeta && accountMeta.favoriteCount)
+          hidden=!(accountMeta && accountMeta.favoriteBadgeCount)
           aria-label="Số tour yêu thích"
-        )= accountMeta ? accountMeta.favoriteCount : 0
+        )= accountMeta ? accountMeta.favoriteBadgeCount : 0
       a(class=activePage === 'profile' ? 'active' : '' href="/account/profile" data-account-sidebar-item="profile")
         i.fa-regular.fa-user
         span Thông tin tài khoản
@@ -57,7 +57,6 @@ mixin account-sidebar(activePage)
 
 mixin account-heading(eyebrow,title,description)
   .account-heading
-    span= eyebrow
     h1= title
     if description
       p= description

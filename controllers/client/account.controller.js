@@ -83,6 +83,7 @@ module.exports.dashboard=async(req,res)=>{
 };
 
 module.exports.orders=async(req,res)=>{
+  const viewedAt=new Date();
   const allowedStatuses=['initial','pending','confirmed','completed','cancelled'];
   const find={userId:req.user.id,deleted:false};
   if(allowedStatuses.includes(req.query.status)){
@@ -90,6 +91,10 @@ module.exports.orders=async(req,res)=>{
   }
 
   const orders=await Order.find(find).sort({createdAt:-1}).lean();
+  await User.updateOne({_id:req.user.id},{
+    $set:{'accountSeenAt.orders':viewedAt}
+  });
+  res.locals.accountMeta.orderBadgeCount=0;
   res.render('client/pages/account/orders',{
     pageTitle:'Đơn hàng của tôi',
     activeAccountPage:'orders',
@@ -99,6 +104,7 @@ module.exports.orders=async(req,res)=>{
 };
 
 module.exports.orderDetail=async(req,res)=>{
+  const viewedAt=new Date();
   const order=await Order.findOne({
     _id:req.params.id,
     userId:req.user.id,
@@ -109,6 +115,10 @@ module.exports.orderDetail=async(req,res)=>{
     return res.redirect('/account/orders');
   }
 
+  await User.updateOne({_id:req.user.id},{
+    $set:{'accountSeenAt.orders':viewedAt}
+  });
+  res.locals.accountMeta.orderBadgeCount=0;
   const [orderDetail]=await enrichOrders([order]);
   res.render('client/pages/account/order-detail',{
     pageTitle:`Đơn hàng ${order.orderCode}`,

@@ -9,7 +9,6 @@
   --account-red: #DC4C64;
   --account-blue: #3478F6;
 }
-
 .inner-user-menu .inner-user-dropdown {
   width: 230px;
 }
@@ -117,7 +116,6 @@
   background-color: #FFFFFF24;
   color: #fff;
   font-size: 19px;
-  font-weight: 800;
 }
 
 .account-user-copy {
@@ -160,7 +158,6 @@
   padding: 0 12px;
   color: #625B69;
   font-size: 14px;
-  font-weight: 600;
   transition: 0.18s ease;
 }
 
@@ -215,7 +212,6 @@
   padding: 11px 12px;
   color: var(--account-red);
   font-size: 14px;
-  font-weight: 700;
   cursor: pointer;
 }
 
@@ -233,13 +229,11 @@
 
 .account-heading > span,
 .account-section-head > div > span,
-.account-panel-head > div > span {
+.account-panel-head > div > span  {
   display: block;
   margin-bottom: 6px;
   color: var(--color-primary);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1.3px;
+  font-size: 13px;
   text-transform: uppercase;
 }
 
@@ -304,7 +298,6 @@
 .account-welcome-copy > span {
   color: #DCCEFF;
   font-size: 13px;
-  font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -338,7 +331,6 @@
   border-radius: 9px;
   padding: 0 15px;
   font-size: 13px;
-  font-weight: 750;
   cursor: pointer;
   transition: 0.18s ease;
 }
@@ -483,7 +475,6 @@
 .account-section-head > strong {
   color: var(--color-primary);
   font-size: 12px;
-  font-weight: 750;
 }
 
 .account-order-mini-list,
@@ -559,7 +550,6 @@
   border-radius: 999px;
   padding: 4px 8px;
   font-size: 10px;
-  font-weight: 750;
 }
 
 .account-notification-mini {
@@ -609,7 +599,6 @@
   padding: 8px 13px;
   color: #6E6675;
   font-size: 12px;
-  font-weight: 700;
 }
 
 .account-filter-tabs a.active,
@@ -705,7 +694,6 @@
 .account-order-item-copy a {
   color: var(--account-ink);
   font-size: 14px;
-  font-weight: 750;
 }
 
 .account-order-item-copy span {
@@ -737,7 +725,6 @@
   gap: 7px;
   color: var(--account-muted);
   font-size: 12px;
-  font-weight: 700;
 }
 
 .account-order-items-large {
@@ -768,7 +755,7 @@
 }
 
 .account-order-summary dt { color: var(--account-muted); }
-.account-order-summary dd { color: var(--account-ink); font-weight: 700; text-align: right; }
+.account-order-summary dd { color: var(--account-ink); text-align: right; }
 
 .account-price-lines {
   margin-bottom: 16px;
@@ -888,7 +875,6 @@
   padding: 4px 7px;
   color: var(--color-primary);
   font-size: 9px;
-  font-weight: 800;
   text-transform: uppercase;
 }
 
@@ -920,7 +906,6 @@
   padding: 0;
   color: var(--account-red);
   font-size: 10px;
-  font-weight: 700;
   cursor: pointer;
 }
 
@@ -1061,7 +1046,6 @@
   padding: 5px 9px;
   color: #fff;
   font-size: 10px;
-  font-weight: 800;
 }
 
 .account-favorite-toggle,
@@ -1097,7 +1081,6 @@
 .account-favorite-copy small {
   color: var(--color-primary);
   font-size: 10px;
-  font-weight: 750;
   text-transform: uppercase;
 }
 
@@ -1168,7 +1151,6 @@
 .account-review-tour-copy small {
   color: var(--color-primary);
   font-size: 10px;
-  font-weight: 700;
 }
 
 .account-review-tour-copy h3,
@@ -1211,7 +1193,6 @@
 .account-rating-field > span {
   color: var(--account-muted);
   font-size: 11px;
-  font-weight: 650;
 }
 
 .account-stars {
@@ -1315,7 +1296,6 @@
   margin-bottom: 7px;
   color: #4D4653;
   font-size: 12px;
-  font-weight: 700;
 }
 
 .account-control {
@@ -1388,7 +1368,6 @@
   border-color: var(--color-primary);
   background-color: #EEE7FA;
   color: var(--color-primary);
-  font-weight: 700;
 }
 
 .account-profile-actions {
@@ -1451,6 +1430,10 @@
   color: var(--account-muted);
   font-size: 12px;
   line-height: 1.55;
+}
+
+.account-page :where(h1, h2, h3, h4, h5, h6, strong, b, dt, th) {
+  font-weight: 400;
 }
 
 .account-toast {
