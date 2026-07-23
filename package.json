@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "yarn nodemon --inspect index.js",
+    "test": "node --test",
     "sync:tour-ratings": "node scripts/sync-tour-ratings.js"
   },
   "dependencies": {

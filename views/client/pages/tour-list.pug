@@ -76,18 +76,14 @@ block main
                         .inner-sort
                             .inner-label Sắp xếp:
                             .inner-list
-                                button
-                                    | Giá tăng dần
-                                    i.fa-solid.fa-square-caret-up
-                                button
-                                    | Giá giảm dần
-                                    i.fa-solid.fa-square-caret-down
-                                button.active
-                                    | Khuyến Mại Hot
-                                    i.fa-solid.fa-tag
-                                button
-                                    | Xem Nhiều
-                                    i.fa-solid.fa-eye
+                                each option in sortOptions
+                                    a(
+                                        class=option.active ? "active" : ""
+                                        href=option.url
+                                        aria-current=option.active ? "page" : null
+                                    )
+                                        | #{option.label}
+                                        i(class=option.icon)
                         .inner-count-record
                             | Tất cả:
                             b  #{tourTotal} Tour
@@ -95,17 +91,25 @@ block main
                             span.inner-title Bộ Lọc
                             i.fa-solid.fa-filter
                     .inner-list-tour 
-                        each item in tourList
-                          +product-item(item)
+                        if tourList.length
+                            each item in tourList
+                                +product-item(item)
+                        else
+                            p Không có tour phù hợp trong danh mục này.
                     // Pagination
-                    .box-pagination
-                        button
-                            i.fa-solid.fa-angles-left
-                        button.active 1
-                        button 2
-                        button 3
-                        button 4
-                        button
-                            i.fa-solid.fa-angles-right
+                    if pagination.totalPages > 1
+                        nav.box-pagination(aria-label="Phân trang danh sách tour")
+                            if pagination.previousUrl
+                                a(href=pagination.previousUrl aria-label="Trang trước")
+                                    i.fa-solid.fa-angles-left
+                            each pageItem in pagination.pages
+                                a(
+                                    class=pageItem.number === pagination.currentPage ? "active" : ""
+                                    href=pageItem.url
+                                    aria-current=pageItem.number === pagination.currentPage ? "page" : null
+                                ) #{pageItem.number}
+                            if pagination.nextUrl
+                                a(href=pagination.nextUrl aria-label="Trang sau")
+                                    i.fa-solid.fa-angles-right
                     // End Pagination
                     // End Section 9

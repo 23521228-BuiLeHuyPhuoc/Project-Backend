@@ -246,14 +246,15 @@ Tour Sapa     = [0, 1, 0, 0.35, 1, 0, 0, 0.4, 0.7, 0.5]
 **Thuật toán xây dựng User Profile:**
 ```
 1. Lấy tất cả tour user đã tương tác (từ UserInteraction + Review + Favorite)
-2. Tính weighted average vector:
-   - Tour user rate 5★ → weight = 5
-   - Tour user rate 1★ → weight = 1
-   - Tour user favorite → weight = 2
-   - Tour user chỉ view → weight = 1
-3. Nếu user có preferences (từ đăng ký) → mix vào profile vector
-4. So sánh cosine similarity với tất cả tour chưa tương tác
-5. Trả về top-N
+2. Rating explicit ghi đè các tín hiệu implicit của cùng tour:
+   - Rating 1-2★ → đưa vào negative profile (cần tránh tour tương tự)
+   - Rating 3★ → trung lập, không cộng vào profile
+   - Rating 4-5★ → đưa vào positive profile
+   - Độ mạnh rating = |rating - 3|
+3. Tour không có rating: favorite = 2, view = 1, cart_add = 3...
+4. Nếu user có preferences (từ đăng ký) → mix vào positive profile
+5. Score = cosine(positiveProfile, tour) - cosine(negativeProfile, tour)
+6. Lọc các tour đã tương tác và trả về top-N
 ```
 
 **Ưu điểm tận dụng dữ liệu hiện có:**

@@ -172,12 +172,28 @@ const weightedAverage=entries=>{
   };
 };
 
+const getRatingSignal=value=>{
+  const rating=Number(value);
+  if(!Number.isFinite(rating) || rating<1 || rating>5){
+    return null;
+  }
+  const normalizedRating=Math.min(5,Math.max(1,rating));
+  const signedWeight=normalizedRating-3;
+  return {
+    rating:normalizedRating,
+    direction:signedWeight>0
+      ? 'positive'
+      : signedWeight<0
+        ? 'negative'
+        : 'neutral',
+    weight:Math.abs(signedWeight)
+  };
+};
+
 const getInteractionWeight=interaction=>{
   if(interaction.type==='rating'){
-    const rating=Number(interaction.value);
-    return Number.isFinite(rating)
-      ? Math.min(5,Math.max(1,rating))
-      : 1;
+    const signal=getRatingSignal(interaction.value);
+    return signal ? signal.rating : 0;
   }
   return interactionWeights[interaction.type] || 0;
 };
@@ -223,6 +239,9 @@ class ContentBasedRecommender{
     this.preferenceWeight=Number.isFinite(options.preferenceWeight)
       ? Math.max(0,options.preferenceWeight)
       : 4;
+    this.negativePenalty=Number.isFinite(options.negativePenalty)
+      ? Math.max(0,options.negativePenalty)
+      : 1;
     this.now=typeof options.now==='function' ? options.now : ()=>new Date();
     this.extractor=options.extractor || new FeatureExtractor();
     this.initialized=false;
@@ -399,6 +418,7 @@ class ContentBasedRecommender{
     }
 
     const signalMap=new Map();
+    const explicitRatings=new Map();
     const interactedTourIds=new Set();
     (interactions || []).forEach(interaction=>{
       const tourId=getId(interaction.tourId);
@@ -406,6 +426,13 @@ class ContentBasedRecommender{
         return;
       }
       interactedTourIds.add(tourId);
+      if(interaction.type==='rating'){
+        const ratingSignal=getRatingSignal(interaction.value);
+        if(ratingSignal){
+          explicitRatings.set(tourId,ratingSignal);
+        }
+        return;
+      }
       addSignal(
         signalMap,
         tourId,
@@ -415,67 +442,115 @@ class ContentBasedRecommender{
     });
     (reviews || []).forEach(review=>{
       const tourId=getId(review.tourId);
+      if(!tourId){
+        return;
+      }
       interactedTourIds.add(tourId);
-      addSignal(
-        signalMap,
-        tourId,
-        'rating',
-        Math.min(5,Math.max(1,Number(review.rating) || 1))
-      );
+      const ratingSignal=getRatingSignal(review.rating);
+      if(ratingSignal){
+        explicitRatings.set(tourId,ratingSignal);
+      }
     });
     (favorites || []).forEach(favorite=>{
       const tourId=getId(favorite.tourId);
+      if(!tourId){
+        return;
+      }
       interactedTourIds.add(tourId);
       addSignal(signalMap,tourId,'favorite',interactionWeights.favorite);
     });
 
-    const behaviorEntries=[];
-    signalMap.forEach((signals,tourId)=>{
+    const positiveBehaviorEntries=[];
+    const negativeBehaviorEntries=[];
+    const profileTourIds=new Set([
+      ...signalMap.keys(),
+      ...explicitRatings.keys()
+    ]);
+    profileTourIds.forEach(tourId=>{
       const vector=this.vectorMap.get(tourId);
       if(!vector){
         return;
       }
+      const ratingSignal=explicitRatings.get(tourId);
+      if(ratingSignal){
+        if(ratingSignal.direction==='positive'){
+          positiveBehaviorEntries.push({
+            vector,
+            weight:ratingSignal.weight
+          });
+        }else if(ratingSignal.direction==='negative'){
+          negativeBehaviorEntries.push({
+            vector,
+            weight:ratingSignal.weight
+          });
+        }
+        return;
+      }
+      const signals=signalMap.get(tourId);
       const weight=[...signals.values()].reduce((total,value)=>total+value,0);
-      behaviorEntries.push({vector,weight});
+      positiveBehaviorEntries.push({vector,weight});
     });
-    const behaviorProfile=weightedAverage(behaviorEntries);
+    const positiveBehaviorProfile=weightedAverage(positiveBehaviorEntries);
+    const negativeBehaviorProfile=weightedAverage(negativeBehaviorEntries);
     const preferenceProfile=this.buildPreferenceProfile(user);
-    const profileEntries=[];
-    if(behaviorProfile){
-      profileEntries.push({
-        vector:behaviorProfile.vector,
-        weight:behaviorProfile.totalWeight
+    const positiveProfileEntries=[];
+    if(positiveBehaviorProfile){
+      positiveProfileEntries.push({
+        vector:positiveBehaviorProfile.vector,
+        weight:positiveBehaviorProfile.totalWeight
       });
     }
     if(preferenceProfile && this.preferenceWeight>0){
-      profileEntries.push({
+      positiveProfileEntries.push({
         vector:preferenceProfile.vector,
         weight:this.preferenceWeight
       });
     }
-    const profile=weightedAverage(profileEntries);
+    const positiveProfile=weightedAverage(positiveProfileEntries);
 
     return {
-      vector:profile ? profile.vector : null,
+      // Keep vector as an alias for callers written before negative profiles.
+      vector:positiveProfile ? positiveProfile.vector : null,
+      positiveVector:positiveProfile ? positiveProfile.vector : null,
+      negativeVector:negativeBehaviorProfile
+        ? negativeBehaviorProfile.vector
+        : null,
       interactedTourIds,
-      behaviorWeight:behaviorProfile ? behaviorProfile.totalWeight : 0,
+      behaviorWeight:positiveBehaviorProfile
+        ? positiveBehaviorProfile.totalWeight
+        : 0,
+      positiveBehaviorWeight:positiveBehaviorProfile
+        ? positiveBehaviorProfile.totalWeight
+        : 0,
+      negativeBehaviorWeight:negativeBehaviorProfile
+        ? negativeBehaviorProfile.totalWeight
+        : 0,
       preferenceWeight:preferenceProfile ? this.preferenceWeight : 0
     };
   }
 
   async getPersonalizedRecommendations(userId,options={}){
     const profile=await this.buildUserProfile(userId);
-    if(!profile || !profile.vector){
+    if(!profile || (!profile.positiveVector && !profile.negativeVector)){
       return [];
     }
     const limit=normalizeLimit(options.limit,10);
 
     return this.candidateTours
       .filter(tour=>!profile.interactedTourIds.has(getId(tour._id)))
-      .map(tour=>getRecommendationResult(
-        tour,
-        cosineSimilarity(profile.vector,this.vectorMap.get(getId(tour._id)))
-      ))
+      .map(tour=>{
+        const candidateVector=this.vectorMap.get(getId(tour._id));
+        const positiveScore=profile.positiveVector
+          ? cosineSimilarity(profile.positiveVector,candidateVector)
+          : 1;
+        const negativeScore=profile.negativeVector
+          ? cosineSimilarity(profile.negativeVector,candidateVector)
+          : 0;
+        return getRecommendationResult(
+          tour,
+          positiveScore-this.negativePenalty*negativeScore
+        );
+      })
       .filter(item=>item.score>0)
       .sort(compareRecommendations)
       .slice(0,limit);
@@ -494,6 +569,7 @@ class ContentBasedRecommender{
 module.exports={
   ContentBasedRecommender,
   getInteractionWeight,
+  getRatingSignal,
   isCandidateTour,
   weightedAverage
 };

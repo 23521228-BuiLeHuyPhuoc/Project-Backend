@@ -1990,7 +1990,8 @@ input, button, textarea {
   gap: 16px;
 }
 
-.section-9 .inner-info-2 .inner-sort .inner-list button {
+.section-9 .inner-info-2 .inner-sort .inner-list button,
+.section-9 .inner-info-2 .inner-sort .inner-list a {
   padding: 0;
   border: 0;
   background-color: transparent;
@@ -1998,15 +1999,19 @@ input, button, textarea {
   font-size: 12px;
   color: #747578;
   cursor: pointer;
+  text-decoration: none;
 }
 
-.section-9 .inner-info-2 .inner-sort .inner-list button i {
+.section-9 .inner-info-2 .inner-sort .inner-list button i,
+.section-9 .inner-info-2 .inner-sort .inner-list a i {
   font-size: 16px;
   margin-left: 5px;
 }
 
 .section-9 .inner-info-2 .inner-sort .inner-list button.active,
-.section-9 .inner-info-2 .inner-sort .inner-list button:hover {
+.section-9 .inner-info-2 .inner-sort .inner-list button:hover,
+.section-9 .inner-info-2 .inner-sort .inner-list a.active,
+.section-9 .inner-info-2 .inner-sort .inner-list a:hover {
   color: #F9313D;
 }
 
@@ -2214,7 +2219,8 @@ input, button, textarea {
   margin-top: 30px;
 }
 
-.box-pagination button {
+.box-pagination button,
+.box-pagination a {
   width: 40px;
   height: 40px;
   border: 1px solid var(--color-primary);
@@ -2224,25 +2230,34 @@ input, button, textarea {
   font-size: 14px;
   color: var(--color-primary);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
-.box-pagination button:last-child {
+.box-pagination button:last-child,
+.box-pagination a:last-child {
   border-right-width: 1px;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
 }
 
-.box-pagination button:first-child {
+.box-pagination button:first-child,
+.box-pagination a:first-child {
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
 }
 
-.box-pagination button i {
+.box-pagination button i,
+.box-pagination a i {
   font-size: 12px;
 }
 
 .box-pagination button.active,
-.box-pagination button:hover {
+.box-pagination button:hover,
+.box-pagination a.active,
+.box-pagination a:hover {
   background-color: var(--color-primary);
   color: #fff;
 }
