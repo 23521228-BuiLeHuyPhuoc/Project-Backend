@@ -3,6 +3,7 @@ const Order=require('../../models/order.model');
 const Voucher=require('../../models/voucher.model');
 const UserVoucher=require('../../models/user-voucher.model');
 const mongoose=require('mongoose');
+const crypto=require('crypto');
 const moment=require('moment');
 const City=require('../../models/city.model');
 const generateHelper=require('../../helpers/generate.helper');
@@ -10,7 +11,7 @@ const axios=require('axios');
 const CryptoJS=require('crypto-js');
 require('dotenv').config();
 const sortHelper=require('../../helpers/sort.helper');
-const Notification=require('../../models/notification.model');
+const {createNotificationSafe}=require('../../helpers/notification.helper');
 const {cancelOrderAndRelease}=require('../../helpers/order.helper');
 const {
   VoucherValidationError,
@@ -18,6 +19,12 @@ const {
   getApplicableVoucher,
   normalizeVoucherCode
 }=require('../../helpers/voucher.helper');
+const signaturesMatch=(left,right)=>{
+  const leftBuffer=Buffer.from(String(left || ''),'utf8');
+  const rightBuffer=Buffer.from(String(right || ''),'utf8');
+  return leftBuffer.length===rightBuffer.length
+    && crypto.timingSafeEqual(leftBuffer,rightBuffer);
+};
 module.exports.createPost=async(req,res)=>{
   const reservedItems=[];
   let order=null;
@@ -41,6 +48,9 @@ module.exports.createPost=async(req,res)=>{
     }
     if(!paymentMethods.includes(paymentMethod)){
       return res.status(400).json({code:'error',message:'Phương thức thanh toán không hợp lệ!'});
+    }
+    if(note.length>1000){
+      return res.status(400).json({code:'error',message:'Ghi chú không được vượt quá 1000 ký tự!'});
     }
 
     const selectedCartItems=req.user.cart.filter(item=>
@@ -174,18 +184,13 @@ module.exports.createPost=async(req,res)=>{
     req.user.cart.pull(...selectedCartItems.map(item=>item._id));
     await req.user.save();
 
-    try{
-      await Notification.create({
+    await createNotificationSafe({
         userId:req.user.id,
         title:'Đặt tour thành công',
         message:`Đơn ${order.orderCode} đã được tạo và đang chờ xác nhận.`,
         type:'order',
         link:`/account/orders/${order.id}`
       });
-    }
-    catch(error){
-      console.error('Create order notification error:',error.message);
-    }
 
     res.status(201).json({
       code:'success',
@@ -231,6 +236,9 @@ module.exports.createPost=async(req,res)=>{
 }
 module.exports.success=async(req,res)=>{
     const orderId=req.query.orderId;
+    if(!mongoose.isValidObjectId(orderId)){
+        return res.redirect('/account/orders');
+    }
     const order=await Order.findOne({
         _id:orderId,
         userId:req.user.id,
@@ -273,12 +281,16 @@ module.exports.success=async(req,res)=>{
     }
 }
 module.exports.paymentZaloPay=async(req,res)=>{
+    const orderId=req.params.orderId;
     try{
-        const orderId=req.params.orderId;
+        if(!mongoose.isValidObjectId(orderId)){
+            return res.redirect('/cart');
+        }
         const orderDetail=await Order.findOne({
             deleted:false,
             paymentStatus:"unpaid",
             paymentMethod:'zalopay',
+            status:{$in:['initial','pending']},
             _id:orderId,
             userId:req.user.id
         });
@@ -321,18 +333,22 @@ const response=await axios.post(config.endpoint, null, { params: order })
         res.redirect(response.data.order_url);
     }
     else{
-        res.redirect("/");
+        await cancelOrderAndRelease({
+          _id:orderId,
+          paymentMethod:'zalopay',
+          paymentStatus:'unpaid',
+          status:{$in:['initial','pending']}
+        });
+        res.redirect(`/account/orders/${orderId}`);
 
     }
 
     }
     catch(error)
     {
-        console.log("ZaloPay error:", error.response?.data || error.message);
         return res.status(500).json({
             code:"error",
             message:"Lỗi kết nối ZaloPay",
-            detail:error.response?.data || error.message
         });
     }
 }
@@ -348,38 +364,65 @@ module.exports.paymentZaloPayResultPost = async (req, res) => {
     let reqMac = req.body.mac;
 
     let mac = CryptoJS.HmacSHA256(dataStr, config.key2).toString();
-    console.log("mac =", mac);
 
 
     // kiểm tra callback hợp lệ (đến từ ZaloPay server)
-    if (reqMac !== mac) {
+    if (!signaturesMatch(reqMac,mac)) {
       // callback không hợp lệ
       result.return_code = -1;
       result.return_message = "mac not equal";
     }
     else {
       // thanh toán thành công
-      let dataJson = JSON.parse(dataStr, config.key2);
-      const [ phone, orderId ] = dataJson.app_user.split("-");
-
-      const updateResult=await Order.updateOne({
-        _id: orderId,
-        phone: phone,
+      const dataJson=JSON.parse(dataStr);
+      const appUser=String(dataJson.app_user || '');
+      const separatorIndex=appUser.lastIndexOf('-');
+      const phone=appUser.slice(0,separatorIndex);
+      const orderId=appUser.slice(separatorIndex+1);
+      const orderFilter={
+        _id:orderId,
+        phone,
         total:Number(dataJson.amount),
         paymentMethod:'zalopay',
-        deleted: false,
-        status:{$ne:'cancelled'}
-      }, {
-        paymentStatus: "paid",
-        status:'confirmed'
-      })
-      if(updateResult.matchedCount===0){
+        deleted:false
+      };
+
+      if(separatorIndex<=0 || !mongoose.isValidObjectId(orderId) || !Number.isFinite(Number(dataJson.amount))){
         result.return_code=0;
         result.return_message="order not found or invalid";
       }
       else{
-        result.return_code = 1;
-        result.return_message = "success";
+        const existingOrder=await Order.findOne(orderFilter);
+        if(!existingOrder || existingOrder.status==='cancelled'){
+          result.return_code=0;
+          result.return_message="order not found or invalid";
+        }
+        else if(existingOrder.paymentStatus==='paid'){
+          result.return_code=1;
+          result.return_message="success";
+        }
+        else if(!['initial','pending'].includes(existingOrder.status)){
+          result.return_code=0;
+          result.return_message="order status is invalid";
+        }
+        else{
+          const updateResult=await Order.updateOne({
+            ...orderFilter,
+            paymentStatus:'unpaid',
+            status:{$in:['initial','pending']}
+          },{
+            $set:{paymentStatus:'paid',status:'confirmed'}
+          });
+          if(updateResult.matchedCount===0){
+            const paidOrder=await Order.findOne({...orderFilter,paymentStatus:'paid'});
+            result.return_code=paidOrder ? 1 : 0;
+            result.return_message=paidOrder ? "success" : "order not found or invalid";
+          }
+          else{
+            result.return_code=1;
+            result.return_message="success";
+          }
+        }
       }
     }
   } catch (ex) {
@@ -391,12 +434,16 @@ module.exports.paymentZaloPayResultPost = async (req, res) => {
   res.json(result);
 }
 module.exports.paymentVnPay=async(req,res)=>{
+    const OrderId=req.params.orderId;
     try{
-        const OrderId=req.params.orderId;
+        if(!mongoose.isValidObjectId(OrderId)){
+            return res.redirect('/cart');
+        }
         const orderDetail=await Order.findOne({
             deleted:false,
             paymentStatus:"unpaid",
             paymentMethod:'vnpay',
+            status:{$in:['initial','pending']},
             _id:OrderId,
             userId:req.user.id
         });
@@ -446,7 +493,6 @@ module.exports.paymentVnPay=async(req,res)=>{
 
     let querystring = require('qs');
     let signData = querystring.stringify(vnp_Params, { encode: false });
-    let crypto = require("crypto");     
     let hmac = crypto.createHmac("sha512", secretKey);
     let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex"); 
     vnp_Params['vnp_SecureHash'] = signed;
@@ -455,12 +501,18 @@ module.exports.paymentVnPay=async(req,res)=>{
     res.redirect(vnpUrl)
 }
     catch(error){
-        res.redirect("/");
+        await cancelOrderAndRelease({
+          _id:OrderId,
+          paymentMethod:'vnpay',
+          paymentStatus:'unpaid',
+          status:{$in:['initial','pending']}
+        }).catch(()=>{});
+        res.redirect(`/account/orders/${OrderId}`);
     }
 
 }
 module.exports.paymentVnPayResult=async(req,res)=>{
-    let vnp_Params = req.query;
+    let vnp_Params = {...req.query};
 
     let secureHash = vnp_Params['vnp_SecureHash'];
 
@@ -473,11 +525,10 @@ module.exports.paymentVnPayResult=async(req,res)=>{
 
     let querystring = require('qs');
     let signData = querystring.stringify(vnp_Params, { encode: false });
-    let crypto = require("crypto");     
     let hmac = crypto.createHmac("sha512", secretKey);
     let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
 
-    if(secureHash !== signed){
+    if(!signaturesMatch(secureHash,signed)){
       return res.redirect('/account/orders');
     }
 
@@ -499,13 +550,19 @@ module.exports.paymentVnPayResult=async(req,res)=>{
       && vnp_Params['vnp_TransactionStatus']==='00'
       && Number(vnp_Params['vnp_Amount'])===Number(orderDetail.total)*100;
     if(paymentSucceeded){
+      if(orderDetail.paymentStatus==='paid'){
+        return res.redirect(`/order/success?orderId=${orderId}`);
+      }
+      if(!['initial','pending'].includes(orderDetail.status)){
+        return res.redirect(`/account/orders/${orderId}`);
+      }
       await Order.updateOne({
         _id:orderId,
         deleted:false,
-        status:{$ne:'cancelled'}
+        paymentStatus:'unpaid',
+        status:{$in:['initial','pending']}
       },{
-        paymentStatus:'paid',
-        status:'confirmed'
+        $set:{paymentStatus:'paid',status:'confirmed'}
       });
       return res.redirect(`/order/success?orderId=${orderId}`);
     }

@@ -4,6 +4,34 @@ const Role=require('../../models/roles.model');
 const slugify=require('slugify');
 const bcrypt=require('bcrypt');
 const AccountAdmin=require('../../models/account-admin.model');
+const mongoose=require('mongoose');
+const isStrongPassword=password=>password.length>=8
+    && /[A-Z]/.test(password)
+    && /[a-z]/.test(password)
+    && /\d/.test(password)
+    && /[@$!%*?&]/.test(password);
+
+const getAccountPayload=body=>({
+    fullName:String(body.fullName || "").trim(),
+    email:String(body.email || "").trim().toLowerCase(),
+    phone:String(body.phone || "").replace(/[\s.-]/g,""),
+    role:String(body.role || ""),
+    positionCompany:String(body.positionCompany || "").trim(),
+    status:["initial","active","inactive"].includes(body.status) ? body.status : "initial"
+});
+
+const validateAccountPayload=payload=>{
+    if(payload.fullName.length<2 || payload.fullName.length>50){
+        return "Họ tên phải có từ 2 đến 50 ký tự!";
+    }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)){
+        return "Email không đúng định dạng!";
+    }
+    if(payload.phone && !/^(?:\+84|0)\d{8,10}$/.test(payload.phone)){
+        return "Số điện thoại không đúng định dạng!";
+    }
+    return null;
+};
 module.exports.list=(req,res)=>{
     res.render("admin/pages/setting-list",{
         pageTitle:"Cài đặt chung"
@@ -44,7 +72,6 @@ module.exports.websiteInfoPatch=async(req,res)=>{
                 _id:recordonly._id
             },req.body)
     }
-    console.log(req.body);
     req.flash("success","Cập nhật thông tin website thành công");    
     res.json({
             code:"success",
@@ -227,13 +254,13 @@ module.exports.roleChangeStatusPatch=async (req,res)=>{
 module.exports.accountAdminCreatePost=async (req,res)=>{
     const password=String(req.body.password || "");
     const confirmPassword=String(req.body.confirmPassword || "");
-    const isStrongPassword=password.length>=8
-        && /[A-Z]/.test(password)
-        && /[a-z]/.test(password)
-        && /\d/.test(password)
-        && /[@$!%*?&]/.test(password);
+    const accountData=getAccountPayload(req.body);
+    const validationMessage=validateAccountPayload(accountData);
+    if(validationMessage){
+        return res.status(400).json({code:"error",message:validationMessage});
+    }
 
-    if(!isStrongPassword){
+    if(!isStrongPassword(password)){
         return res.status(400).json({
             code:"error",
             message:"Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt!"
@@ -245,9 +272,12 @@ module.exports.accountAdminCreatePost=async (req,res)=>{
             message:"Mật khẩu xác nhận không khớp!"
         });
     }
+    if(accountData.role && !(await Role.exists({_id:accountData.role,deleted:false}))){
+        return res.status(400).json({code:"error",message:"Nhóm quyền không hợp lệ!"});
+    }
 
     const findRecord=await AccountAdmin.findOne({
-        email:req.body.email,
+        email:accountData.email,
         deleted:false
     });
     if(findRecord){
@@ -257,8 +287,6 @@ module.exports.accountAdminCreatePost=async (req,res)=>{
         })
     }
     const random=await bcrypt.genSalt(10);
-    const accountData={...req.body};
-    delete accountData.confirmPassword;
     accountData.password=await bcrypt.hash(password,random);
     accountData.createdBy=req.account.id;
     accountData.updatedBy=req.account.id;
@@ -277,6 +305,9 @@ module.exports.accountAdminCreatePost=async (req,res)=>{
 }
 module.exports.accountAdminEdit=async (req,res)=>{
     const id=req.params.id;
+    if(!mongoose.isValidObjectId(id)){
+        return res.status(404).render("admin/pages/error-404",{pageTitle:"Không tìm thấy tài khoản"});
+    }
     const record=await AccountAdmin.findOne({
         _id:id,
         deleted:false
@@ -284,6 +315,9 @@ module.exports.accountAdminEdit=async (req,res)=>{
     const roleList=await Role.find({
         deleted:false
     })
+    if(!record){
+        return res.status(404).render("admin/pages/error-404",{pageTitle:"Không tìm thấy tài khoản"});
+    }
     res.render("admin/pages/setting-account-admin-edit",{
         pageTitle:"Sửa tài khoản quản trị",
         record:record,
@@ -292,33 +326,49 @@ module.exports.accountAdminEdit=async (req,res)=>{
 }
 module.exports.accountEditPatch=async(req,res)=>{
     const id=req.params.id;
+    if(!mongoose.isValidObjectId(id)){
+        return res.status(404).json({code:"error",message:"Không tìm thấy tài khoản quản trị!"});
+    }
     const record=await AccountAdmin.findOne({
         _id:id,
         deleted:false
     })
-    req.body.updatedBy=req.account.id;
-    req.body.updatedAt=Date.now();
-    const compare= await bcrypt.compare(req.body.password,record.password);
-    if(compare==1)
-    {
-        delete req.body.password
+    if(!record){
+        return res.status(404).json({code:"error",message:"Không tìm thấy tài khoản quản trị!"});
     }
-    else{
+
+    const updateData=getAccountPayload(req.body);
+    const validationMessage=validateAccountPayload(updateData);
+    if(validationMessage){
+        return res.status(400).json({code:"error",message:validationMessage});
+    }
+    if(await AccountAdmin.exists({
+        _id:{$ne:id},
+        email:updateData.email,
+        deleted:false
+    })){
+        return res.status(409).json({code:"error",message:"Email đã tồn tại!"});
+    }
+    if(updateData.role && !(await Role.exists({_id:updateData.role,deleted:false}))){
+        return res.status(400).json({code:"error",message:"Nhóm quyền không hợp lệ!"});
+    }
+
+    const password=String(req.body.password || "");
+    if(password){
+        if(!isStrongPassword(password)){
+            return res.status(400).json({
+                code:"error",
+                message:"Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt!"
+            });
+        }
         const salt=await bcrypt.genSalt(10);
-        const passEncrypt=await bcrypt.hash(req.body.password,salt);
-        req.body.password=passEncrypt;
+        updateData.password=await bcrypt.hash(password,salt);
     }
+    updateData.updatedBy=req.account.id;
     if(req.file){
-        req.body.avatar=req.file.path;
-    }else{
-        delete req.body.avatar;
+        updateData.avatar=req.file.path;
     }
-    if(record){
-    await AccountAdmin.updateOne({_id:record._id},req.body);
-    }
-    else{
-        return;
-    }
+    await AccountAdmin.updateOne({_id:record._id},updateData);
     req.flash("success","Thành công!");
     res.json({
         code:"success"
@@ -327,8 +377,6 @@ module.exports.accountEditPatch=async(req,res)=>{
 module.exports.changeStatusPatch=async(req,res)=>{
     const status=req.body.status;
     const idList=req.body.idList;
-    console.log(status);
-    console.log(idList);
 
     const accountList=await AccountAdmin.find({
         _id: {$in:idList}

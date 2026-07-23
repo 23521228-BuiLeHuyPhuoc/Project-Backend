@@ -11,6 +11,9 @@ module.exports.verifyToken=async (req,res,next)=>{
     }
     try{ 
     const decoded=jwt.verify(token,process.env.JWT_SECRET);
+    if(decoded.purpose!=="admin-session"){
+        throw new Error("Invalid token purpose");
+    }
     const{ id , email}=decoded;
     const existAccount=await AccountAdmin.findOne({
         _id: id,

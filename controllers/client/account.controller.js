@@ -1,7 +1,9 @@
 const jwt=require('jsonwebtoken');
+const mongoose=require('mongoose');
 const moment=require('moment');
 const Favorite=require('../../models/favorite.model');
 const Notification=require('../../models/notification.model');
+const {createNotificationSafe}=require('../../helpers/notification.helper');
 const Order=require('../../models/order.model');
 const Review=require('../../models/review.model');
 const Tour=require('../../models/tour.model');
@@ -107,6 +109,9 @@ module.exports.orders=async(req,res)=>{
 };
 
 module.exports.orderDetail=async(req,res)=>{
+  if(!mongoose.isValidObjectId(req.params.id)){
+    return res.redirect('/account/orders');
+  }
   const viewedAt=new Date();
   const order=await Order.findOne({
     _id:req.params.id,
@@ -132,6 +137,9 @@ module.exports.orderDetail=async(req,res)=>{
 
 module.exports.cancelOrder=async(req,res)=>{
   try{
+    if(!mongoose.isValidObjectId(req.params.id)){
+      return res.status(400).json({code:'error',message:'Đơn hàng không hợp lệ!'});
+    }
     const order=await cancelOrderAndRelease({
       _id:req.params.id,
       userId:req.user.id,
@@ -147,7 +155,7 @@ module.exports.cancelOrder=async(req,res)=>{
       });
     }
 
-    await Notification.create({
+    await createNotificationSafe({
       userId:req.user.id,
       title:'Đơn hàng đã được hủy',
       message:`Đơn ${order.orderCode} đã được hủy theo yêu cầu của bạn.`,
@@ -219,7 +227,7 @@ module.exports.updateProfile=async(req,res)=>{
       secure:process.env.NODE_ENV==='production'
     });
 
-    await Notification.create({
+    await createNotificationSafe({
       userId:user.id,
       title:'Thông tin tài khoản đã thay đổi',
       message:'Hồ sơ cá nhân và sở thích du lịch của bạn vừa được cập nhật.',

@@ -32,7 +32,10 @@ block main
           option(value="inactive" selected=record.status=="inactive") Dừng hoạt động
       .inner-group
         label(class="inner-label" for="password") Mật khẩu
-        input(type="text" id="password" name="password" value=record.password)
+        .inner-password-control
+          input(type="password" id="password" name="password" value="" placeholder="Để trống nếu không đổi mật khẩu" autocomplete="new-password")
+          button.inner-password-toggle(type="button" data-password-toggle aria-label="Hiện mật khẩu")
+            i.fa-solid.fa-eye
       .inner-group.inner-two-col
         label(class="inner-label" for="avatar") Ảnh đại diện
         div(class="inner-upload-image" image-default=record.avatar?record.avatar:"")

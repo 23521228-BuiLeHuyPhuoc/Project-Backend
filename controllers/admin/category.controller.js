@@ -47,7 +47,6 @@ module.exports.list=async (req,res)=>{
 
         const regex=new RegExp(keyword,"i");
         find.slug=regex;
-        console.log(regex);
     }
     //Phân trang
     const limitItem=3;
@@ -113,7 +112,6 @@ module.exports.create=async (req,res)=>{
     const categoryList=await Category.find({
         deleted:false
     })
-    console.log(CategoryTreeHelper.buildCategoryTree(categoryList));
     res.render("admin/pages/category-create",{
         pageTitle:"Tạo mới danh mục",
         categoryList:CategoryTreeHelper.buildCategoryTree(categoryList)
@@ -147,11 +145,9 @@ module.exports.createPost=async(req,res)=>{
     else{
         req.body.avatar="";
     }
-    console.log(req.file);
      const newRecord=new Category(req.body);
      await newRecord.save();
     req.flash("success","Tạo mới danh mục thành công");
-    console.log(req.body);
     res.json({
         code:"success"
     })
@@ -175,7 +171,6 @@ module.exports.edit=async(req,res)=>{
         _id:id,
         deleted:false
     })
-    console.log(CategoryTreeHelper.buildCategoryTree(categoryList));
     res.render("admin/pages/category-edit",{
         pageTitle:"Chỉnh sửa danh mục",
         category:category,

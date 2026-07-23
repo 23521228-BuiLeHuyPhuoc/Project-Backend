@@ -16,15 +16,21 @@ const buildCategoryTree=(categories,parentId="")=>{
 }
 const CategoriesFamily=async(parentId)=>
 {
-    const family=[parentId];
+    const family=[];
+    const visited=new Set();
     const findChildren=async(currentId)=>{
+        const normalizedId=String(currentId || "");
+        if(!normalizedId || visited.has(normalizedId)){
+            return;
+        }
+        visited.add(normalizedId);
+        family.push(currentId);
         const children=await Category.find({
             parent:currentId,
             deleted:false,
             status:"active"
         });
     for(const child of children){
-        family.push(child.id);
         await findChildren(child.id)
     } 
     };
@@ -33,24 +39,33 @@ const CategoriesFamily=async(parentId)=>
    
 
 }
-const CategoriesParentToRoot=async(categories,categoryId)=>
+const CategoriesParentToRoot=async(categories,categoryId,visited=new Set())=>
 {
+    const normalizedId=String(categoryId || "");
+    if(!normalizedId || visited.has(normalizedId)){
+        return [];
+    }
+    visited.add(normalizedId);
+
     const catRecord=await Category.findOne({
         _id:categoryId,
         
     })
+    if(!catRecord){
+        return [];
+    }
     const list=[];
     list.push({
         _id:catRecord._id,
         name:catRecord.name,
         slug:catRecord.slug
     })
-    if(!catRecord || !catRecord.parent) return list;
+    if(!catRecord.parent) return list;
     for(const cat of categories)
     {
         if(cat._id.toString()==catRecord.parent.toString())
         {
-             const parents = await CategoriesParentToRoot(categories,cat._id.toString());
+             const parents = await CategoriesParentToRoot(categories,cat._id.toString(),visited);
              list.unshift(...parents);
              
              break;

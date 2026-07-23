@@ -1,4 +1,5 @@
 const moment=require('moment');
+const mongoose=require('mongoose');
 const Notification=require('../../models/notification.model');
 
 module.exports.list=async(req,res)=>{
@@ -23,6 +24,9 @@ module.exports.list=async(req,res)=>{
 };
 
 module.exports.read=async(req,res)=>{
+  if(!mongoose.isValidObjectId(req.params.id)){
+    return res.status(400).json({code:'error',message:'Thông báo không hợp lệ!'});
+  }
   const notification=await Notification.findOneAndUpdate({
     _id:req.params.id,
     userId:req.user.id,
@@ -49,6 +53,9 @@ module.exports.readAll=async(req,res)=>{
 };
 
 module.exports.remove=async(req,res)=>{
+  if(!mongoose.isValidObjectId(req.params.id)){
+    return res.status(400).json({code:'error',message:'Thông báo không hợp lệ!'});
+  }
   const result=await Notification.updateOne({
     _id:req.params.id,
     userId:req.user.id,

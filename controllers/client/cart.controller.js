@@ -245,6 +245,12 @@ module.exports.updatePatch=async(req,res)=>{
       if(quantityFields.some(field=>nextQuantities[field]===null)){
         return res.status(400).json({code:'error',message:'Số lượng hành khách không hợp lệ!'});
       }
+      if(quantityFields.every(field=>nextQuantities[field]===0)){
+        return res.status(400).json({
+          code:'error',
+          message:'Vui lòng chọn ít nhất một hành khách hoặc xóa tour khỏi giỏ!'
+        });
+      }
 
       const tour=await Tour.findOne({_id:item.tourId,status:'active',deleted:false});
       if(!tour){

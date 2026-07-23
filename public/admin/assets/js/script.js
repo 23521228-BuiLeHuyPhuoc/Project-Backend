@@ -642,8 +642,6 @@ if(settingWebsiteInfoForm) {
 
 
       console.log(websiteName);
-      console.log(phone);
-      console.log(email);
       console.log(address);
       console.log(logo);
       console.log(favicon);
@@ -875,27 +873,27 @@ if(settingAccountAdminEditForm) {
     ])
     .addField('#password', [
       {
-        rule: 'required',
-        errorMessage: 'Vui lòng nhập mật khẩu!',
+        validator: () => true,
+        errorMessage: '',
       },
       {
-        validator: (value) => value.length >= 8,
+        validator: (value) => !value || value.length >= 8,
         errorMessage: 'Mật khẩu phải chứa ít nhất 8 ký tự!',
       },
       {
-        validator: (value) => /[A-Z]/.test(value),
+        validator: (value) => !value || /[A-Z]/.test(value),
         errorMessage: 'Mật khẩu phải chứa ít nhất một chữ cái in hoa!',
       },
       {
-        validator: (value) => /[a-z]/.test(value),
+        validator: (value) => !value || /[a-z]/.test(value),
         errorMessage: 'Mật khẩu phải chứa ít nhất một chữ cái thường!',
       },
       {
-        validator: (value) => /\d/.test(value),
+        validator: (value) => !value || /\d/.test(value),
         errorMessage: 'Mật khẩu phải chứa ít nhất một chữ số!',
       },
       {
-        validator: (value) => /[@$!%*?&]/.test(value),
+        validator: (value) => !value || /[@$!%*?&]/.test(value),
         errorMessage: 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt!',
       },
     ])
@@ -914,14 +912,6 @@ if(settingAccountAdminEditForm) {
         avatar = avatars[0].file;
       }
 
-      console.log(fullName);
-      console.log(email);
-      console.log(phone);
-      console.log(role);
-      console.log(positionCompany);
-      console.log(status);
-      console.log(password);
-      console.log(avatar);
       const formData=new FormData();
       formData.append("fullName",fullName);
       formData.append("email",email);
@@ -1354,10 +1344,6 @@ if(profileEditForm) {
           window.location.reload();
         }
       })
-      console.log(fullName);
-      console.log(email);
-      console.log(phone);
-      console.log(avatar);
     })
   ;
 }
@@ -1410,7 +1396,6 @@ if(profileChangePasswordForm) {
     ])
     .onSuccess((event) => {
       const password = event.target.password.value;
-      console.log(password);
       fetch(`/${pathAdmin}/profile/change-password`,{
         method:"PATCH",
         headers:{

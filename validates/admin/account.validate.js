@@ -1,102 +1,53 @@
 const joi=require('joi');
-module.exports.loginPost=async(req,res,next)=>{
-     const schema=joi.object({
-        email:joi.string().required().email().messages({
-            "string.empty":"Vui lòng nhập email!",
-            "string.email":"Vui lòng nhập đúng định dạng email!"
-        }),
-        password:joi.string().required()
-        .min(8)
-        .custom((value,helpers)=>{
-        if(!/[A-Z]/.test(value))
-        {
-            return helpers.error("password.uppercase");
-        }
-        if(!/[a-z]/.test(value)){
-            return helpers.error("password.lowercase");
-        }
-        
-        if(!/[0-9]/.test(value)){
-            return helpers.error("password.digit");
-        }
-        if(!/[!@#$%^&*()<>?,./_+=-]/.test(value)){
-            return helpers.error("password.special");
-        }
-        return value;
-    })
-        .messages({
-        "string.empty":"Vui lòng nhập mật khẩu!",
-        "string.min":"Mật khẩu phải có ít nhất 8 ký tự!",
-        "password.uppercase":"Mật khẩu phải chứa ít nhất một chữ cái viết hoa!",
-        "password.lowercase":"Mật khẩu phải chứa ít nhất một chữ cái viết thường!",
-        "password.digit":"Mật khẩu phải chứa ít nhất một chữ số!",
-        "password.special":"Mật khẩu phải chứa ít nhất một ký tự đặc biệt!"        
-        }),
-        rememberPassword: joi.boolean(),
-    })
-    const {error}=schema.validate(req.body,{abortEarly:false});
-    console.log(error);
-    if(error){
-         const errorMessage=error.details.map(err=>{
-            return err.message;
-         }).join("\n");
-        
-        res.json({
-            code:"error",
-            message: errorMessage
-        });
-        return;
-    }
 
-    next();
-}
-module.exports.resetPasswordPost=async(req,res,next)=>{
-    const {password}=req.body;
-            
-    const schema=joi.object({
-        password:joi.string().required()
-        .min(8)
-        .custom((value,helpers)=>{
-            if(!/[A-Z]/.test(value))
-        {
-            return helpers.error("password.uppercase");
-        }
-        if(!/[a-z]/.test(value)){
-            return helpers.error("password.lowercase");
-        }
-        
-        if(!/[0-9]/.test(value)){
-            return helpers.error("password.digit");
-        }
-        if(!/[!@#$%^&*()<>?,./_+=-]/.test(value)){
-            return helpers.error("password.special");
-        }
-        return value;
-        })
-        .messages({
-        "string.empty":"Vui lòng nhập mật khẩu!",
-        "string.min":"Mật khẩu phải có ít nhất 8 ký tự!",
-        "password.uppercase":"Mật khẩu phải chứa ít nhất một chữ cái viết hoa!",
-        "password.lowercase":"Mật khẩu phải chứa ít nhất một chữ cái viết thường!",
-        "password.digit":"Mật khẩu phải chứa ít nhất một chữ số!",
-        "password.special":"Mật khẩu phải chứa ít nhất một ký tự đặc biệt!"        
-        }),
-        
-    })
-    const {error}=schema.validate(req.body,{abortEarly:false});
-    console.log(error);
-    if(error){
-         const errorMessage=error.details.map(err=>{
-            return err.message;
-         }).join("\n");
-        
-        res.json({
-            code:"error",
-            message: errorMessage
-        });
-        return;
-    }
-    
-    
-    next();
-}
+const passwordSchema=joi.string()
+  .required()
+  .min(8)
+  .pattern(/[A-Z]/,{name:'chữ hoa'})
+  .pattern(/[a-z]/,{name:'chữ thường'})
+  .pattern(/[0-9]/,{name:'chữ số'})
+  .pattern(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]/,{name:'ký tự đặc biệt'})
+  .messages({
+    'string.empty':'Vui lòng nhập mật khẩu!',
+    'string.min':'Mật khẩu phải có ít nhất 8 ký tự!',
+    'string.pattern.name':'Mật khẩu phải chứa ít nhất một {#name}!'
+  });
+
+const emailSchema=joi.string().trim().lowercase().required().email().messages({
+  'string.empty':'Vui lòng nhập email!',
+  'string.email':'Vui lòng nhập đúng định dạng email!'
+});
+
+const validate=schema=>(req,res,next)=>{
+  const {value,error}=schema.validate(req.body,{abortEarly:false});
+  if(error){
+    return res.status(400).json({
+      code:'error',
+      message:error.details.map(item=>item.message).join('\n')
+    });
+  }
+  req.body=value;
+  next();
+};
+
+module.exports.loginPost=validate(joi.object({
+  email:emailSchema,
+  password:joi.string().required().messages({
+    'string.empty':'Vui lòng nhập mật khẩu!'
+  }),
+  rememberPassword:joi.boolean().default(false)
+}));
+
+module.exports.forgotPasswordPost=validate(joi.object({email:emailSchema}));
+
+module.exports.otpPasswordPost=validate(joi.object({
+  email:emailSchema,
+  otp:joi.string().required().pattern(/^\d{6}$/).messages({
+    'string.empty':'Vui lòng nhập mã OTP!',
+    'string.pattern.base':'Mã OTP phải gồm đúng 6 chữ số!'
+  })
+}));
+
+module.exports.resetPasswordPost=validate(joi.object({
+  password:passwordSchema
+}));

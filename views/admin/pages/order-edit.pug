@@ -9,16 +9,16 @@ block main
       .inner-group
         input(type="hidden" id="id" value=orderRecord._id)
         label(class="inner-label" for="fullName") Tên khách hàng
-        input(type="text" id="fullName" name="fullName" value=orderRecord.fullName)
+        input(type="text" id="fullName" name="fullName" value=orderRecord.fullName readonly aria-readonly="true")
       .inner-group
         label(class="inner-label" for="phone") Số điện thoại
-        input(type="text" id="phone" name="phone" value=orderRecord.phone)
+        input(type="text" id="phone" name="phone" value=orderRecord.phone readonly aria-readonly="true")
       .inner-group.inner-two-col
         label(class="inner-label" for="note") Ghi chú
         textarea(id="note" name="note") #{orderRecord.note}
       .inner-group
         label(class="inner-label" for="paymentMethod") Phương thức thanh toán
-        select(id="paymentMethod" name="paymentMethod")
+        select(id="paymentMethod" name="paymentMethod" disabled)
           option(value="money" selected=orderRecord.paymentMethod==="money") Tiền mặt
           option(value="bank" selected=orderRecord.paymentMethod==="bank") Chuyển khoản ngân hàng
           option(value="vnpay" selected=orderRecord.paymentMethod==="vnpay") VNPay

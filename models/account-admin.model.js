@@ -6,7 +6,11 @@ const schema=new mongoose.Schema({
   role:String,
   positionCompany:String,
   status: String,
-  password:String,
+  password:{
+    type:String,
+    required:true,
+    select:false
+  },
   avatar:String,
   address:String,
   createdBy:String,

@@ -25,7 +25,6 @@ module.exports.editPatch=async(req,res,next)=>{
         schedules:joi.string().allow(""),
     })
     const {error}=schema.validate(req.body,{abortEarly:false,allowUnknown:true});
-    console.log(error);
     if(error){
         const errorMessage=error.details.map(err=>{
             return err.message;
@@ -64,7 +63,6 @@ module.exports.createPost=async(req,res,next)=>{
         schedules:joi.string().allow(""),
     })
     const {error}=schema.validate(req.body,{abortEarly:false,allowUnknown:true});
-    console.log(error);
     if(error){
         const errorMessage=error.details.map(err=>{
             return err.message;

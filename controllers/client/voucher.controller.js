@@ -1,5 +1,6 @@
 const moment=require('moment');
-const Notification=require('../../models/notification.model');
+const mongoose=require('mongoose');
+const {createNotificationSafe}=require('../../helpers/notification.helper');
 const UserVoucher=require('../../models/user-voucher.model');
 const Voucher=require('../../models/voucher.model');
 
@@ -44,6 +45,9 @@ module.exports.list=async(req,res)=>{
 
 module.exports.claim=async(req,res)=>{
   try{
+    if(!mongoose.isValidObjectId(req.params.id)){
+      return res.status(400).json({code:'error',message:'Voucher không hợp lệ!'});
+    }
     const now=new Date();
     const voucher=await Voucher.findOne({
       _id:req.params.id,
@@ -66,7 +70,7 @@ module.exports.claim=async(req,res)=>{
     }
 
     await UserVoucher.create({userId:req.user.id,voucherId:voucher.id});
-    await Notification.create({
+    await createNotificationSafe({
       userId:req.user.id,
       title:'Đã lưu voucher mới',
       message:`Voucher ${voucher.code} đã được thêm vào ví của bạn.`,
@@ -89,6 +93,9 @@ module.exports.claim=async(req,res)=>{
 };
 
 module.exports.remove=async(req,res)=>{
+  if(!mongoose.isValidObjectId(req.params.id)){
+    return res.status(400).json({code:'error',message:'Voucher không hợp lệ!'});
+  }
   const result=await UserVoucher.deleteOne({
     _id:req.params.id,
     userId:req.user.id,

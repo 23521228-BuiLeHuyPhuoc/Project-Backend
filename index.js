@@ -11,9 +11,23 @@ const app = express()
 const variableconfig=require('./config/variable');
 const port = 3000
 const cookieParser=require('cookie-parser');
+const sessionSecret=process.env.SESSION_SECRET || process.env.JWT_SECRET;
+if(!sessionSecret){
+  throw new Error('SESSION_SECRET or JWT_SECRET must be configured');
+}
 //sử dụng flash
-app.use(cookieParser("builehuyphuoc"));
-app.use(session({secret:"builehuyphuoc", resave:false, saveUninitialized:true, cookie:{maxAge:60000}}));
+app.use(cookieParser(process.env.COOKIE_SECRET || sessionSecret));
+app.use(session({
+  secret:sessionSecret,
+  resave:false,
+  saveUninitialized:false,
+  cookie:{
+    maxAge:60*60*1000,
+    httpOnly:true,
+    sameSite:'lax',
+    secure:process.env.NODE_ENV==='production'
+  }
+}));
 app.use(flash());
 
 app.set('views', path.join(__dirname, "views"));

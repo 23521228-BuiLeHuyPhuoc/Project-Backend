@@ -1,4 +1,5 @@
 const moment=require('moment');
+const mongoose=require('mongoose');
 const Favorite=require('../../models/favorite.model');
 const Tour=require('../../models/tour.model');
 const User=require('../../models/user.model');
@@ -44,6 +45,9 @@ module.exports.list=async(req,res)=>{
 
 module.exports.toggle=async(req,res)=>{
   try{
+    if(!mongoose.isValidObjectId(req.params.tourId)){
+      return res.status(400).json({code:'error',message:'Thông tin tour không hợp lệ!'});
+    }
     const tour=await Tour.findOne({
       _id:req.params.tourId,
       status:'active',
@@ -74,6 +78,13 @@ module.exports.toggle=async(req,res)=>{
     });
   }
   catch(error){
+    if(error && error.code===11000){
+      return res.json({
+        code:'success',
+        favorited:true,
+        message:'Đã thêm tour vào yêu thích!'
+      });
+    }
     res.status(500).json({code:'error',message:'Không thể cập nhật yêu thích lúc này!'});
   }
 };
