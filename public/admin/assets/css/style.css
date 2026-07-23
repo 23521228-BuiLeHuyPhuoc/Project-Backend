@@ -1299,6 +1299,319 @@ a {
 }
 /* End Section 7 */
 
+/* Order management */
+.order-admin-page .order-filter-bar .inner-wrap {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.order-admin-page .order-filter-bar .inner-item {
+  min-height: 64px;
+  padding: 14px 18px;
+  flex: 0 1 auto;
+  white-space: nowrap;
+}
+
+.order-admin-page .order-filter-bar .inner-date {
+  gap: 8px;
+}
+
+.order-admin-page .order-filter-bar .inner-date input[type="date"] {
+  width: 118px;
+}
+
+.order-admin-page .order-filter-bar .inner-reset {
+  margin-left: auto;
+  text-decoration: none;
+}
+
+.order-admin-page .order-search-bar .inner-wrap {
+  min-height: 48px;
+}
+
+.order-admin-page .order-search-bar .inner-search {
+  width: min(100%, 520px);
+  min-height: 48px;
+}
+
+.order-admin-table table {
+  min-width: 1500px;
+}
+
+.order-admin-table table tbody tr td {
+  padding: 14px;
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.order-admin-table .order-col-code {
+  width: 100px;
+}
+
+.order-admin-table .order-col-customer {
+  width: 190px;
+}
+
+.order-admin-table .order-col-tours {
+  width: 320px;
+}
+
+.order-admin-table .order-col-payment {
+  width: 210px;
+}
+
+.order-admin-table .order-col-status {
+  width: 130px;
+}
+
+.order-admin-table .order-col-confirm {
+  width: 190px;
+}
+
+.order-admin-table .order-col-date {
+  width: 125px;
+}
+
+.order-admin-table .order-col-action {
+  width: 90px;
+}
+
+.order-admin-table .badge {
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.order-customer,
+.order-payment-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.order-customer span,
+.order-payment-summary span {
+  color: #5D6673;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.order-customer .order-note {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-payment-summary strong {
+  color: #EF3826;
+  font-size: 14px;
+}
+
+.order-payment-summary .is-paid {
+  color: #008F79;
+}
+
+.order-payment-summary .is-unpaid {
+  color: #D97706;
+}
+
+.order-admin-table .order-tour-list .inner-item {
+  align-items: flex-start;
+}
+
+.order-admin-table .order-tour-list .inner-image {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+}
+
+.order-confirm-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.order-confirm-actions form {
+  margin: 0;
+}
+
+.order-confirm-button {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 7px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background-color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.order-confirm-button.is-success {
+  border-color: rgba(0, 182, 155, 0.35);
+  background-color: rgba(0, 182, 155, 0.1);
+  color: #008F79;
+}
+
+.order-confirm-button.is-danger {
+  border-color: rgba(239, 55, 38, 0.3);
+  background-color: rgba(239, 55, 38, 0.08);
+  color: #D92D20;
+}
+
+.order-confirm-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.order-confirm-state i {
+  margin-top: 2px;
+}
+
+.order-confirm-state.is-success {
+  color: #008F79;
+}
+
+.order-confirm-state.is-danger {
+  color: #D92D20;
+}
+
+.order-confirm-state.is-waiting {
+  color: #D97706;
+}
+
+.order-created-at {
+  color: #5D6673;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.order-empty {
+  height: 160px;
+  color: #8A9099 !important;
+}
+
+.order-empty i,
+.order-empty span {
+  display: block;
+}
+
+.order-empty i {
+  margin-bottom: 10px;
+  font-size: 28px;
+}
+
+.order-pagination {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1399.98px) {
+  .order-admin-page .order-filter-bar .inner-wrap {
+    overflow: visible;
+  }
+
+  .order-admin-page .order-filter-bar .inner-item {
+    flex: 1 1 180px;
+    border-bottom: 1px solid #D5D5D5;
+  }
+
+  .order-admin-page .order-filter-bar .inner-reset {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .order-admin-page .order-filter-bar .inner-wrap {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .order-admin-page .order-filter-bar .inner-item {
+    width: 100%;
+    min-height: 52px;
+    border-right: 0;
+  }
+
+  .order-admin-page .order-filter-bar .inner-date {
+    justify-content: space-between;
+  }
+}
+/* End Order management */
+
+/* Dashboard live data */
+.dashboard-section-head {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.dashboard-section-head .inner-title {
+  margin-bottom: 5px;
+}
+
+.dashboard-section-head p {
+  margin: 0;
+  color: #7B8492;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dashboard-section-head > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dashboard-recent-orders .dashboard-note {
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #7B8492;
+}
+
+.dashboard-recent-orders .dashboard-more-items {
+  margin-top: 6px;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dashboard-recent-orders .badge {
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.dashboard-recent-orders .dashboard-empty {
+  text-align: center;
+  color: #8A9099;
+}
+
+@media (max-width: 575.98px) {
+  .dashboard-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+/* End Dashboard live data */
+
 .error-permission {
   min-height: 60vh;
   display: flex;

@@ -149,8 +149,10 @@ const inputDate = document.querySelector('.section-2 .inner-filter input[type="m
 
 if(inputDate){
   inputDate.addEventListener("change",()=>{
-    const now = new Date(inputDate.value);
-    drawChart(now);
+    const [year,month]=inputDate.value.split('-').map(Number);
+    if(Number.isInteger(year) && Number.isInteger(month)){
+      drawChart(new Date(year,month-1,1));
+    }
   })
 }
 // Hết Biểu đồ doanh thu
@@ -202,7 +204,7 @@ function drawChart(now) {
       revenueChartInstance = new Chart(revenueChart, {
     type: 'line',
     data: {
-      labels: arrayDay,
+      labels: data.days || arrayDay,
       datasets: [
         {
            label: `Tháng ${currentMonth}/${currentYear}`, // Nhãn của dataset

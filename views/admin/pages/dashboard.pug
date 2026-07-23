@@ -1,48 +1,45 @@
 extends ../layouts/default.pug
 
-
 block main
-  if(permission.includes('dashboard-view'))
+  if permission.includes('dashboard-view')
     h1.box-title Tổng quan
-    //- Section 1
+
     .section-1
       .inner-item
         .inner-icon
-          img(src="/admin/assets/images/section-1-icon-1.svg")
+          img(src="/admin/assets/images/section-1-icon-1.svg" alt="Quản trị viên")
         .inner-content
           .inner-title Quản trị viên
-          .inner-number #{total.toLocaleString("vi-VN")}
+          .inner-number= total.toLocaleString('vi-VN')
       .inner-item
         .inner-icon
-          img(src="/admin/assets/images/section-1-icon-2.svg")
+          img(src="/admin/assets/images/section-1-icon-2.svg" alt="Đơn hàng")
         .inner-content
           .inner-title Đơn hàng
-          .inner-number #{totalOrder.toLocaleString("vi-VN")}
+          .inner-number= totalOrder.toLocaleString('vi-VN')
       .inner-item
         .inner-icon
-          img(src="/admin/assets/images/section-1-icon-3.svg")
+          img(src="/admin/assets/images/section-1-icon-3.svg" alt="Doanh thu")
         .inner-content
-          .inner-title Doanh thu
-          .inner-number #{totalSum.toLocaleString("vi-VN")}đ
-    //- End Section 1
+          .inner-title Doanh thu đã thanh toán
+          .inner-number #{totalSum.toLocaleString('vi-VN')}đ
 
-    //- Section 2
     .section-2
       .inner-head
-        h2.inner-title Biểu đồ doanh thu
+        h2.inner-title Biểu đồ doanh thu thực tế
         .inner-filter
-          input(
-            type="month"
-            name=""
-            inputDate
-          )
+          input(type="month" value=currentMonthValue inputDate aria-label="Chọn tháng thống kê")
       .inner-chart
-        canvas(id="revenue-chart")
-    //- End Section 2
+        canvas#revenue-chart
 
-    //- Section 3
-    .section-3
-      h2.inner-title Đơn hàng mới
+    .section-3.dashboard-recent-orders
+      .dashboard-section-head
+        div
+          h2.inner-title Đơn hàng mới
+          p 5 đơn gần nhất từ hệ thống
+        a(href=`/${pathAdmin}/order/list`)
+          | Xem tất cả
+          i.fa-solid.fa-arrow-right
       .table-1
         table
           thead
@@ -54,40 +51,42 @@ block main
               th Trạng thái
               th.inner-text-right Ngày đặt
           tbody
-            tr
-              td
-                .inner-code OD000001
-              td
-                .inner-text Họ tên: Lê Văn A
-                .inner-text SĐT: 0123456789
-                .inner-text Ghi chú: Test...
-              td
-                .inner-item
-                  .inner-image
-                    img(src="/admin/assets/images/tour-1.jpg", alt="Tour Hạ Long")
-                  .inner-content
-                    .inner-name Tour Hạ Long
-                    .inner-quantity Người lớn: 3 x 1.500.000đ
-                    .inner-quantity Trẻ em: 2 x 1.300.000đ
-                    .inner-quantity Em bé: 2 x 1.000.000đ
-                .inner-item
-                  .inner-image
-                    img(src="/admin/assets/images/tour-1.jpg", alt="Tour Hạ Long")
-                  .inner-content
-                    .inner-name Tour Hạ Long
-                    .inner-quantity Người lớn: 3 x 1.500.000đ
-                    .inner-quantity Trẻ em: 2 x 1.300.000đ
-                    .inner-quantity Em bé: 2 x 1.000.000đ
-              td
-                .inner-text Tổng tiền: 10.000.000đ
-                .inner-text Giảm: 400.000đ
-                .inner-text Mã giảm: TOURMUAHE2024
-                .inner-text Thanh toán: 9.600.000đ
-                .inner-text PTTT: Ví Momo
-                .inner-text TTTT: Đã thanh toán
-              td
-                .badge.badge-orange Khởi tạo
-              td.inner-text-right
-                .inner-text 16:20
-                .inner-text 01/01/2024
-    //- End Section 3
+            if recentOrders.length
+              each order in recentOrders
+                tr
+                  td
+                    a.inner-code(href=`/${pathAdmin}/order/edit/${order._id}`)= order.orderCode || '-'
+                  td
+                    .inner-text= order.fullName || 'Chưa cập nhật'
+                    .inner-text SĐT: #{order.phone || '-'}
+                    if order.note
+                      .inner-text.dashboard-note= order.note
+                  td
+                    each item in order.items.slice(0,2)
+                      .inner-item
+                        .inner-image
+                          img(src=item.avatar alt=item.name)
+                        .inner-content
+                          .inner-name= item.name
+                          .inner-quantity Người lớn: #{item.quantityAdult || 0} · Trẻ em: #{item.quantityChildren || 0} · Em bé: #{item.quantityBaby || 0}
+                    if order.items.length>2
+                      .dashboard-more-items +#{order.items.length-2} tour khác
+                  td
+                    .inner-text Tổng tiền: #{Number(order.subTotal || 0).toLocaleString('vi-VN')}đ
+                    .inner-text Giảm: #{Number(order.discount || 0).toLocaleString('vi-VN')}đ
+                    .inner-text Thanh toán: #{Number(order.total || 0).toLocaleString('vi-VN')}đ
+                    .inner-text= order.paymentMethodLabel
+                    .inner-text= order.paymentStatus==='paid' ? 'Đã thanh toán' : 'Chưa thanh toán'
+                  td
+                    if order.status==='confirmed' || order.status==='completed'
+                      .badge.badge-green= order.statusLabel
+                    else if order.status==='cancelled'
+                      .badge.badge-red= order.statusLabel
+                    else
+                      .badge.badge-orange= order.statusLabel
+                  td.inner-text-right
+                    .inner-text= order.createdAtTime
+                    .inner-text= order.createdAtDate
+            else
+              tr
+                td.dashboard-empty(colspan="6") Chưa có đơn hàng nào trong hệ thống.

@@ -1,138 +1,152 @@
 extends ../layouts/default.pug
 
 block main
-  h1.box-title Quản lý đơn hàng
-  form#order-filter(method="get" action=`/${pathAdmin}/order/list`)
+  .order-admin-page
+    h1.box-title Quản lý đơn hàng
 
-  .section-4
-    .inner-wrap
-      .inner-item.inner-label
-        i.fa-solid.fa-filter
-        |  Bộ lọc
-      .inner-item
-        select(name="status" form="order-filter")
-          option(value="" selected=!filters.status) Trạng thái
-          option(value="initial" selected=filters.status==="initial") Chờ xác nhận
-          option(value="pending" selected=filters.status==="pending") Đang xử lý
-          option(value="confirmed" selected=filters.status==="confirmed") Đã xác nhận
-          option(value="completed" selected=filters.status==="completed") Hoàn thành
-          option(value="cancelled" selected=filters.status==="cancelled") Đã hủy
-      .inner-item.inner-date
-        input(type="date" name="fromDate" value=filters.fromDate form="order-filter" aria-label="Từ ngày")
-        span -
-        input(type="date" name="toDate" value=filters.toDate form="order-filter" aria-label="Đến ngày")
-      .inner-item
-        select(name="paymentMethod" form="order-filter")
-          option(value="" selected=!filters.paymentMethod) Phương thức thanh toán
-          option(value="money" selected=filters.paymentMethod==="money") Tiền mặt
-          option(value="bank" selected=filters.paymentMethod==="bank") Chuyển khoản ngân hàng
-          option(value="vnpay" selected=filters.paymentMethod==="vnpay") VNPay
-          option(value="zalopay" selected=filters.paymentMethod==="zalopay") ZaloPay
-      .inner-item
-        select(name="paymentStatus" form="order-filter")
-          option(value="" selected=!filters.paymentStatus) Trạng thái thanh toán
-          option(value="paid" selected=filters.paymentStatus==="paid") Đã thanh toán
-          option(value="unpaid" selected=filters.paymentStatus==="unpaid") Chưa thanh toán
-      .inner-item
-        button.inner-edit(type="submit" form="order-filter" title="Áp dụng bộ lọc")
-          i.fa-solid.fa-filter-circle-dollar
-      .inner-item.inner-reset
-        a(href=`/${pathAdmin}/order/list`)
+    .section-4.order-filter-bar
+      .inner-wrap
+        .inner-item.inner-label
+          i.fa-solid.fa-filter
+          |  Bộ lọc
+        .inner-item
+          select(data-query-filter="status" aria-label="Lọc trạng thái đơn")
+            option(value="" selected=!filters.status) Trạng thái
+            option(value="initial" selected=filters.status==='initial') Chờ xác nhận
+            option(value="pending" selected=filters.status==='pending') Đang xử lý
+            option(value="confirmed" selected=filters.status==='confirmed') Đã xác nhận
+            option(value="completed" selected=filters.status==='completed') Hoàn thành
+            option(value="cancelled" selected=filters.status==='cancelled') Đã hủy
+        .inner-item.inner-date
+          input(type="date" value=filters.fromDate data-query-filter="fromDate" aria-label="Từ ngày")
+          span -
+          input(type="date" value=filters.toDate data-query-filter="toDate" aria-label="Đến ngày")
+        .inner-item
+          select(data-query-filter="paymentMethod" aria-label="Lọc phương thức thanh toán")
+            option(value="" selected=!filters.paymentMethod) Phương thức thanh toán
+            option(value="money" selected=filters.paymentMethod==='money') Tiền mặt
+            option(value="bank" selected=filters.paymentMethod==='bank') Chuyển khoản
+            option(value="vnpay" selected=filters.paymentMethod==='vnpay') VNPay
+            option(value="zalopay" selected=filters.paymentMethod==='zalopay') ZaloPay
+        .inner-item
+          select(data-query-filter="paymentStatus" aria-label="Lọc trạng thái thanh toán")
+            option(value="" selected=!filters.paymentStatus) Thanh toán
+            option(value="paid" selected=filters.paymentStatus==='paid') Đã thanh toán
+            option(value="unpaid" selected=filters.paymentStatus==='unpaid') Chưa thanh toán
+        a.inner-item.inner-reset(href=`/${pathAdmin}/order/list`)
           i.fa-solid.fa-rotate-left
           |  Xóa bộ lọc
 
-  .section-5
-    .inner-wrap
-      .inner-search
-        i.fa-solid.fa-magnifying-glass
-        input(type="text" name="search" value=filters.search placeholder="Mã đơn, khách hàng, điện thoại, voucher" form="order-filter")
-        button.inner-edit(type="submit" form="order-filter" title="Tìm kiếm")
-          i.fa-solid.fa-arrow-right
+    .section-5.order-search-bar
+      .inner-wrap
+        .inner-search
+          i.fa-solid.fa-magnifying-glass
+          input(type="text" value=filters.search placeholder="Tìm mã đơn, khách hàng, điện thoại, voucher..." data-query-search)
 
-  .section-6
-    .table-2
-      table
-        thead
-          tr
-            th Mã
-            th Thông tin khách
-            th Danh sách tour
-            th Thanh toán
-            th Trạng thái
-            th Xác nhận đặt tour
-            th.inner-center Ngày đặt
-            th Hành động
-        tbody
-          if orderList.length
-            each order in orderList
-              tr
-                td
-                  .inner-code= order.orderCode || "-"
-                td
-                  div= order.fullName
-                  div SĐT: #{order.phone}
-                  div Ghi chú: #{order.note || "-"}
-                td
-                  each item in order.items
-                    .inner-item
-                      .inner-image
-                        img(src=item.avatar alt=item.Name)
-                      .inner-content
-                        .inner-name= item.Name
-                        .inner-quantity Người lớn: #{item.quantityAdult} x #{Number(item.priceNewAdult || 0).toLocaleString("vi-VN")}đ
-                        .inner-quantity Trẻ em: #{item.quantityChildren} x #{Number(item.priceNewChildren || 0).toLocaleString("vi-VN")}đ
-                        .inner-quantity Em bé: #{item.quantityBaby} x #{Number(item.priceNewBaby || 0).toLocaleString("vi-VN")}đ
-                td
-                  div Tổng tiền: #{Number(order.subTotal || 0).toLocaleString("vi-VN")}đ
-                  div Giảm: #{Number(order.discount || 0).toLocaleString("vi-VN")}đ
-                  div Mã giảm: #{order.voucherCode || "-"}
-                  div Thanh toán: #{Number(order.total || 0).toLocaleString("vi-VN")}đ
-                  div PTTT: #{order.PaymentMethodLabel}
-                  div TTTT: #{order.paymentStatus==="paid" ? "Đã thanh toán" : "Chưa thanh toán"}
-                td
-                  if order.status==="confirmed" || order.status==="completed"
-                    .badge.badge-green= order.StatusLabel
-                  else if order.status==="cancelled"
-                    .badge.badge-red= order.StatusLabel
-                  else
-                    .badge.badge-orange= order.StatusLabel
-                td
-                  if order.CanConfirmCash && permission.includes('order-edit')
-                    .inner-buttons
-                      form(method="post" action=`/${pathAdmin}/order/confirm/${order._id}/confirmed`)
-                        button.inner-edit(type="submit" title="Xác nhận thành công" onclick="return confirm('Xác nhận đơn tiền mặt này thành công?')")
-                          i.fa-solid.fa-check
-                      form(method="post" action=`/${pathAdmin}/order/confirm/${order._id}/cancelled`)
-                        button.inner-delete(type="submit" title="Xác nhận không thành công" onclick="return confirm('Xác nhận đơn này không thành công và hoàn lại số chỗ?')")
-                          i.fa-solid.fa-xmark
-                  else if order.status==="confirmed" || order.status==="completed"
-                    .badge.badge-green Thành công
-                  else if order.status==="cancelled"
-                    .badge.badge-red Không thành công
-                  else if order.paymentMethod==="zalopay" || order.paymentMethod==="vnpay"
-                    .badge.badge-orange Cổng thanh toán tự cập nhật
-                  else if order.paymentMethod==="bank"
-                    .badge.badge-orange Chờ đối soát chuyển khoản
-                  else
-                    .badge.badge-orange Chờ xác nhận
-                td.inner-center= order.FormatCreatedAt
-                td
-                  if permission.includes('order-edit')
-                    .inner-buttons
-                      a.inner-edit(href=`/${pathAdmin}/order/edit/${order._id}` title="Xem chi tiết")
-                        i.fa-regular.fa-pen-to-square
-          else
+    .section-6
+      .table-2.order-admin-table
+        table
+          thead
             tr
-              td(colspan="8" style="text-align:center") Không tìm thấy đơn hàng phù hợp.
+              th.order-col-code Mã
+              th.order-col-customer Thông tin khách
+              th.order-col-tours Danh sách tour
+              th.order-col-payment Thanh toán
+              th.order-col-status Trạng thái
+              th.order-col-confirm Xác nhận đặt tour
+              th.order-col-date.inner-center Ngày đặt
+              th.order-col-action.inner-center Hành động
+          tbody
+            if orderList.length
+              each order in orderList
+                tr
+                  td
+                    a.inner-code(href=`/${pathAdmin}/order/edit/${order._id}`)= order.orderCode || '-'
+                  td
+                    .order-customer
+                      strong= order.fullName || 'Chưa cập nhật'
+                      span SĐT: #{order.phone || '-'}
+                      if order.note
+                        span.order-note(title=order.note) Ghi chú: #{order.note}
+                  td
+                    .order-tour-list
+                      each item in order.items
+                        .inner-item
+                          .inner-image
+                            img(src=item.avatar alt=item.Name)
+                          .inner-content
+                            .inner-name= item.Name
+                            .inner-quantity Người lớn: #{item.quantityAdult || 0} × #{Number(item.priceNewAdult || 0).toLocaleString('vi-VN')}đ
+                            .inner-quantity Trẻ em: #{item.quantityChildren || 0} × #{Number(item.priceNewChildren || 0).toLocaleString('vi-VN')}đ
+                            .inner-quantity Em bé: #{item.quantityBaby || 0} × #{Number(item.priceNewBaby || 0).toLocaleString('vi-VN')}đ
+                  td
+                    .order-payment-summary
+                      span Tạm tính: #{Number(order.subTotal || 0).toLocaleString('vi-VN')}đ
+                      span Giảm: #{Number(order.discount || 0).toLocaleString('vi-VN')}đ
+                      strong Tổng: #{Number(order.total || 0).toLocaleString('vi-VN')}đ
+                      span Mã: #{order.voucherCode || '-'}
+                      span= order.PaymentMethodLabel
+                      span(class=order.paymentStatus==='paid' ? 'is-paid' : 'is-unpaid')= order.paymentStatus==='paid' ? 'Đã thanh toán' : 'Chưa thanh toán'
+                  td
+                    if order.status==='confirmed' || order.status==='completed'
+                      .badge.badge-green= order.StatusLabel
+                    else if order.status==='cancelled'
+                      .badge.badge-red= order.StatusLabel
+                    else
+                      .badge.badge-orange= order.StatusLabel
+                  td
+                    if order.CanConfirmCash && permission.includes('order-edit')
+                      .order-confirm-actions
+                        form(method="post" action=`/${pathAdmin}/order/confirm/${order._id}/confirmed`)
+                          button.order-confirm-button.is-success(type="submit" onclick="return confirm('Xác nhận đơn tiền mặt này thành công?')")
+                            i.fa-solid.fa-check
+                            |  Thành công
+                        form(method="post" action=`/${pathAdmin}/order/confirm/${order._id}/cancelled`)
+                          button.order-confirm-button.is-danger(type="submit" onclick="return confirm('Xác nhận đơn này không thành công và hoàn lại số chỗ?')")
+                            i.fa-solid.fa-xmark
+                            |  Không thành công
+                    else if order.status==='confirmed' || order.status==='completed'
+                      .order-confirm-state.is-success
+                        i.fa-solid.fa-circle-check
+                        span Thành công
+                    else if order.status==='cancelled'
+                      .order-confirm-state.is-danger
+                        i.fa-solid.fa-circle-xmark
+                        span Không thành công
+                    else if order.paymentMethod==='zalopay' || order.paymentMethod==='vnpay'
+                      .order-confirm-state.is-waiting
+                        i.fa-solid.fa-arrows-rotate
+                        span Cổng thanh toán tự cập nhật
+                    else if order.paymentMethod==='bank'
+                      .order-confirm-state.is-waiting
+                        i.fa-regular.fa-clock
+                        span Chờ đối soát chuyển khoản
+                    else
+                      .order-confirm-state.is-waiting
+                        i.fa-regular.fa-clock
+                        span Chờ xác nhận
+                  td.inner-center
+                    .order-created-at= order.FormatCreatedAt
+                  td.inner-center
+                    if permission.includes('order-edit')
+                      .inner-buttons
+                        a.inner-edit(href=`/${pathAdmin}/order/edit/${order._id}` title="Xem chi tiết")
+                          i.fa-regular.fa-pen-to-square
+            else
+              tr
+                td.order-empty.inner-center(colspan="8")
+                  i.fa-solid.fa-box-open
+                  span Không tìm thấy đơn hàng phù hợp.
 
-  - const queryBase = `status=${encodeURIComponent(filters.status)}&paymentMethod=${encodeURIComponent(filters.paymentMethod)}&paymentStatus=${encodeURIComponent(filters.paymentStatus)}&fromDate=${encodeURIComponent(filters.fromDate)}&toDate=${encodeURIComponent(filters.toDate)}&search=${encodeURIComponent(filters.search)}`
-  .section-7
-    span.inner-label Hiển thị #{pagination.from} - #{pagination.to} của #{pagination.totalRecords}
-    if pagination.totalPages>1
-      .inner-pagination
-        if pagination.currentPage>1
-          a(href=`?${queryBase}&page=${pagination.currentPage-1}` aria-label="Trang trước") ‹
-        each page in Array.from({length:pagination.totalPages},(_,index)=>index+1)
-          a(class=page===pagination.currentPage ? "active" : "" href=`?${queryBase}&page=${page}`)= page
-        if pagination.currentPage<pagination.totalPages
-          a(href=`?${queryBase}&page=${pagination.currentPage+1}` aria-label="Trang sau") ›
+    - const queryParams = {...filters}
+    .section-7.order-pagination
+      span.inner-label Hiển thị #{pagination.from} - #{pagination.to} của #{pagination.totalRecords}
+      if pagination.totalPages>1
+        nav.contact-admin-pagination(aria-label="Phân trang đơn hàng")
+          if pagination.currentPage>1
+            a(href=`?${new URLSearchParams({...queryParams,page:pagination.currentPage-1}).toString()}` aria-label="Trang trước")
+              i.fa-solid.fa-chevron-left
+          span Trang #{pagination.currentPage} / #{pagination.totalPages}
+          if pagination.currentPage<pagination.totalPages
+            a(href=`?${new URLSearchParams({...queryParams,page:pagination.currentPage+1}).toString()}` aria-label="Trang sau")
+              i.fa-solid.fa-chevron-right
