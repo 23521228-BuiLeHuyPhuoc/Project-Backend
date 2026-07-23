@@ -24,6 +24,119 @@ block main
           .inner-title Doanh thu đã thanh toán
           .inner-number #{totalSum.toLocaleString('vi-VN')}đ
 
+    section.recommendation-monitor(aria-labelledby="recommendation-monitor-title")
+      .recommendation-monitor-hero
+        .recommendation-monitor-heading
+          .recommendation-monitor-kicker
+            i.fa-solid.fa-chart-line
+            | Recommendation intelligence
+          h2#recommendation-monitor-title Hiệu quả hệ thống đề xuất
+          p Tương tác trong #{recommendationMonitoring.windowDays} ngày gần nhất · Chất lượng đánh giá toàn hệ thống
+        .recommendation-model-status(
+          class=recommendationMonitoring.model.ready ? 'is-ready' : 'is-waiting'
+        )
+          span.inner-dot
+          if recommendationMonitoring.model.training
+            | Đang huấn luyện
+          else if recommendationMonitoring.model.ready
+            | Model sẵn sàng
+          else
+            | Chờ dữ liệu model
+
+      .recommendation-metric-grid
+        article.recommendation-metric-card.is-blue
+          .recommendation-metric-head
+            span.inner-icon
+              i.fa-solid.fa-arrow-pointer
+            span.inner-label CTR phản hồi
+          .recommendation-metric-value= recommendationMonitoring.labels.ctr
+          .recommendation-metric-caption
+            | #{recommendationMonitoring.engagement.clickCount.toLocaleString('vi-VN')} click trên #{recommendationMonitoring.engagement.responseCount.toLocaleString('vi-VN')} phản hồi
+          .recommendation-metric-track
+            span(style=`width:${Math.min(100,recommendationMonitoring.engagement.ctr)}%`)
+
+        article.recommendation-metric-card.is-teal
+          .recommendation-metric-head
+            span.inner-icon
+              i.fa-solid.fa-cart-shopping
+            span.inner-label Conversion rate
+          .recommendation-metric-value= recommendationMonitoring.labels.conversion
+          .recommendation-metric-caption
+            | #{recommendationMonitoring.conversion.attributedClicks.toLocaleString('vi-VN')} / #{recommendationMonitoring.conversion.eligibleClicks.toLocaleString('vi-VN')} click đăng nhập tạo mua hàng
+          .recommendation-metric-track
+            span(style=`width:${Math.min(100,recommendationMonitoring.conversion.rate)}%`)
+
+        article.recommendation-metric-card.is-gold
+          .recommendation-metric-head
+            span.inner-icon
+              i.fa-solid.fa-star
+            span.inner-label Điểm đánh giá TB
+          .recommendation-metric-value
+            | #{recommendationMonitoring.labels.averageRating}
+            small / 5
+          .recommendation-metric-caption
+            | #{recommendationMonitoring.quality.reviewCount.toLocaleString('vi-VN')} đánh giá đã xuất bản
+          .recommendation-metric-track
+            span(style=`width:${Math.min(100,recommendationMonitoring.quality.averageRating/5*100)}%`)
+
+        article.recommendation-metric-card.is-coral
+          .recommendation-metric-head
+            span.inner-icon
+              i.fa-solid.fa-layer-group
+            span.inner-label Review coverage
+          .recommendation-metric-value= recommendationMonitoring.labels.coverage
+          .recommendation-metric-caption
+            | #{recommendationMonitoring.quality.reviewedTourCount.toLocaleString('vi-VN')} / #{recommendationMonitoring.quality.totalTours.toLocaleString('vi-VN')} tour đã có review
+          .recommendation-metric-track
+            span(style=`width:${Math.min(100,recommendationMonitoring.quality.reviewCoverage)}%`)
+
+      if recommendationMonitoring.engagement.dataQuality==='partial'
+        .recommendation-data-note.is-warning
+          i.fa-solid.fa-triangle-exclamation
+          span Chưa ghi nhận lượt bỏ qua recommendation, vì vậy CTR hiện tại có thể cao hơn thực tế.
+      else if recommendationMonitoring.engagement.dataQuality==='empty'
+        .recommendation-data-note
+          i.fa-solid.fa-circle-info
+          span Chưa có phản hồi recommendation trong khoảng thời gian thống kê.
+
+      .recommendation-health-grid
+        .recommendation-model-health
+          .recommendation-panel-head
+            div
+              span.inner-eyebrow Model health
+              h3 Sai số và độ chính xác
+            i.fa-solid.fa-wave-square
+          .recommendation-model-metrics
+            .inner-item
+              span.inner-label RMSE
+              strong= recommendationMonitoring.labels.rmse
+              small Càng thấp càng tốt
+            .inner-item
+              span.inner-label MAE
+              strong= recommendationMonitoring.labels.mae
+              small Sai lệch trung bình
+            .inner-item
+              span.inner-label Precision@#{recommendationMonitoring.model.precisionK || 'K'}
+              strong= recommendationMonitoring.labels.precision
+              small Chất lượng top đề xuất
+
+        .recommendation-training-card
+          .recommendation-panel-head
+            div
+              span.inner-eyebrow Vòng đời model
+              h3 Lần huấn luyện gần nhất
+            i.fa-solid.fa-rotate
+          .recommendation-training-time= recommendationMonitoring.labels.lastTraining
+          .recommendation-training-meta
+            span
+              i.fa-solid.fa-bolt
+              | #{recommendationMonitoring.labels.trainingReason}
+            span
+              i.fa-solid.fa-database
+              | Cache hit #{recommendationMonitoring.labels.cacheHitRate}
+          .recommendation-cache-detail
+            | #{recommendationMonitoring.cache.size.toLocaleString('vi-VN')} / #{recommendationMonitoring.cache.maxEntries.toLocaleString('vi-VN')} cache entries đang dùng
+
     .section-2
       .inner-head
         h2.inner-title Biểu đồ doanh thu thực tế

@@ -8,7 +8,8 @@ const interactionTypes=[
   'purchase',
   'rating',
   'search',
-  'click_recommendation'
+  'click_recommendation',
+  'recommendation_ignore'
 ];
 
 module.exports.events=async(req,res)=>{

@@ -138,9 +138,18 @@ test('new interaction threshold triggers one locked retraining',async t=>{
   const directory=await fs.mkdtemp(path.join(os.tmpdir(),'recommender-'));
   t.after(()=>fs.rm(directory,{recursive:true,force:true}));
   let interactionCount=2;
+  let cacheClears=0;
   const engine=createFakeEngine();
   const scheduler=new RecommendationTrainingScheduler({
     engine,
+    cacheManager:{
+      clear(){
+        cacheClears+=1;
+      },
+      getStats(){
+        return {size:0};
+      }
+    },
     models:{
       UserInteraction:{
         countDocuments:()=>Promise.resolve(interactionCount)
@@ -164,6 +173,7 @@ test('new interaction threshold triggers one locked retraining',async t=>{
     'interaction_threshold'
   ]);
   assert.equal(engine.getTrainCount(),2);
+  assert.equal(cacheClears,2);
   assert.equal(scheduler.getStatus().lastInteractionCount,7);
   assert.equal(scheduler.getStatus().lastReason,'interaction_threshold');
 });

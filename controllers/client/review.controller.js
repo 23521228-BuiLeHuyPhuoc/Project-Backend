@@ -9,6 +9,16 @@ const {
   syncRatingInteraction
 }=require('../../helpers/user-interaction.helper');
 const {updateTourRatingSafe}=require('../../helpers/tour-rating.helper');
+const {
+  invalidateRecommendationCache
+}=require('../../services/recommendation/cache-manager');
+
+const invalidateReviewRecommendations=(req,tourId)=>
+  invalidateRecommendationCache(req.app,{
+    userId:req.user.id,
+    tourId,
+    scopes:['top-rated','trending']
+  });
 
 const getEligibleTours=async userId=>{
   const [orders,reviews]=await Promise.all([
@@ -117,6 +127,7 @@ module.exports.create=async(req,res)=>{
 
     await syncRatingInteraction(review);
     await updateTourRatingSafe(review.tourId);
+    invalidateReviewRecommendations(req,review.tourId);
 
     await createNotificationSafe({
       userId:req.user.id,
@@ -160,6 +171,7 @@ module.exports.update=async(req,res)=>{
     }
     await syncRatingInteraction(review);
     await updateTourRatingSafe(review.tourId);
+    invalidateReviewRecommendations(req,review.tourId);
     return res.json({code:'success',message:'Cập nhật đánh giá thành công!',redirect:'/account/reviews'});
   }
   catch(error){
@@ -186,6 +198,7 @@ module.exports.remove=async(req,res)=>{
     }
     await removeRatingInteraction(review);
     await updateTourRatingSafe(review.tourId);
+    invalidateReviewRecommendations(req,review.tourId);
     return res.json({code:'success',message:'Đã xóa đánh giá!',redirect:'/account/reviews'});
   }
   catch(error){

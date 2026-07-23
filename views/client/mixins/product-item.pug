@@ -1,5 +1,11 @@
 mixin product-item(item)
-    .product-item(data-tour-card data-tour-id=item._id)
+    .product-item(
+        data-tour-card
+        data-tour-id=item._id
+        data-tour-name=item.name
+        data-tour-duration=item.time
+        data-tour-types=item.recommendationTypes
+    )
         .inner-image
             a(href=`/tour/detail/${item.slug}`)
                 img(

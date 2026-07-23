@@ -1551,6 +1551,354 @@ a {
 /* End Order management */
 
 /* Dashboard live data */
+.recommendation-monitor {
+  margin-top: 30px;
+  overflow: hidden;
+  border: 1px solid #E5EAF2;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, #F5F8FC 0%, #FFFFFF 72%);
+  box-shadow: 6px 6px 54px 0 #0000000D;
+}
+
+.recommendation-monitor-hero {
+  min-height: 190px;
+  padding: 32px 34px 72px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 78% 10%, #28A7A040 0, transparent 28%),
+    radial-gradient(circle at 8% 110%, #4880FF59 0, transparent 35%),
+    linear-gradient(125deg, #111C36 0%, #172D55 58%, #123F52 100%);
+}
+
+.recommendation-monitor-kicker {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8FD9D1;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+
+.recommendation-monitor-heading h2 {
+  margin: 0 0 7px;
+  font-size: 25px;
+  line-height: 1.25;
+}
+
+.recommendation-monitor-heading p {
+  margin: 0;
+  color: #C7D3E5;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.recommendation-model-status {
+  padding: 9px 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #FFFFFF26;
+  border-radius: 999px;
+  background: #0812255C;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.recommendation-model-status .inner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #F4B740;
+  box-shadow: 0 0 0 5px #F4B7401F;
+}
+
+.recommendation-model-status.is-ready .inner-dot {
+  background: #3DD6A5;
+  box-shadow: 0 0 0 5px #3DD6A51F;
+}
+
+.recommendation-metric-grid {
+  margin-top: -46px;
+  padding: 0 28px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.recommendation-metric-card {
+  --metric-accent: #4880FF;
+  --metric-soft: #EAF0FF;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #E8EDF4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 14px 35px #1C2A4414;
+}
+
+.recommendation-metric-card.is-teal {
+  --metric-accent: #168B82;
+  --metric-soft: #E4F6F3;
+}
+
+.recommendation-metric-card.is-gold {
+  --metric-accent: #C98200;
+  --metric-soft: #FFF3D8;
+}
+
+.recommendation-metric-card.is-coral {
+  --metric-accent: #D85845;
+  --metric-soft: #FDECE8;
+}
+
+.recommendation-metric-head {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.recommendation-metric-head .inner-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: var(--metric-accent);
+  background: var(--metric-soft);
+}
+
+.recommendation-metric-head .inner-label {
+  overflow: hidden;
+  color: #657084;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .25px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.recommendation-metric-value {
+  margin-bottom: 6px;
+  color: #172033;
+  font-size: 31px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.recommendation-metric-value small {
+  color: #8791A1;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.recommendation-metric-caption {
+  min-height: 36px;
+  color: #8590A1;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.recommendation-metric-caption strong {
+  color: #4D586A;
+}
+
+.recommendation-metric-track {
+  height: 5px;
+  margin-top: 15px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #EDF1F6;
+}
+
+.recommendation-metric-track span {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: var(--metric-accent);
+}
+
+.recommendation-data-note {
+  margin: 18px 28px 0;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #DCE7F5;
+  border-radius: 10px;
+  color: #48627D;
+  background: #F3F8FD;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.recommendation-data-note.is-warning {
+  border-color: #F1D9A3;
+  color: #805A08;
+  background: #FFF8E8;
+}
+
+.recommendation-health-grid {
+  padding: 22px 28px 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr);
+  gap: 16px;
+}
+
+.recommendation-model-health,
+.recommendation-training-card {
+  padding: 21px;
+  border: 1px solid #E7ECF3;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.recommendation-panel-head {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.recommendation-panel-head .inner-eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: #4880FF;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.recommendation-panel-head h3 {
+  margin: 0;
+  color: #202B3C;
+  font-size: 16px;
+}
+
+.recommendation-panel-head > i {
+  color: #94A3B8;
+  font-size: 19px;
+}
+
+.recommendation-model-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.recommendation-model-metrics .inner-item {
+  min-width: 0;
+  padding: 14px;
+  border-radius: 11px;
+  background: #F6F8FB;
+}
+
+.recommendation-model-metrics .inner-label,
+.recommendation-model-metrics small {
+  display: block;
+  color: #8993A2;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.recommendation-model-metrics strong {
+  display: block;
+  margin: 5px 0 3px;
+  overflow: hidden;
+  color: #1F2A3D;
+  font-size: 19px;
+  text-overflow: ellipsis;
+}
+
+.recommendation-training-time {
+  margin-bottom: 14px;
+  color: #1D2939;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.recommendation-training-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.recommendation-training-meta span {
+  padding: 6px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+  color: #536174;
+  background: #F1F4F8;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.recommendation-cache-detail {
+  margin-top: 14px;
+  color: #8A94A4;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+@media (max-width: 1199.98px) {
+  .recommendation-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 991.98px) {
+  .recommendation-health-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .recommendation-monitor-hero {
+    padding: 26px 20px 68px;
+    flex-direction: column;
+  }
+
+  .recommendation-monitor-heading h2 {
+    font-size: 21px;
+  }
+
+  .recommendation-metric-grid {
+    padding: 0 14px;
+    grid-template-columns: 1fr;
+  }
+
+  .recommendation-data-note {
+    margin-right: 14px;
+    margin-left: 14px;
+  }
+
+  .recommendation-health-grid {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .recommendation-model-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
 .dashboard-section-head {
   margin-bottom: 24px;
   display: flex;

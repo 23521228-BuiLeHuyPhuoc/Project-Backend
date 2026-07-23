@@ -19,6 +19,15 @@ const defaultModels={
   UserInteraction
 };
 
+const profileInteractionTypes=[
+  'view',
+  'favorite',
+  'cart_add',
+  'purchase',
+  'rating',
+  'click_recommendation'
+];
+
 const defaultPopularityWeights={
   ratingAvg:0.35,
   ratingCount:0.15,
@@ -334,7 +343,11 @@ class HybridRecommendationEngine{
 
   async refreshInteractionCounts(){
     const records=await executeAggregate(this.models.UserInteraction.aggregate([
-      {$match:{userId:{$ne:null},tourId:{$ne:null}}},
+      {$match:{
+        userId:{$ne:null},
+        tourId:{$ne:null},
+        type:{$in:profileInteractionTypes}
+      }},
       {$group:{_id:'$userId',count:{$sum:1}}}
     ]));
     this.interactionCounts=countRecordsToMap(records);

@@ -359,6 +359,11 @@
       return;
     }
 
+    if(tourCard
+      && tourCard.dataset.recommendationFeedbackManaged==='true'){
+      return;
+    }
+
     queueEvent({
       type:'click_recommendation',
       tourId,

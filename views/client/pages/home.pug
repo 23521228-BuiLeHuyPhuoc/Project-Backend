@@ -1,5 +1,6 @@
 extends ../layouts/default.pug
 include ../mixins/product-item.pug
+include ../partials/recommendation-section.pug
 block main 
     .section-1
         .container
@@ -203,6 +204,19 @@ block main
                               +product-item(item)
                                     // End Product Item                           
                                     // End Section 2 
+    -
+      const topRatedHome={
+        id:'top-rated-home',
+        variant:'is-top-rated',
+        endpoint:'/api/recommendation/top-rated?limit=8',
+        source:'home',
+        eyebrow:'Được cộng đồng kiểm chứng',
+        title:'Tour được đánh giá cao',
+        description:'Những hành trình nổi bật dựa trên điểm số và số lượng đánh giá thực tế.',
+        icon:'fa-solid fa-star',
+        contextualRerank:false
+      }
+    +recommendation-section(topRatedHome)
                                     // Section 3
     .section-3
         .container
@@ -309,6 +323,19 @@ block main
                         src="assets/images/banner-5.png"
                         )
     // End Section 7
+    if user
+      -
+        const personalizedHome={
+          id:'personalized-home',
+          variant:'is-personalized',
+          endpoint:'/api/recommendation/personalized?limit=8',
+          source:'home',
+          eyebrow:'Được chọn theo sở thích của bạn',
+          title:'Dành riêng cho bạn',
+          description:'Gợi ý kết hợp sở thích, lịch sử tương tác và xu hướng đang được yêu thích.',
+          icon:'fa-solid fa-sparkles'
+        }
+      +recommendation-section(personalizedHome)
     // Section 8
     .section-8
         .container

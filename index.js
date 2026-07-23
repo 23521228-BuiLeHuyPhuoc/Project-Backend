@@ -16,6 +16,7 @@ const port = 3000
 const cookieParser=require('cookie-parser');
 const recommendationScheduler=getRecommendationScheduler();
 app.locals.recommendationScheduler=recommendationScheduler;
+app.locals.recommendationCache=recommendationScheduler.getCacheManager();
 const sessionSecret=process.env.SESSION_SECRET || process.env.JWT_SECRET;
 if(!sessionSecret){
   throw new Error('SESSION_SECRET or JWT_SECRET must be configured');

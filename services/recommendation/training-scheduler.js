@@ -1,6 +1,7 @@
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const UserInteraction=require('../../models/user-interaction.model');
+const {RecommendationCacheManager}=require('./cache-manager');
 const {HybridRecommendationEngine}=require('./hybrid-engine');
 const {MatrixFactorization}=require('./matrix-factorization');
 
@@ -9,6 +10,14 @@ const DEFAULT_INTERVAL_HOURS=6;
 const DEFAULT_CHECK_INTERVAL_MS=60*1000;
 const DEFAULT_INTERACTION_THRESHOLD=100;
 const DEFAULT_PRECISION_K=10;
+const trainableInteractionTypes=[
+  'view',
+  'favorite',
+  'cart_add',
+  'purchase',
+  'rating',
+  'click_recommendation'
+];
 
 const normalizePositiveNumber=(value,fallback)=>{
   const number=Number(value);
@@ -126,6 +135,8 @@ class RecommendationTrainingScheduler{
       factorizationOptions:options.factorizationOptions,
       popularityWeights:options.popularityWeights
     });
+    this.cacheManager=options.cacheManager
+      || new RecommendationCacheManager(options.cacheOptions);
     this.logger=options.logger || console;
     this.now=typeof options.now==='function' ? options.now : ()=>new Date();
     this.setInterval=options.setInterval || global.setInterval;
@@ -151,7 +162,8 @@ class RecommendationTrainingScheduler{
     const count=await executeCount(
       this.models.UserInteraction.countDocuments({
         userId:{$ne:null},
-        tourId:{$ne:null}
+        tourId:{$ne:null},
+        type:{$in:trainableInteractionTypes}
       })
     );
     return Math.max(0,Number(count) || 0);
@@ -213,6 +225,7 @@ class RecommendationTrainingScheduler{
       artifact.factorization
     );
     await this.engine.restore(artifact.matrixData,factorization);
+    this.cacheManager.clear();
     this.lastTrainedAt=artifact.lastTrainedAt || artifact.savedAt || null;
     this.lastInteractionCount=Math.max(
       0,
@@ -231,6 +244,7 @@ class RecommendationTrainingScheduler{
   async performTraining(reason){
     const startedAt=Date.now();
     await this.engine.train();
+    this.cacheManager.clear();
     const collaborative=this.engine.collaborative;
     this.metrics=calculateModelMetrics(
       collaborative.matrixData,
@@ -355,6 +369,10 @@ class RecommendationTrainingScheduler{
     return this.engine;
   }
 
+  getCacheManager(){
+    return this.cacheManager;
+  }
+
   getStatus(){
     return {
       running:this.running,
@@ -366,7 +384,8 @@ class RecommendationTrainingScheduler{
       lastTrainedAt:this.lastTrainedAt,
       lastInteractionCount:this.lastInteractionCount,
       lastReason:this.lastReason,
-      metrics:this.metrics ? {...this.metrics} : null
+      metrics:this.metrics ? {...this.metrics} : null,
+      cache:this.cacheManager.getStats()
     };
   }
 }

@@ -7,6 +7,9 @@ const {
   removeFavoriteInteraction,
   syncFavoriteInteraction
 }=require('../../helpers/user-interaction.helper');
+const {
+  invalidateRecommendationCache
+}=require('../../services/recommendation/cache-manager');
 
 module.exports.list=async(req,res)=>{
   const viewedAt=new Date();
@@ -68,6 +71,10 @@ module.exports.toggle=async(req,res)=>{
     if(favorite){
       await favorite.deleteOne();
       await removeFavoriteInteraction({userId:req.user.id,tourId:tour.id});
+      invalidateRecommendationCache(req.app,{
+        userId:req.user.id,
+        scopes:['trending']
+      });
       return res.json({
         code:'success',
         favorited:false,
@@ -77,6 +84,10 @@ module.exports.toggle=async(req,res)=>{
 
     await Favorite.create({userId:req.user.id,tourId:tour.id});
     await syncFavoriteInteraction({userId:req.user.id,tourId:tour.id});
+    invalidateRecommendationCache(req.app,{
+      userId:req.user.id,
+      scopes:['trending']
+    });
     res.json({
       code:'success',
       favorited:true,
@@ -86,6 +97,10 @@ module.exports.toggle=async(req,res)=>{
   catch(error){
     if(error && error.code===11000){
       await syncFavoriteInteraction({userId:req.user.id,tourId:req.params.tourId});
+      invalidateRecommendationCache(req.app,{
+        userId:req.user.id,
+        scopes:['trending']
+      });
       return res.json({
         code:'success',
         favorited:true,

@@ -2,6 +2,10 @@ const moment=require('moment');
 const AccountAdmin=require('../../models/account-admin.model');
 const Order=require('../../models/order.model');
 const Tour=require('../../models/tour.model');
+const {
+  createEmptyRecommendationMonitoring,
+  loadRecommendationMonitoring
+}=require('../../services/recommendation/monitoring');
 
 const statusLabels={
   initial:'Chờ xác nhận',
@@ -17,6 +21,61 @@ const paymentMethodLabels={
   zalopay:'ZaloPay',
   vnpay:'VNPay'
 };
+
+const trainingReasonLabels={
+  startup:'Khởi động hệ thống',
+  stale_model:'Model đã cũ',
+  missing_model:'Thiếu model',
+  interaction_threshold:'Đủ tương tác mới',
+  scheduled_interval:'Lịch định kỳ',
+  manual:'Thủ công',
+  restored:'Khôi phục model'
+};
+
+const formatPercent=value=>`${Number(value || 0).toLocaleString('vi-VN',{
+  maximumFractionDigits:1
+})}%`;
+
+const formatModelMetric=value=>Number.isFinite(value)
+  ? Number(value).toLocaleString('vi-VN',{
+    minimumFractionDigits:3,
+    maximumFractionDigits:4
+  })
+  : '—';
+
+const getSchedulerStatus=req=>{
+  const scheduler=req.app
+    && req.app.locals
+    && req.app.locals.recommendationScheduler;
+  return scheduler && typeof scheduler.getStatus==='function'
+    ? scheduler.getStatus()
+    : {};
+};
+
+const createRecommendationViewModel=metrics=>({
+  ...metrics,
+  labels:{
+    ctr:formatPercent(metrics.engagement.ctr),
+    conversion:formatPercent(metrics.conversion.rate),
+    averageRating:Number(metrics.quality.averageRating || 0).toLocaleString(
+      'vi-VN',
+      {minimumFractionDigits:1,maximumFractionDigits:2}
+    ),
+    coverage:formatPercent(metrics.quality.reviewCoverage),
+    rmse:formatModelMetric(metrics.model.rmse),
+    mae:formatModelMetric(metrics.model.mae),
+    precision:metrics.model.precisionAtK===null
+      ? '—'
+      : formatPercent(metrics.model.precisionAtK*100),
+    lastTraining:metrics.model.lastTrainedAt
+      ? moment(metrics.model.lastTrainedAt).format('HH:mm DD/MM/YYYY')
+      : 'Chưa có lần train',
+    trainingReason:trainingReasonLabels[metrics.model.lastReason]
+      || metrics.model.lastReason
+      || 'Chưa xác định',
+    cacheHitRate:formatPercent(metrics.cache.hitRate)
+  }
+});
 
 const enrichRecentOrders=async orders=>{
   const tourIds=[...new Set(orders.flatMap(order=>(order.items || []).map(item=>String(item.tourId))))];
@@ -41,14 +100,27 @@ const enrichRecentOrders=async orders=>{
 };
 
 module.exports.dashboard=async(req,res)=>{
-  const [totalAdmins,totalOrders,revenueResult,recentOrderRecords]=await Promise.all([
+  const schedulerStatus=getSchedulerStatus(req);
+  const monitoringPromise=loadRecommendationMonitoring({schedulerStatus})
+    .catch(error=>{
+      console.error('Unable to load recommendation monitoring:',error.message);
+      return createEmptyRecommendationMonitoring(schedulerStatus);
+    });
+  const [
+    totalAdmins,
+    totalOrders,
+    revenueResult,
+    recentOrderRecords,
+    recommendationMetrics
+  ]=await Promise.all([
     AccountAdmin.countDocuments({deleted:false}),
     Order.countDocuments({deleted:false}),
     Order.aggregate([
       {$match:{deleted:false,paymentStatus:'paid',status:{$ne:'cancelled'}}},
       {$group:{_id:null,total:{$sum:'$total'}}}
     ]),
-    Order.find({deleted:false}).sort({createdAt:-1}).limit(5).lean()
+    Order.find({deleted:false}).sort({createdAt:-1}).limit(5).lean(),
+    monitoringPromise
   ]);
 
   res.render('admin/pages/dashboard',{
@@ -57,6 +129,9 @@ module.exports.dashboard=async(req,res)=>{
     totalOrder:totalOrders,
     totalSum:Number(revenueResult[0] && revenueResult[0].total || 0),
     recentOrders:await enrichRecentOrders(recentOrderRecords),
+    recommendationMonitoring:createRecommendationViewModel(
+      recommendationMetrics
+    ),
     currentMonthValue:moment().format('YYYY-MM')
   });
 };

@@ -1,5 +1,6 @@
 extends ../layouts/default.pug 
 include ../mixins/box-breadcrumb.pug
+include ../partials/recommendation-section.pug
 block main
 
     
@@ -187,3 +188,28 @@ block main
                             data-authenticated=user ? "true" : "false"
                         )= user ? "Thêm Vào Giỏ Hàng" : "Đăng Nhập Để Đặt Tour"
     // End Section 10
+    -
+      const similarTours={
+        id:'similar-tours',
+        variant:'is-similar',
+        endpoint:`/api/recommendation/similar/${tour._id}?limit=4`,
+        source:'detail',
+        eyebrow:'Cùng phong cách hành trình',
+        title:'Tour tương tự',
+        description:'Khám phá thêm những chuyến đi có điểm đến, thời lượng và trải nghiệm gần với tour này.',
+        icon:'fa-solid fa-route'
+      }
+    +recommendation-section(similarTours)
+    if user
+      -
+        const personalizedDetail={
+          id:'personalized-detail',
+          variant:'is-personalized',
+          endpoint:'/api/recommendation/personalized?limit=4',
+          source:'detail',
+          eyebrow:'Có thể hợp gu của bạn',
+          title:'Bạn có thể thích',
+          description:'Các lựa chọn được cân bằng từ sở thích cá nhân và hành vi gần đây của bạn.',
+          icon:'fa-solid fa-heart'
+        }
+      +recommendation-section(personalizedDetail)

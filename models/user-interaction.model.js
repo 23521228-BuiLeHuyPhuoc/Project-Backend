@@ -25,7 +25,8 @@ const userInteractionSchema=new mongoose.Schema({
       "purchase",
       "rating",
       "search",
-      "click_recommendation"
+      "click_recommendation",
+      "recommendation_ignore"
     ],
     required:true
   },
@@ -37,7 +38,12 @@ const userInteractionSchema=new mongoose.Schema({
     clientEventId:String,
     interactionKind:{
       type:String,
-      enum:["detail_engagement","hover","recommendation_click"]
+      enum:[
+        "detail_engagement",
+        "hover",
+        "recommendation_click",
+        "recommendation_ignore"
+      ]
     },
     searchQuery:String,
     viewDuration:Number,
@@ -47,6 +53,16 @@ const userInteractionSchema=new mongoose.Schema({
     clickEvents:[String],
     pagePath:String,
     occurredAt:Date,
+    recommendationRequestId:String,
+    recommendationPosition:Number,
+    recommendationSurface:String,
+    recommendationScores:{
+      final:Number,
+      content:Number,
+      collaborative:Number,
+      popularity:Number,
+      contextual:Number
+    },
     source:{
       type:String,
       enum:[

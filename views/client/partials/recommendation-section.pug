@@ -1,0 +1,38 @@
+mixin recommendation-section(config)
+  section.recommendation-section(
+    id=config.id
+    class=config.variant || ''
+    data-recommendation-section
+    data-recommendation-endpoint=config.endpoint
+    data-recommendation-source=config.source
+    data-contextual-rerank=config.contextualRerank === false ? 'false' : 'true'
+    aria-labelledby=`${config.id}-title`
+  )
+    .container
+      .recommendation-heading
+        .recommendation-heading-copy
+          span.recommendation-eyebrow
+            i(class=config.icon || 'fa-solid fa-wand-magic-sparkles')
+            | #{config.eyebrow}
+          h2.recommendation-title(id=`${config.id}-title`) #{config.title}
+          if config.description
+            p.recommendation-description #{config.description}
+        if config.link
+          a.recommendation-all-link(href=config.link)
+            | Xem tất cả
+            i.fa-solid.fa-arrow-right
+      .recommendation-status(data-recommendation-status hidden)
+        i.fa-solid.fa-circle-exclamation
+        span(data-recommendation-status-message)
+        button(type="button" data-recommendation-retry) Thử lại
+      .recommendation-grid(
+        data-recommendation-list
+        aria-live="polite"
+        aria-busy="true"
+      )
+        - for(let index=0;index<4;index+=1)
+          .recommendation-skeleton(aria-hidden="true")
+            .recommendation-skeleton-image
+            .recommendation-skeleton-line.is-short
+            .recommendation-skeleton-line
+            .recommendation-skeleton-line.is-medium
