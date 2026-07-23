@@ -4,9 +4,44 @@ header.header
       span 28
       span Admin
   .inner-wrap
-    .inner-notify
-      img(src="/admin/assets/images/icon-bell.svg", alt="")
-      span 6
+    if permission.includes('notification-view')
+      .inner-notify(data-admin-notify)
+        button.inner-notify-button(type="button" aria-label="Mở thông báo" aria-expanded="false" aria-controls="admin-notify-dropdown" data-admin-notify-button)
+          img(src="/admin/assets/images/icon-bell.svg", alt="")
+          if adminHeaderUnreadCount
+            span.inner-notify-badge=adminHeaderUnreadCount > 99 ? '99+' : adminHeaderUnreadCount
+        #admin-notify-dropdown.inner-notify-dropdown(data-admin-notify-dropdown)
+          .inner-notify-head
+            .inner-notify-heading Thông báo gần đây
+            a(href=`/${pathAdmin}/notification/list`) Xem tất cả
+          .inner-notify-list
+            if adminHeaderNotifications.length
+              each item in adminHeaderNotifications
+                a.inner-notify-item(class=!item.readAt ? 'is-unread' : '' href=`/${pathAdmin}/notification/list`)
+                  .inner-notify-item-icon
+                    if item.type === 'order'
+                      i.fa-solid.fa-bag-shopping
+                    else if item.type === 'voucher'
+                      i.fa-solid.fa-ticket
+                    else if item.type === 'review'
+                      i.fa-solid.fa-star
+                    else if item.type === 'account'
+                      i.fa-solid.fa-user
+                    else
+                      i.fa-solid.fa-bell
+                  .inner-notify-item-body
+                    .inner-notify-title=item.title
+                    .inner-notify-message=item.message
+                    .inner-notify-meta
+                      span=item.userId ? item.userId.fullName : 'Tài khoản đã xóa'
+                      time=item.createdAtLabel
+            else
+              .inner-notify-empty
+                i.fa-regular.fa-bell-slash
+                span Chưa có thông báo nào.
+          a.inner-notify-footer(href=`/${pathAdmin}/notification/list`)
+            span Đi đến quản lý thông báo
+            i.fa-solid.fa-arrow-right
     .inner-account
       .inner-avatar
         img(src=account.avatar, alt="")

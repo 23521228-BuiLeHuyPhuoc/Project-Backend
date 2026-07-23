@@ -330,13 +330,52 @@ if(couponForm) {
   const validation = new JustValidate('#coupon-form');
 
   validation
-    .onSuccess((event) => {
-      const coupon = event.target.coupon.value;
-      console.log(coupon);
+    .addField('#voucher-code-input',[
+      {
+        rule:'required',
+        errorMessage:'Vui lòng nhập mã giảm giá!'
+      }
+    ])
+    .onSuccess(async(event) => {
+      const input=event.target.voucherCode;
+      const button=event.target.querySelector('button[type="submit"]');
+      const message=document.querySelector('[data-coupon-message]');
+      button.disabled=true;
+
+      try{
+        const response=await fetch('/cart/voucher',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({voucherCode:input.value})
+        });
+        const data=await response.json();
+        if(response.status===401 && data.redirect){
+          window.location.href=data.redirect;
+          return;
+        }
+        if(data.code!=='success'){
+          throw new Error(data.message || 'Không thể áp dụng mã giảm giá!');
+        }
+
+        input.value=data.voucherCode;
+        document.querySelector('[cart-discount]').textContent=Number(data.discount).toLocaleString('vi-VN');
+        document.querySelector('[cart-total]').textContent=Number(data.total).toLocaleString('vi-VN');
+        message.textContent=data.message;
+        message.classList.remove('is-error');
+        message.hidden=false;
+      }
+      catch(error){
+        message.textContent=error.message;
+        message.classList.add('is-error');
+        message.hidden=false;
+      }
+      finally{
+        button.disabled=false;
+      }
     })
   ;
 }
-// End Email Form
+// End Coupon Form
 
 // Order Form
 const orderForm = document.querySelector("#order-form");
@@ -351,8 +390,8 @@ if(orderForm) {
       },
       {
         rule: 'minLength',
-        value: 5,
-        errorMessage: 'Họ tên phải có ít nhất 5 ký tự!',
+        value: 2,
+        errorMessage: 'Vui lòng cập nhật họ tên trong hồ sơ tài khoản!',
       },
       {
         rule: 'maxLength',
@@ -363,7 +402,7 @@ if(orderForm) {
     .addField('#phone-input', [
       {
         rule: 'required',
-        errorMessage: 'Vui lòng nhập số điện thoại!'
+        errorMessage: 'Vui lòng cập nhật số điện thoại trong hồ sơ tài khoản!'
       },
       {
         rule: 'customRegexp',
@@ -372,10 +411,9 @@ if(orderForm) {
       },
     ])
     .onSuccess(async(event) => {
-      const fullName = event.target.fullName.value;
-      const phone = event.target.phone.value;
       const note = event.target.note.value;
       const method = event.target.method.value;
+      const voucherCode=document.querySelector('#voucher-code-input')?.value || '';
       const submitButton=event.target.querySelector('button[type="submit"]');
       submitButton.disabled=true;
 
@@ -386,10 +424,9 @@ if(orderForm) {
             "Content-Type":"application/json"
           },
           body:JSON.stringify({
-            fullName,
-            phone,
             note,
-            paymentMethod:method
+            paymentMethod:method,
+            voucherCode
           })
         });
         const data=await response.json();

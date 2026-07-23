@@ -46,6 +46,7 @@ module.exports.detail= async(req,res)=>{
     if(tour.departureDate){
       tour.departureFormatDate=moment(tour.departureDate).format("DD/MM/YYYY");
     }
+    tour.informationIsHtml=/<[a-z][\s\S]*>/i.test(tour.information || '');
     const city=await City.find({});
     const reviews=await Review.find({
       tourId:tour.id,

@@ -35,7 +35,11 @@ block main
                                     
                     .box-tour-info
                         .inner-title Thông Tin Tour
-                        .inner-content !{tour.information}
+                        - const informationIsHtml=tour.informationIsHtml || /<[a-z][\s\S]*>/i.test(tour.information || '')
+                        if informationIsHtml
+                            .inner-content !{tour.information}
+                        else
+                            .inner-content.inner-content-plain= tour.information
 
                         .inner-read-more
                             button.button-outline Xem tất cả
@@ -45,7 +49,10 @@ block main
                           .inner-list
                               .inner-item
                                   .inner-title #{item.title}
-                                  .inner-content !{item.description}
+                                  .inner-content
+                                      if item.image
+                                          img(src=item.image alt=item.title loading="lazy")
+                                      .inner-schedule-copy !{item.description}
 
                     .tour-review-section
                         .tour-review-head

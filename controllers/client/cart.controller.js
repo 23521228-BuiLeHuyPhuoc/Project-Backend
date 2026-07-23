@@ -2,6 +2,7 @@ const mongoose=require('mongoose');
 const moment=require('moment');
 const Tour=require('../../models/tour.model');
 const City=require('../../models/city.model');
+const {getApplicableVoucher}=require('../../helpers/voucher.helper');
 
 const quantityFields=['quantityAdult','quantityChildren','quantityBaby'];
 
@@ -106,6 +107,37 @@ module.exports.cartDetail=async(req,res)=>{
     res.status(500).json({
       code:'error',
       message:'Không thể tải giỏ hàng lúc này!'
+    });
+  }
+};
+
+module.exports.applyVoucher=async(req,res)=>{
+  try{
+    const cartData=await getCartDetails(req.user);
+    if(cartData.subTotal<=0){
+      return res.status(400).json({
+        code:'error',
+        message:'Vui lòng chọn ít nhất một tour trước khi áp dụng mã giảm giá!'
+      });
+    }
+
+    const result=await getApplicableVoucher({
+      userId:req.user.id,
+      code:req.body.voucherCode,
+      subTotal:cartData.subTotal
+    });
+    res.json({
+      code:'success',
+      message:`Đã áp dụng mã ${result.code}!`,
+      voucherCode:result.code,
+      discount:result.discount,
+      total:result.total
+    });
+  }
+  catch(error){
+    res.status(error.status || 500).json({
+      code:'error',
+      message:error.status ? error.message : 'Không thể áp dụng mã giảm giá lúc này!'
     });
   }
 };

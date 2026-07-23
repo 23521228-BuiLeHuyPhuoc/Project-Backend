@@ -225,26 +225,50 @@ module.exports.roleChangeStatusPatch=async (req,res)=>{
     });
 }
 module.exports.accountAdminCreatePost=async (req,res)=>{
+    const password=String(req.body.password || "");
+    const confirmPassword=String(req.body.confirmPassword || "");
+    const isStrongPassword=password.length>=8
+        && /[A-Z]/.test(password)
+        && /[a-z]/.test(password)
+        && /\d/.test(password)
+        && /[@$!%*?&]/.test(password);
+
+    if(!isStrongPassword){
+        return res.status(400).json({
+            code:"error",
+            message:"Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt!"
+        });
+    }
+    if(password!==confirmPassword){
+        return res.status(400).json({
+            code:"error",
+            message:"Mật khẩu xác nhận không khớp!"
+        });
+    }
+
     const findRecord=await AccountAdmin.findOne({
         email:req.body.email,
         deleted:false
     });
     if(findRecord){
         return res.json({
-            code:"error"
+            code:"error",
+            message:"Email đã tồn tại!"
         })
     }
     const random=await bcrypt.genSalt(10);
-    req.body.password=await bcrypt.hash(req.body.password,random);
-    req.body.createdBy=req.account.id;
-    req.body.updatedBy=req.account.id;
+    const accountData={...req.body};
+    delete accountData.confirmPassword;
+    accountData.password=await bcrypt.hash(password,random);
+    accountData.createdBy=req.account.id;
+    accountData.updatedBy=req.account.id;
     if(req.file){
-        req.body.avatar=req.file.path;
+        accountData.avatar=req.file.path;
     }
     else{
-        req.body.avatar="";
+        accountData.avatar="";
     }
-    const newRecord=new AccountAdmin(req.body);
+    const newRecord=new AccountAdmin(accountData);
     await newRecord.save();
     req.flash("success","Tạo mới tài khoản quản trị thành công");
     res.json({

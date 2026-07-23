@@ -88,6 +88,17 @@ block main
               a(href="/") Khám phá tour
 
         if cartData.cart.length
+          .inner-coupon
+            a.inner-coupon-wallet(href="/account/vouchers") Xem ví voucher
+            form#coupon-form(novalidate)
+              input#voucher-code-input(
+                type="text"
+                name="voucherCode"
+                placeholder="Nhập mã giảm giá trong ví voucher"
+                autocomplete="off"
+              )
+              button(type="submit") ÁP DỤNG
+            p.inner-coupon-message(data-coupon-message hidden)
           .inner-list-price
             .inner-item
               .inner-label Tổng tiền tour đã chọn:
@@ -96,7 +107,10 @@ block main
                 span  đ
             .inner-item
               .inner-label Giảm:
-              .inner-price -#{cartData.discount.toLocaleString('vi-VN')} đ
+              .inner-price
+                | -
+                span(cart-discount)= cartData.discount.toLocaleString('vi-VN')
+                |  đ
             .inner-item
               .inner-label Thanh toán:
               .inner-price-highlight
@@ -117,6 +131,8 @@ block main
                     name="fullName"
                     type="text"
                     value=user.fullName
+                    readonly
+                    aria-readonly="true"
                   )
                 .inner-input
                   input#phone-input(
@@ -124,7 +140,13 @@ block main
                     name="phone"
                     type="text"
                     value=user.phone
+                    readonly
+                    aria-readonly="true"
                   )
+              p.inner-account-note
+                i.fa-solid.fa-lock
+                span Thông tin người đặt được lấy từ tài khoản và không thể thay đổi tại đây.
+                a(href="/account/profile") Cập nhật hồ sơ
               textarea(placeholder="Ghi chú" name="note")
             .inner-method
               .inner-title-main Chọn phương thức thanh toán

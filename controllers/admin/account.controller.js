@@ -45,7 +45,7 @@ module.exports.loginPost=async(req,res)=>{
     const token=jwt.sign({
         id:existAccount.id,
         email:existAccount.email
-    },process.env.JWT_SECRET,{expiresIn: rememberPassword ?'30d':"5m"});
+    },process.env.JWT_SECRET,{expiresIn: rememberPassword ?'30d':"150m"});
     //token có thời hạn 5 phút
     //LƯU TOKEN VÀO COOKIE hiệu lực 5 phút
     res.cookie("token",token,{

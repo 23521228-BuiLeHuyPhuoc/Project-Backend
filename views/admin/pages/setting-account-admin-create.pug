@@ -31,7 +31,16 @@ block main
           option(value="inactive") Dừng hoạt động
       .inner-group
         label(class="inner-label" for="password") Mật khẩu
-        input(type="text" id="password" name="password")
+        .inner-password-control
+          input(type="password" id="password" name="password" autocomplete="new-password")
+          button.inner-password-toggle(type="button" data-password-toggle aria-label="Hiện mật khẩu")
+            i.fa-solid.fa-eye
+      .inner-group
+        label(class="inner-label" for="confirmPassword") Xác nhận mật khẩu
+        .inner-password-control
+          input(type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password")
+          button.inner-password-toggle(type="button" data-password-toggle aria-label="Hiện mật khẩu xác nhận")
+            i.fa-solid.fa-eye
       .inner-group.inner-two-col
         label(class="inner-label" for="avatar") Ảnh đại diện
         div(class="inner-upload-image")

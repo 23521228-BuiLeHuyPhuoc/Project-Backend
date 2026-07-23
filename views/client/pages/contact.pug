@@ -1,0 +1,114 @@
+extends ../layouts/default.pug
+
+block main
+  main.contact-page
+    .container
+      nav.contact-breadcrumb(aria-label="Điều hướng")
+        a(href="/") Trang chủ
+        i.fa-solid.fa-chevron-right(aria-hidden="true")
+        span Liên hệ
+
+      .contact-heading
+        h1 Liên hệ với chúng tôi
+        p Cần tư vấn tour hoặc hỗ trợ đơn hàng? Hãy để lại thông tin, đội ngũ của chúng tôi sẽ phản hồi sớm nhất có thể.
+
+      .contact-layout
+        aside.contact-info(aria-label="Thông tin liên hệ")
+          h2 Thông tin liên hệ
+          p.inner-note Bạn cũng có thể liên hệ trực tiếp qua các kênh dưới đây trong giờ làm việc.
+
+          .contact-info-list
+            .contact-info-item
+              i.fa-solid.fa-phone(aria-hidden="true")
+              div
+                span Điện thoại
+                if settingWebsiteInfo.phone
+                  a(href=`tel:${settingWebsiteInfo.phone.replace(/\s/g, "")}`)=settingWebsiteInfo.phone
+                else
+                  strong Đang cập nhật
+            .contact-info-item
+              i.fa-regular.fa-envelope(aria-hidden="true")
+              div
+                span Email
+                if settingWebsiteInfo.email
+                  a(href=`mailto:${settingWebsiteInfo.email}`)=settingWebsiteInfo.email
+                else
+                  strong Đang cập nhật
+            .contact-info-item
+              i.fa-solid.fa-location-dot(aria-hidden="true")
+              div
+                span Địa chỉ
+                strong=settingWebsiteInfo.address || "Đang cập nhật"
+            .contact-info-item
+              i.fa-regular.fa-clock(aria-hidden="true")
+              div
+                span Giờ làm việc
+                strong 08:00 - 17:30, Thứ 2 - Thứ 7
+
+        section.contact-form-panel
+          .inner-head
+            h2 Gửi lời nhắn
+            p Các trường có dấu * là thông tin bắt buộc.
+
+          form.contact-form(contact-form novalidate)
+            .contact-honeypot(aria-hidden="true")
+              label(for="contact-website") Website
+              input#contact-website(type="text" name="website" tabindex="-1" autocomplete="off")
+
+            .contact-form-grid
+              .contact-field
+                label(for="contact-full-name") Họ và tên *
+                input#contact-full-name(
+                  type="text"
+                  name="fullName"
+                  value=contactUser ? contactUser.fullName : ""
+                  autocomplete="name"
+                  minlength="2"
+                  maxlength="80"
+                  required
+                )
+              .contact-field
+                label(for="contact-email") Email *
+                input#contact-email(
+                  type="email"
+                  name="email"
+                  value=contactUser ? contactUser.email : ""
+                  autocomplete="email"
+                  maxlength="150"
+                  required
+                )
+              .contact-field
+                label(for="contact-phone") Số điện thoại
+                input#contact-phone(
+                  type="tel"
+                  name="phone"
+                  value=contactUser ? contactUser.phone : ""
+                  autocomplete="tel"
+                  maxlength="20"
+                  placeholder="Ví dụ: 0901 234 567"
+                )
+              .contact-field
+                label(for="contact-subject") Nội dung cần hỗ trợ *
+                select#contact-subject(name="subject" required)
+                  option(value="") Chọn một nội dung
+                  each topic in topics
+                    option(value=topic.value)=topic.label
+
+            .contact-field
+              label(for="contact-message") Lời nhắn *
+              textarea#contact-message(
+                name="message"
+                rows="7"
+                minlength="10"
+                maxlength="2000"
+                placeholder="Bạn cần chúng tôi hỗ trợ điều gì?"
+                required
+              )
+
+            .contact-form-footer
+              p.contact-form-message(role="status" aria-live="polite" contact-form-message hidden)
+              button.contact-submit(type="submit")
+                span Gửi liên hệ
+                i.fa-solid.fa-arrow-right(aria-hidden="true")
+
+  script(src="/assets/js/contact.js")

@@ -49,7 +49,10 @@ header.header
               href="/tin-tuc"
               ) Tin tức
           li
-            a(href="#") Liên hệ
+            a(
+              class=currentPath && currentPath.startsWith("/contact") ? "active" : ""
+              href="/contact"
+              ) Liên hệ
         .inner-overlay
       // Client actions
       if user

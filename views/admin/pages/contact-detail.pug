@@ -1,0 +1,63 @@
+extends ../layouts/default.pug
+
+block main
+  .contact-admin-heading
+    div
+      a.inner-back(href=`/${pathAdmin}/contact/list`)
+        i.fa-solid.fa-arrow-left
+        |  Danh sách liên hệ
+      h1.box-title Liên hệ từ #{contact.fullName}
+    if contact.status==="resolved"
+      .badge.badge-green Đã xử lý
+    else
+      .badge.badge-blue Đã đọc
+
+  .contact-admin-detail
+    .inner-meta
+      .inner-item
+        span Họ và tên
+        strong=contact.fullName
+      .inner-item
+        span Email
+        a(href=`mailto:${contact.email}`)=contact.email
+      .inner-item
+        span Số điện thoại
+        if contact.phone
+          a(href=`tel:${contact.phone}`)=contact.phone
+        else
+          strong Không cung cấp
+      .inner-item
+        span Thời gian gửi
+        strong=contact.createdAtLabel
+      .inner-item.inner-full
+        span Nội dung cần hỗ trợ
+        strong=contact.subjectLabel
+
+    .inner-message
+      h2 Lời nhắn
+      p=contact.message
+
+    .inner-actions
+      a.inner-primary(href=`mailto:${contact.email}?subject=${encodeURIComponent(`Phản hồi: ${contact.subjectLabel}`)}`)
+        i.fa-regular.fa-envelope
+        |  Phản hồi qua email
+      if contact.phone
+        a.inner-secondary(href=`tel:${contact.phone}`)
+          i.fa-solid.fa-phone
+          |  Gọi điện
+      if contact.status!=="resolved"
+        button.inner-secondary(
+          type="button"
+          data-status-api=`/${pathAdmin}/contact/status/${contact._id}`
+          data-status="resolved"
+        )
+          i.fa-solid.fa-check
+          |  Đánh dấu đã xử lý
+      else
+        button.inner-secondary(
+          type="button"
+          data-status-api=`/${pathAdmin}/contact/status/${contact._id}`
+          data-status="read"
+        )
+          i.fa-solid.fa-rotate-left
+          |  Mở lại liên hệ

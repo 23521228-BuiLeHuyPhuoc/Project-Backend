@@ -19,9 +19,10 @@ block main
       .inner-group
         label(class="inner-label" for="paymentMethod") Phương thức thanh toán
         select(id="paymentMethod" name="paymentMethod")
-          option(value="") Ví Momo
-          option(value="") VNPay
-          option(value="") ZaloPay
+          option(value="money" selected=orderRecord.paymentMethod==="money") Tiền mặt
+          option(value="bank" selected=orderRecord.paymentMethod==="bank") Chuyển khoản ngân hàng
+          option(value="vnpay" selected=orderRecord.paymentMethod==="vnpay") VNPay
+          option(value="zalopay" selected=orderRecord.paymentMethod==="zalopay") ZaloPay
       .inner-group
         label(class="inner-label" for="paymentStatus") Trạng thái thanh toán
         select(id="paymentStatus" name="paymentStatus")
@@ -34,6 +35,8 @@ block main
         label(class="inner-label" for="status") Trạng thái
         select(id="status" name="status")
           option(value="initial" selected=orderRecord.status=="initial") Khởi tạo
+          option(value="pending" selected=orderRecord.status=="pending") Đang xử lý
+          option(value="confirmed" selected=orderRecord.status=="confirmed") Đã xác nhận
           option(value="completed" selected=orderRecord.status=="completed") Hoàn thành
           option(value="cancelled" selected=orderRecord.status=="cancelled") Hủy
       .inner-group
@@ -56,7 +59,7 @@ block main
         .inner-order-total
           div Tổng tiền: #{(orderRecord.total + orderRecord.discount).toLocaleString("vi-VN")}đ
           div Giảm: #{orderRecord.discount.toLocaleString("vi-VN")}đ
-          div Mã giảm: TOURMUAHE2024
+          div Mã giảm: #{orderRecord.voucherCode || "-"}
           div Thanh toán: <span class="inner-order-price">#{orderRecord.total.toLocaleString("vi-VN")}đ</span>
       .inner-button.inner-two-col
         button Cập nhật

@@ -1,63 +1,96 @@
 extends ../layouts/default.pug
-block main
-  h1.box-title Thông tin liên hệ
 
-  //- Section 4
+block main
+  h1.box-title Quản lý liên hệ
+
   .section-4
     .inner-wrap
       .inner-item.inner-label
-        <i class="fa-solid fa-filter"></i> Bộ lọc
-      .inner-item.inner-date
-        input(type="date")
-        span -
-        input(type="date")
-      .inner-item.inner-reset
-        <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
-  //- End Section 4
+        i.fa-solid.fa-filter
+        |  Bộ lọc
+      .inner-item
+        select(data-query-filter="status")
+          option(value="") Tất cả trạng thái
+          option(value="unread" selected=filters.status==="unread") Chưa đọc
+          option(value="read" selected=filters.status==="read") Đã đọc
+          option(value="resolved" selected=filters.status==="resolved") Đã xử lý
+      a.inner-item.inner-reset(href=`/${pathAdmin}/contact/list`)
+        i.fa-solid.fa-rotate-left
+        |  Xóa bộ lọc
 
-  //- Section 5
   .section-5
     .inner-wrap
-      .inner-change-status
-        .inner-item
-          select
-            option(value="") -- Hành động --
-            option(value="") Xóa
-        .inner-item
-          button Áp dụng
       .inner-search
-        <i class="fa-solid fa-magnifying-glass"></i>
-        input(type="text" placeholder="Tìm kiếm")
-  //- End Section 5
+        i.fa-solid.fa-magnifying-glass
+        input(
+          type="text"
+          value=filters.search
+          placeholder="Tìm tên, email, số điện thoại"
+          data-query-search
+        )
 
-  //- Section 6
   .section-6
     .table-2
       table
         thead
           tr
-            th(class="inner-center")
-              input(type="checkbox" class="inner-check")
-            th Email
-            th Ngày tạo
-            th(class="inner-center") Hành động
+            th Người gửi
+            th Nội dung cần hỗ trợ
+            th Lời nhắn
+            th Trạng thái
+            th Thời gian
+            th.inner-center Hành động
         tbody
-          each contact of contactList
+          if contactList.length
+            each contact in contactList
+              tr(class=contact.status==="unread" ? "contact-row-unread" : "")
+                td
+                  .contact-person
+                    strong=contact.fullName || "Khách hàng"
+                    a(href=`mailto:${contact.email}`)=contact.email
+                    if contact.phone
+                      span=contact.phone
+                td=contact.subjectLabel
+                td
+                  .contact-message-preview=contact.message.length > 90 ? `${contact.message.slice(0, 90)}...` : contact.message
+                td
+                  if contact.status==="unread"
+                    .badge.badge-orange Chưa đọc
+                  else if contact.status==="resolved"
+                    .badge.badge-green Đã xử lý
+                  else
+                    .badge.badge-blue Đã đọc
+                td=contact.createdAtLabel
+                td.inner-center
+                  .inner-buttons
+                    a.inner-edit(href=`/${pathAdmin}/contact/detail/${contact._id}` title="Xem liên hệ")
+                      i.fa-regular.fa-eye
+                    if contact.status!=="resolved"
+                      button.inner-edit(
+                        type="button"
+                        data-status-api=`/${pathAdmin}/contact/status/${contact._id}`
+                        data-status="resolved"
+                        title="Đánh dấu đã xử lý"
+                      )
+                        i.fa-solid.fa-check
+                    button.inner-delete(
+                      type="button"
+                      data-delete-api=`/${pathAdmin}/contact/delete/${contact._id}`
+                      title="Xóa liên hệ"
+                    )
+                      i.fa-regular.fa-trash-can
+          else
             tr
-              td(class="inner-center")
-                input(type="checkbox" class="inner-check")
-              td #{contact.email}
-              td #{contact.createdFormatAt}
-              td(class="inner-center")
-                .inner-buttons
-                  button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
-  //- End Section 6
+              td.inner-center(colspan="6") Chưa có liên hệ phù hợp.
 
-  //- Section 7
-  .section-7
-    span(class="inner-label") Hiển thị 1 - 9 của 78
-    select(class="inner-pagination")
-      option Trang 1
-      option Trang 2
-      option Trang 3
-  //- End Section 7
+  if pagination.total
+    .section-7
+      span.inner-label Hiển thị #{(pagination.page - 1) * pagination.limit + 1} - #{Math.min(pagination.page * pagination.limit, pagination.total)} trong #{pagination.total} liên hệ
+      nav.contact-admin-pagination(aria-label="Phân trang liên hệ")
+        if pagination.page > 1
+          a(href=`?${new URLSearchParams({...filters, page: pagination.page - 1}).toString()}` aria-label="Trang trước")
+            i.fa-solid.fa-chevron-left
+        span Trang #{pagination.page} / #{pagination.totalPages}
+        if pagination.page < pagination.totalPages
+          a(href=`?${new URLSearchParams({...filters, page: pagination.page + 1}).toString()}` aria-label="Trang sau")
+            i.fa-solid.fa-chevron-right

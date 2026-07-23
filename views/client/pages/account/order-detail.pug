@@ -54,6 +54,10 @@ block main
                   div
                     dt Ghi chú
                     dd= order.note
+                if order.voucherCode
+                  div
+                    dt Mã giảm giá
+                    dd= order.voucherCode
               .account-price-lines
                 div
                   span Tạm tính

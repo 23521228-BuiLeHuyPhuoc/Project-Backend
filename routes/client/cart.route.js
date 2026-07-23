@@ -6,6 +6,7 @@ const authMiddleware=require('../../middlewares/client/auth.middleware');
 router.use(authMiddleware.requireAuth);
 router.get('/',cartController.cart);
 router.get('/detail',cartController.cartDetail);
+router.post('/voucher',cartController.applyVoucher);
 router.post('/add',cartController.addPost);
 router.patch('/items/:itemId',cartController.updatePatch);
 router.delete('/items/:itemId',cartController.deleteItem);

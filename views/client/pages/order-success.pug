@@ -11,6 +11,8 @@ block main
         p Tên khách hàng: #{order.fullName}
         p Số điện thoại: #{order.phone}
         p Ghi chú: #{order.note}
+        if order.voucherCode
+          p Mã giảm giá: #{order.voucherCode}
         p 
           |Phương thức thanh toán: 
           -if(order.paymentMethod=="money")

@@ -1,5 +1,8 @@
 const Tour=require('../../models/tour.model');
 const Order=require('../../models/order.model');
+const Voucher=require('../../models/voucher.model');
+const UserVoucher=require('../../models/user-voucher.model');
+const mongoose=require('mongoose');
 const moment=require('moment');
 const City=require('../../models/city.model');
 const generateHelper=require('../../helpers/generate.helper');
@@ -8,22 +11,33 @@ const CryptoJS=require('crypto-js');
 require('dotenv').config();
 const sortHelper=require('../../helpers/sort.helper');
 const Notification=require('../../models/notification.model');
+const {cancelOrderAndRelease}=require('../../helpers/order.helper');
+const {
+  VoucherValidationError,
+  calculateDiscount,
+  getApplicableVoucher,
+  normalizeVoucherCode
+}=require('../../helpers/voucher.helper');
 module.exports.createPost=async(req,res)=>{
   const reservedItems=[];
   let order=null;
+  let orderId=null;
+  let reservedUserVoucher=null;
+  let reservedVoucher=null;
 
   try{
-    const fullName=typeof req.body.fullName==='string' ? req.body.fullName.trim() : '';
-    const phone=typeof req.body.phone==='string' ? req.body.phone.replace(/[\s.-]/g,'') : '';
+    const fullName=typeof req.user.fullName==='string' ? req.user.fullName.trim() : '';
+    const phone=typeof req.user.phone==='string' ? req.user.phone.replace(/[\s.-]/g,'') : '';
     const note=typeof req.body.note==='string' ? req.body.note.trim() : '';
     const paymentMethod=req.body.paymentMethod;
+    const voucherCode=normalizeVoucherCode(req.body.voucherCode);
     const paymentMethods=['money','bank','zalopay','vnpay'];
 
     if(fullName.length<2 || fullName.length>50){
-      return res.status(400).json({code:'error',message:'Họ tên không hợp lệ!'});
+      return res.status(400).json({code:'error',message:'Vui lòng cập nhật họ tên trong hồ sơ tài khoản!'});
     }
     if(!/^(?:\+84|0)\d{8,10}$/.test(phone)){
-      return res.status(400).json({code:'error',message:'Số điện thoại không đúng định dạng!'});
+      return res.status(400).json({code:'error',message:'Vui lòng cập nhật số điện thoại hợp lệ trong hồ sơ tài khoản!'});
     }
     if(!paymentMethods.includes(paymentMethod)){
       return res.status(400).json({code:'error',message:'Phương thức thanh toán không hợp lệ!'});
@@ -74,6 +88,10 @@ module.exports.createPost=async(req,res)=>{
         +(item.priceNewBaby*item.quantityBaby);
     }
 
+    const voucherSelection=voucherCode
+      ? await getApplicableVoucher({userId:req.user.id,code:voucherCode,subTotal})
+      : null;
+
     for(const item of items){
       const reservedTour=await Tour.findOneAndUpdate({
         _id:item.tourId,
@@ -97,8 +115,47 @@ module.exports.createPost=async(req,res)=>{
       reservedItems.push(item);
     }
 
-    const discount=0;
+    orderId=new mongoose.Types.ObjectId();
+    let discount=0;
+    if(voucherSelection){
+      reservedUserVoucher=await UserVoucher.findOneAndUpdate({
+        _id:voucherSelection.userVoucher._id,
+        userId:req.user.id,
+        status:'available'
+      },{
+        $set:{status:'used',usedAt:new Date(),orderId}
+      },{new:true});
+      if(!reservedUserVoucher){
+        throw new VoucherValidationError('Mã giảm giá vừa được sử dụng ở một đơn hàng khác!',409);
+      }
+
+      const now=new Date();
+      reservedVoucher=await Voucher.findOneAndUpdate({
+        _id:voucherSelection.voucher._id,
+        status:'active',
+        deleted:false,
+        startAt:{$lte:now},
+        endAt:{$gte:now},
+        $expr:{
+          $or:[
+            {$lte:['$usageLimit',0]},
+            {$lt:['$usedCount','$usageLimit']}
+          ]
+        }
+      },{
+        $inc:{usedCount:1}
+      },{new:true});
+      if(!reservedVoucher){
+        throw new VoucherValidationError('Mã giảm giá vừa hết lượt sử dụng!',409);
+      }
+      if(subTotal<Number(reservedVoucher.minOrderValue || 0)){
+        throw new VoucherValidationError('Đơn hàng không còn đủ điều kiện áp dụng mã giảm giá!');
+      }
+      discount=calculateDiscount(reservedVoucher,subTotal);
+    }
+
     order=await Order.create({
+      _id:orderId,
       orderCode:`OD${Date.now()}`,
       userId:req.user.id,
       fullName,
@@ -108,6 +165,7 @@ module.exports.createPost=async(req,res)=>{
       subTotal,
       discount,
       total:subTotal-discount,
+      voucherCode:voucherSelection ? voucherSelection.code : '',
       paymentMethod,
       paymentStatus:'unpaid',
       status:'initial'
@@ -139,6 +197,24 @@ module.exports.createPost=async(req,res)=>{
     if(order){
       await Order.deleteOne({_id:order._id}).catch(()=>{});
     }
+    if(reservedVoucher){
+      await Voucher.updateOne({
+        _id:reservedVoucher._id,
+        usedCount:{$gt:0}
+      },{
+        $inc:{usedCount:-1}
+      }).catch(()=>{});
+    }
+    if(reservedUserVoucher){
+      await UserVoucher.updateOne({
+        _id:reservedUserVoucher._id,
+        userId:req.user.id,
+        status:'used',
+        orderId
+      },{
+        $set:{status:'available',usedAt:null,orderId:null}
+      }).catch(()=>{});
+    }
     await Promise.all(reservedItems.map(reserved=>Tour.updateOne(
       {_id:reserved.tourId},
       {$inc:{
@@ -149,7 +225,7 @@ module.exports.createPost=async(req,res)=>{
     ).catch(()=>{})));
     res.status(error.status || 500).json({
       code:'error',
-      message:error.status===409 ? error.message : 'Không thể đặt tour lúc này!'
+      message:error.status ? error.message : 'Không thể đặt tour lúc này!'
     });
   }
 }
@@ -202,6 +278,7 @@ module.exports.paymentZaloPay=async(req,res)=>{
         const orderDetail=await Order.findOne({
             deleted:false,
             paymentStatus:"unpaid",
+            paymentMethod:'zalopay',
             _id:orderId,
             userId:req.user.id
         });
@@ -285,16 +362,25 @@ module.exports.paymentZaloPayResultPost = async (req, res) => {
       let dataJson = JSON.parse(dataStr, config.key2);
       const [ phone, orderId ] = dataJson.app_user.split("-");
 
-      await Order.updateOne({
+      const updateResult=await Order.updateOne({
         _id: orderId,
         phone: phone,
-        deleted: false
+        total:Number(dataJson.amount),
+        paymentMethod:'zalopay',
+        deleted: false,
+        status:{$ne:'cancelled'}
       }, {
-        paymentStatus: "paid"
+        paymentStatus: "paid",
+        status:'confirmed'
       })
-
-      result.return_code = 1;
-      result.return_message = "success";
+      if(updateResult.matchedCount===0){
+        result.return_code=0;
+        result.return_message="order not found or invalid";
+      }
+      else{
+        result.return_code = 1;
+        result.return_message = "success";
+      }
     }
   } catch (ex) {
     result.return_code = 0; // ZaloPay server sẽ callback lại (tối đa 3 lần)
@@ -310,6 +396,7 @@ module.exports.paymentVnPay=async(req,res)=>{
         const orderDetail=await Order.findOne({
             deleted:false,
             paymentStatus:"unpaid",
+            paymentMethod:'vnpay',
             _id:OrderId,
             userId:req.user.id
         });
@@ -390,26 +477,44 @@ module.exports.paymentVnPayResult=async(req,res)=>{
     let hmac = crypto.createHmac("sha512", secretKey);
     let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");     
 
-    if(secureHash === signed){
-        //Kiem tra xem du lieu trong db co hop le hay khong va thong bao ket qua
-        if(vnp_Params['vnp_ResponseCode'] === '00'&& vnp_Params['vnp_TransactionStatus']==='00') {
-        const orderId=vnp_Params['vnp_TxnRef'].split("-")[0];
-        const orderDetail=await Order.findOne({
-            _id:orderId,
-            deleted:false
-        })
-        await Order.updateOne({
-            _id:orderId,
-            deleted:false
-        },{
-                paymentStatus:"paid"
-        })
-        res.redirect(`${process.env.NGROK}/order/success?orderId=${orderId}&phone=${orderDetail.phone}`);
+    if(secureHash !== signed){
+      return res.redirect('/account/orders');
     }
-    else{
-        res.redirect("/");
+
+    const orderId=String(vnp_Params['vnp_TxnRef'] || '').split('-')[0];
+    if(!mongoose.isValidObjectId(orderId)){
+      return res.redirect('/account/orders');
     }
-    } else{
-        res.redirect("/");
+    const orderDetail=await Order.findOne({
+      _id:orderId,
+      paymentMethod:'vnpay',
+      deleted:false,
+      status:{$ne:'cancelled'}
+    });
+    if(!orderDetail){
+      return res.redirect('/account/orders');
     }
+
+    const paymentSucceeded=vnp_Params['vnp_ResponseCode']==='00'
+      && vnp_Params['vnp_TransactionStatus']==='00'
+      && Number(vnp_Params['vnp_Amount'])===Number(orderDetail.total)*100;
+    if(paymentSucceeded){
+      await Order.updateOne({
+        _id:orderId,
+        deleted:false,
+        status:{$ne:'cancelled'}
+      },{
+        paymentStatus:'paid',
+        status:'confirmed'
+      });
+      return res.redirect(`/order/success?orderId=${orderId}`);
+    }
+
+    await cancelOrderAndRelease({
+      _id:orderId,
+      paymentMethod:'vnpay',
+      paymentStatus:'unpaid',
+      status:{$in:['initial','pending']}
+    });
+    return res.redirect(`/account/orders/${orderId}`);
 }

@@ -16,6 +16,37 @@ if(buttonMenuMobile) {
 }
 // End Menu Mobile
 
+// Header Notifications
+const adminNotify = document.querySelector("[data-admin-notify]");
+if(adminNotify) {
+  const button = adminNotify.querySelector("[data-admin-notify-button]");
+
+  const closeNotify = () => {
+    adminNotify.classList.remove("is-open");
+    button.setAttribute("aria-expanded", "false");
+  };
+
+  button.addEventListener("click", event => {
+    event.stopPropagation();
+    const isOpen = adminNotify.classList.toggle("is-open");
+    button.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  document.addEventListener("click", event => {
+    if(!adminNotify.contains(event.target)) {
+      closeNotify();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if(event.key === "Escape") {
+      closeNotify();
+      button.focus();
+    }
+  });
+}
+// End Header Notifications
+
 // Schedule Section 8
 const scheduleSection8 = document.querySelector(".section-8 .inner-schedule");
 if(scheduleSection8) {
@@ -644,6 +675,26 @@ if(settingWebsiteInfoForm) {
 }
 // End Setting Website Info Form
 
+// Password Visibility
+const passwordToggleList = document.querySelectorAll("[data-password-toggle]");
+passwordToggleList.forEach(button => {
+  const input = button.closest(".inner-password-control")?.querySelector("input");
+  const icon = button.querySelector("i");
+
+  if(!input || !icon) {
+    return;
+  }
+
+  button.addEventListener("click", () => {
+    const isHidden = input.type === "password";
+    input.type = isHidden ? "text" : "password";
+    icon.classList.toggle("fa-eye", !isHidden);
+    icon.classList.toggle("fa-eye-slash", isHidden);
+    button.setAttribute("aria-label", isHidden ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+  });
+});
+// End Password Visibility
+
 // Setting Account Admin Create Form
 const settingAccountAdminCreateForm = document.querySelector("#setting-account-admin-create-form");
 if(settingAccountAdminCreateForm) {
@@ -719,6 +770,19 @@ if(settingAccountAdminCreateForm) {
         errorMessage: 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt!',
       },
     ])
+    .addField('#confirmPassword', [
+      {
+        rule: 'required',
+        errorMessage: 'Vui lòng xác nhận mật khẩu!',
+      },
+      {
+        validator: (value, fields) => {
+          const password = fields['#password'].elem.value;
+          return value === password;
+        },
+        errorMessage: 'Mật khẩu xác nhận không khớp!',
+      },
+    ])
     .onSuccess((event) => {
       const fullName = event.target.fullName.value;
       const email = event.target.email.value;
@@ -727,20 +791,13 @@ if(settingAccountAdminCreateForm) {
       const positionCompany = event.target.positionCompany.value;
       const status = event.target.status.value;
       const password = event.target.password.value;
+      const confirmPassword = event.target.confirmPassword.value;
       const avatars = filePond.avatar.getFiles();
       let avatar = null;
       if(avatars.length > 0) {
         avatar = avatars[0].file;
       }
 
-      console.log(fullName);
-      console.log(email);
-      console.log(phone);
-      console.log(role);
-      console.log(positionCompany);
-      console.log(status);
-      console.log(password);
-      console.log(avatar);
       const formData=new FormData();
       formData.append("fullName",fullName);
       formData.append("email",email);
@@ -749,6 +806,7 @@ if(settingAccountAdminCreateForm) {
       formData.append("positionCompany",positionCompany);
       formData.append("status",status);
       formData.append("password",password);
+      formData.append("confirmPassword",confirmPassword);
       formData.append("avatar",avatar);
       fetch(`/${pathAdmin}/setting/account-admin/create`,{
         method:"POST",
@@ -1378,16 +1436,36 @@ if(profileChangePasswordForm) {
 const sider = document.querySelector(".sider");
 if(sider) {
   const pathNameCurrent = window.location.pathname;
-  const splitPathNameCurrent = pathNameCurrent.split("/");
+  const splitPathNameCurrent = pathNameCurrent.split("/").filter(Boolean);
   const menuList = sider.querySelectorAll("a");
+  let activeMenu = null;
+  let bestMatchLength = 1;
+
   menuList.forEach(item => {
     const href = item.href;
     const pathName = new URL(href).pathname;
-    const splitPathName = pathName.split("/");
-    if(splitPathNameCurrent[1] == splitPathName[1] && splitPathNameCurrent[2] == splitPathName[2]) {
-      item.classList.add("active");
+    const splitPathName = pathName.split("/").filter(Boolean);
+    let matchLength = 0;
+
+    while(
+      matchLength < splitPathNameCurrent.length &&
+      matchLength < splitPathName.length &&
+      splitPathNameCurrent[matchLength] == splitPathName[matchLength]
+    ) {
+      matchLength++;
     }
-  })
+
+    if(matchLength > bestMatchLength) {
+      bestMatchLength = matchLength;
+      activeMenu = item;
+    }
+
+    item.classList.remove("active");
+  });
+
+  if(activeMenu) {
+    activeMenu.classList.add("active");
+  }
 }
 // End Sider
 //Logout

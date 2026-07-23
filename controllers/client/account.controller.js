@@ -7,6 +7,7 @@ const Review=require('../../models/review.model');
 const Tour=require('../../models/tour.model');
 const User=require('../../models/user.model');
 const UserVoucher=require('../../models/user-voucher.model');
+const {cancelOrderAndRelease}=require('../../helpers/order.helper');
 
 const budgetRanges={
   "under-2":{min:0,max:2000000},
@@ -48,7 +49,9 @@ const enrichOrders=async orders=>{
     statusLabel:statusLabels[order.status] || order.status,
     paymentLabel:paymentLabels[order.paymentStatus] || order.paymentStatus,
     createdAtLabel:moment(order.createdAt).format('DD/MM/YYYY HH:mm'),
-    canCancel:['initial','pending'].includes(order.status) && order.paymentStatus==='unpaid',
+    canCancel:['initial','pending'].includes(order.status)
+      && order.paymentStatus==='unpaid'
+      && ['money','bank'].includes(order.paymentMethod),
     items:(order.items || []).map(item=>({
       ...item,
       tour:tourMap.get(String(item.tourId)),
@@ -129,15 +132,12 @@ module.exports.orderDetail=async(req,res)=>{
 
 module.exports.cancelOrder=async(req,res)=>{
   try{
-    const order=await Order.findOneAndUpdate({
+    const order=await cancelOrderAndRelease({
       _id:req.params.id,
       userId:req.user.id,
-      deleted:false,
       status:{$in:['initial','pending']},
-      paymentStatus:'unpaid'
-    },{
-      status:'cancelled',
-      cancelledAt:new Date()
+      paymentStatus:'unpaid',
+      paymentMethod:{$in:['money','bank']}
     });
 
     if(!order){
@@ -146,15 +146,6 @@ module.exports.cancelOrder=async(req,res)=>{
         message:'Đơn hàng không thể hủy ở trạng thái hiện tại!'
       });
     }
-
-    await Promise.all((order.items || []).map(item=>Tour.updateOne(
-      {_id:item.tourId},
-      {$inc:{
-        stockAdult:Number(item.quantityAdult || 0),
-        stockChildren:Number(item.quantityChildren || 0),
-        stockBaby:Number(item.quantityBaby || 0)
-      }}
-    )));
 
     await Notification.create({
       userId:req.user.id,

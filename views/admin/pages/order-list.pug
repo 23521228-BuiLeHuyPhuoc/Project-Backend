@@ -53,6 +53,7 @@ block main
             th Danh sách tour
             th Thanh toán
             th Trạng thái
+            th Xác nhận đặt tour
             th(class="inner-center") Ngày đặt
             th Hành động
         tbody
@@ -78,18 +79,9 @@ block main
               td
                 div Tổng tiền: #{(order.total + order.discount).toLocaleString("vi-VN")}đ
                 div Giảm: #{order.discount.toLocaleString("vi-VN")}đ
-                div Mã giảm: TOURMUAHE2024
+                div Mã giảm: #{order.voucherCode || "-"}
                 div Thanh toán: #{order.total.toLocaleString("vi-VN")}đ
-                div
-                  |PTTT: 
-                  if order.paymentMethod=="momo"
-                    | Ví Momo
-                  else if order.paymentMethod=="money"
-                    | Tiền mặt
-                  else if order.paymentMethod=="zalopay"
-                    | ZaloPay
-                  else 
-                    | Chưa xác định
+                div PTTT: #{order.PaymentMethodLabel}
                 div 
                   |TTTT: 
                   if (order.paymentStatus=="unpaid")
@@ -97,16 +89,46 @@ block main
                   else 
                     | Đã thanh toán
               td
-                -if(order.status=="initial")
-                .badge.badge-orange Khởi tạo
-                
+                if order.status==="confirmed" || order.status==="completed"
+                  .badge.badge-green=order.StatusLabel
+                else if order.status==="cancelled"
+                  .badge.badge-red=order.StatusLabel
+                else
+                  .badge.badge-orange=order.StatusLabel
+              td
+                if order.CanConfirmCash && permission.includes('order-edit')
+                  .inner-buttons
+                    form(method="post" action=`/${pathAdmin}/order/confirm/${order._id}/confirmed`)
+                      button.inner-edit(
+                        type="submit"
+                        title="Xác nhận thành công"
+                        onclick="return confirm('Xác nhận đơn tiền mặt này thành công?')"
+                      )
+                        i.fa-solid.fa-check
+                    form(method="post" action=`/${pathAdmin}/order/confirm/${order._id}/cancelled`)
+                      button.inner-delete(
+                        type="submit"
+                        title="Xác nhận không thành công"
+                        onclick="return confirm('Xác nhận đơn tiền mặt này không thành công và hoàn lại số chỗ?')"
+                      )
+                        i.fa-solid.fa-xmark
+                else if order.status==="confirmed" || order.status==="completed"
+                  .badge.badge-green Thành công
+                else if order.status==="cancelled"
+                  .badge.badge-red Không thành công
+                else if order.paymentMethod==="zalopay" || order.paymentMethod==="vnpay"
+                  .badge.badge-orange Cổng thanh toán tự cập nhật
+                else if order.paymentMethod==="bank"
+                  .badge.badge-orange Chờ đối soát chuyển khoản
+                else
+                  .badge.badge-orange Chờ xác nhận
               td(class="inner-center")
                 div #{order.FormatCreatedAt}
               td
-                .inner-buttons
-                  a(href=`/${pathAdmin}/order/edit/${order._id}`) 
-                    button(class="inner-edit") <i class="fa-regular fa-pen-to-square"></i>
-                  button(class="inner-delete") <i class="fa-regular fa-trash-can"></i>
+                if permission.includes('order-edit')
+                  .inner-buttons
+                    a.inner-edit(href=`/${pathAdmin}/order/edit/${order._id}` title="Xem chi tiết")
+                      i.fa-regular.fa-pen-to-square
   //- End Section 6
 
   //- Section 7
