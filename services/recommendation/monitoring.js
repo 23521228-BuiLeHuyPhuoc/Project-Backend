@@ -206,8 +206,11 @@ const loadRecommendationMonitoring=async(options={})=>{
       userId:{$in:userIds},
       deleted:false,
       isMock:{$ne:true},
-      paymentStatus:'paid',
       status:{$ne:'cancelled'},
+      $or:[
+        {paymentStatus:'paid'},
+        {status:'completed'}
+      ],
       createdAt:{$gte:since,$lte:now}
     }).select('_id userId items.tourId createdAt').lean()
     : [];
