@@ -82,10 +82,8 @@
   top: 24px;
   overflow: hidden;
   border: 1px solid #FFFFFFB8;
-  border-radius: 22px;
+  border-radius:10px;
   background-color: #FFFFFFE8;
-  box-shadow: 0 18px 50px #32194B14;
-  backdrop-filter: blur(14px);
 }
 
 .account-user-card {
@@ -104,7 +102,7 @@
   height: 48px;
   flex: 0 0 48px;
   border: 2px solid #FFFFFF80;
-  border-radius: 50%;
+  border-radius: 10px;
   object-fit: cover;
 }
 
@@ -179,7 +177,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: 10px;
   padding: 0 6px;
   color: var(--account-soft);
   background-color:#5A20C8;
@@ -268,8 +266,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 22px;
-  border-radius: 22px;
+  margin-bottom: 14px;
+  border-radius: 10px;
   background:
     radial-gradient(circle at 85% 15%, #FFFFFF38 0, transparent 23%),
     linear-gradient(120deg, #2E067C 0%, #591DC3 66%, #7B45D8 100%);
@@ -286,7 +284,7 @@
   width: 190px;
   height: 190px;
   border: 1px solid #FFFFFF47;
-  border-radius: 50%;
+  border-radius: 10px;
   box-shadow: inset 0 0 0 24px #FFFFFF0D;
 }
 
@@ -371,8 +369,8 @@
 .account-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 22px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .account-stat {
@@ -380,7 +378,7 @@
   align-items: center;
   gap: 13px;
   border: 1px solid #FFFFFFB8;
-  border-radius: 15px;
+  border-radius: 10px;
   background-color: #FFFFFFD9;
   padding: 16px;
   box-shadow: 0 10px 30px #361C4D0D;
@@ -399,14 +397,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border: 1px solid #D8C9F1;
+  border-radius: 10px;
+  background-color: transparent;
+  color: var(--color-primary);
   font-size: 18px;
+  transition: 0.18s ease;
 }
 
-.account-stat-orange { background-color: #FFF1D9; color: #C87800; }
-.account-stat-green { background-color: #DFF7EC; color: #187B54; }
-.account-stat-red { background-color: #FFE7EB; color: #C8354D; }
-.account-stat-blue { background-color: #E5EEFF; color: #2867CF; }
+.account-stat:hover .account-stat-icon {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: #fff;
+}
 
 .account-stat-copy {
   display: flex;
@@ -430,6 +433,10 @@
   gap: 18px;
 }
 
+.account-grid-two {
+  gap: 12px;
+}
+
 .account-order-detail-grid {
   grid-template-columns: minmax(0, 1.45fr) minmax(270px, 0.55fr);
   align-items: start;
@@ -439,7 +446,7 @@
 .account-section,
 .account-order-summary {
   border: 1px solid #FFFFFFB8;
-  border-radius: 18px;
+  border-radius: 10px;
   background-color: #FFFFFFEB;
   box-shadow: 0 14px 40px #3517480F;
 }
@@ -489,7 +496,7 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 11px;
-  border-radius: 11px;
+  border-radius: 10px;
   padding: 10px;
   color: var(--account-ink);
 }
@@ -547,7 +554,7 @@
 .account-notification-title span {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: 10px;
   padding: 4px 8px;
   font-size: 10px;
 }
@@ -557,7 +564,7 @@
   grid-template-columns: 34px 1fr;
   align-items: center;
   gap: 10px;
-  border-radius: 11px;
+  border-radius: 10px;
   padding: 10px;
 }
 
@@ -594,7 +601,7 @@
 
 .account-filter-tabs a {
   border: 1px solid #E4DDEA;
-  border-radius: 999px;
+  border-radius: 10px;
   background-color: #FFFFFFB8;
   padding: 8px 13px;
   color: #6E6675;
@@ -617,7 +624,7 @@
 .account-order-card {
   overflow: hidden;
   border: 1px solid #FFFFFFB8;
-  border-radius: 17px;
+  border-radius: 10px;
   background-color: #FFFFFFEB;
   box-shadow: 0 12px 36px #3517480F;
 }
@@ -759,7 +766,7 @@
 
 .account-price-lines {
   margin-bottom: 16px;
-  border-radius: 12px;
+  border-radius: 10px;
   background-color: #F7F3FA;
   padding: 13px;
 }
@@ -798,7 +805,7 @@
   grid-template-columns: 112px 1fr;
   min-height: 174px;
   border: 1px solid #E6DEEC;
-  border-radius: 15px;
+  border-radius: 10px;
   background-color: #fff;
 }
 
@@ -810,7 +817,7 @@
   width: 20px;
   height: 20px;
   border: 1px solid #E6DEEC;
-  border-radius: 50%;
+  border-radius: 10px;
   background-color: #F9F7FB;
 }
 
@@ -870,7 +877,7 @@
 }
 
 .account-voucher-code span {
-  border-radius: 999px;
+  border-radius: 10px;
   background-color: #EEE7FA;
   padding: 4px 7px;
   color: var(--color-primary);
@@ -920,7 +927,7 @@
   grid-template-columns: 1fr auto;
   align-items: center;
   border: 1px solid #FFFFFFB8;
-  border-radius: 14px;
+  border-radius: 10px;
   background-color: #FFFFFFD9;
   padding: 8px;
 }
@@ -949,7 +956,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 10px;
   background-color: #EEE9F2;
   color: #756C7D;
 }
@@ -1015,7 +1022,7 @@
 .account-favorite-card {
   overflow: hidden;
   border: 1px solid #FFFFFFB8;
-  border-radius: 16px;
+  border-radius: 10px;
   background-color: #fff;
   box-shadow: 0 14px 35px #30184812;
 }
@@ -1041,7 +1048,7 @@
   position: absolute;
   left: 12px;
   bottom: 12px;
-  border-radius: 999px;
+  border-radius: 10px;
   background-color: #F39A15;
   padding: 5px 9px;
   color: #fff;
@@ -1056,7 +1063,7 @@
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 50%;
+  border-radius: 10px;
   background-color: #FFFFFFE8;
   box-shadow: 0 7px 18px #1F102C26;
   color: #7B7281;
@@ -1122,7 +1129,7 @@
 .account-review-editor,
 .account-review-card {
   border: 1px solid #E6DFEB;
-  border-radius: 15px;
+  border-radius: 10px;
   background-color: #FCFAFD;
   padding: 16px;
 }
@@ -1249,7 +1256,7 @@
   align-items: center;
   gap: 13px;
   margin-bottom: 20px;
-  border-radius: 13px;
+  border-radius: 10px;
   background-color: #F7F3FA;
   padding: 13px;
 }
@@ -1356,7 +1363,7 @@
   align-items: center;
   gap: 6px;
   border: 1px solid #DED6E4;
-  border-radius: 999px;
+  border-radius: 10px;
   background-color: #fff;
   padding: 8px 11px;
   color: #6E6674;
@@ -1400,7 +1407,7 @@
   justify-content: center;
   min-height: 190px;
   border: 1px dashed #D8CFDF;
-  border-radius: 14px;
+  border-radius: 10px;
   background-color: #FCFAFD;
   padding: 28px;
   text-align: center;
@@ -1412,7 +1419,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 15px;
+  border-radius: 10px;
   background-color: #EEE7FA;
   color: var(--color-primary);
   font-size: 22px;
@@ -1445,7 +1452,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  border-radius: 11px;
+  border-radius: 10px;
   background-color: #241B2B;
   box-shadow: 0 16px 42px #140A1D40;
   padding: 12px 15px;
@@ -1482,7 +1489,7 @@
 
 .tour-review-section {
   margin-top: 24px;
-  border-radius: 18px;
+  border-radius: 10px;
   background-color: #fff;
   padding: 24px;
   box-shadow: 0 8px 28px #2B173A12;
@@ -1555,7 +1562,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 10px;
   background-color: #EEE7FA;
   color: var(--color-primary);
   object-fit: cover;
@@ -1583,7 +1590,7 @@
 
 .tour-review-empty {
   border: 1px dashed #DCD3E3;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 25px;
   color: var(--account-muted);
   font-size: 10px;
@@ -1628,14 +1635,14 @@
 
 @media (max-width: 575.98px) {
   .account-page { padding: 25px 0 48px; }
-  .account-sidebar { border-radius: 16px; }
+  .account-sidebar { border-radius: 10px; }
   .account-user-card { display: none; }
   .account-heading h1 { font-size: 29px; }
   .account-stats { grid-template-columns: 1fr 1fr; gap: 9px; }
   .account-stat { align-items: flex-start; flex-direction: column; padding: 13px; }
   .account-panel,
   .account-section,
-  .account-order-summary { border-radius: 15px; padding: 17px; }
+  .account-order-summary { border-radius: 10px; padding: 17px; }
   .account-order-item { grid-template-columns: 64px 1fr; }
   .account-order-item img { width: 64px; height: 58px; }
   .account-order-statuses { flex-wrap: wrap; justify-content: flex-end; }

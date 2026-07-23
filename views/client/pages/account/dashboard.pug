@@ -17,26 +17,26 @@ block main
 
           .account-stats
             a.account-stat(href="/account/orders")
-              .account-stat-icon.account-stat-orange
-                i.fa-solid.fa-suitcase-rolling
+              .account-stat-icon
+                i.fa-solid.fa-receipt
               .account-stat-copy
                 strong= accountMeta.orderCount
                 span Đơn hàng
             a.account-stat(href="/account/vouchers")
-              .account-stat-icon.account-stat-green
-                i.fa-solid.fa-ticket
+              .account-stat-icon
+                i.fa-solid.fa-tag
               .account-stat-copy
                 strong= accountMeta.voucherCount
                 span Voucher khả dụng
             a.account-stat(href="/account/favorites")
-              .account-stat-icon.account-stat-red
-                i.fa-solid.fa-heart
+              .account-stat-icon
+                i.fa-solid.fa-bookmark
               .account-stat-copy
                 strong= accountMeta.favoriteCount
                 span Tour yêu thích
             a.account-stat(href="/account/reviews")
-              .account-stat-icon.account-stat-blue
-                i.fa-solid.fa-star
+              .account-stat-icon
+                i.fa-solid.fa-comment
               .account-stat-copy
                 strong= reviewCount
                 span Đánh giá
