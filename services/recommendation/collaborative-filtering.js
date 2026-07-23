@@ -91,25 +91,48 @@ class CollaborativeFilteringRecommender{
     this.seenTourIdsByUser=new Map();
   }
 
+  applyState(matrixData,tours){
+    this.matrixData=matrixData;
+    this.tours=Array.isArray(tours) ? tours : [];
+    this.tourMap=new Map(this.tours.map(tour=>[
+      getId(tour._id),
+      tour
+    ]));
+    const now=this.now();
+    this.candidateTours=this.tours.filter(tour=>
+      this.factorization.tourIndex[getId(tour._id)]!==undefined
+      && isCandidateTour(tour,now)
+    );
+    this.seenTourIdsByUser=buildSeenTourIds(matrixData);
+    this.initialized=true;
+    return this;
+  }
+
   async train(matrixData=null){
     const [resolvedMatrix,tours]=await Promise.all([
       matrixData || this.matrixBuilder.build(),
       executeLean(this.models.Tour.find({deleted:false}))
     ]);
     this.factorization.fit(resolvedMatrix);
-    this.matrixData=resolvedMatrix;
-    this.tours=Array.isArray(tours) ? tours : [];
-    this.tourMap=new Map(this.tours.map(tour=>[
-      getId(tour._id),
-      tour
-    ]));
-    this.candidateTours=this.tours.filter(tour=>
-      this.factorization.tourIndex[getId(tour._id)]!==undefined
-      && isCandidateTour(tour,this.now())
-    );
-    this.seenTourIdsByUser=buildSeenTourIds(resolvedMatrix);
-    this.initialized=true;
-    return this;
+    return this.applyState(resolvedMatrix,tours);
+  }
+
+  async restore(matrixData,factorization){
+    if(!matrixData || !factorization || !factorization.trained){
+      throw new TypeError('A trained model and its matrix data are required.');
+    }
+    const matrixUserIds=matrixData.userIds.map(getId);
+    const matrixTourIds=matrixData.tourIds.map(getId);
+    const usersMatch=matrixUserIds.length===factorization.userIds.length
+      && matrixUserIds.every((id,index)=>id===factorization.userIds[index]);
+    const toursMatch=matrixTourIds.length===factorization.tourIds.length
+      && matrixTourIds.every((id,index)=>id===factorization.tourIds[index]);
+    if(!usersMatch || !toursMatch){
+      throw new RangeError('Saved model indexes do not match matrix data.');
+    }
+    const tours=await executeLean(this.models.Tour.find({deleted:false}));
+    this.factorization=factorization;
+    return this.applyState(matrixData,tours);
   }
 
   async initialize(matrixData=null){

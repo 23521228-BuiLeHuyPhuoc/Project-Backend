@@ -352,6 +352,17 @@ class HybridRecommendationEngine{
     return this;
   }
 
+  async restore(matrixData,factorization){
+    await Promise.all([
+      this.content.initialize(),
+      this.collaborative.restore(matrixData,factorization),
+      this.popularity.refresh(),
+      this.refreshInteractionCounts()
+    ]);
+    this.initialized=true;
+    return this;
+  }
+
   async initialize(){
     await this.ensureInitialized();
     return this;

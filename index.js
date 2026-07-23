@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express')
 const path=require('path');
 const connect=require('./config/database');
+const {
+  getRecommendationScheduler
+}=require('./services/recommendation/training-scheduler');
 
 const clientRoutes=require('./routes/client/index.route');
 const adminRoutes=require('./routes/admin/index.route');
@@ -11,6 +14,8 @@ const app = express()
 const variableconfig=require('./config/variable');
 const port = 3000
 const cookieParser=require('cookie-parser');
+const recommendationScheduler=getRecommendationScheduler();
+app.locals.recommendationScheduler=recommendationScheduler;
 const sessionSecret=process.env.SESSION_SECRET || process.env.JWT_SECRET;
 if(!sessionSecret){
   throw new Error('SESSION_SECRET or JWT_SECRET must be configured');
@@ -48,6 +53,11 @@ app.use(`/${variableconfig.pathAdmin}`, adminRoutes);
 
 const start=async()=>{
   await connect.connect();
+  try{
+    await recommendationScheduler.start();
+  }catch(error){
+    console.error('Recommendation scheduler failed to start:',error);
+  }
   app.listen(port, () => {
     console.log(`Website đang chạy trên cổng ${port}`)
   });

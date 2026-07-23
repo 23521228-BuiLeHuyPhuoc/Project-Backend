@@ -1,3 +1,5 @@
 node_modules/
 .env
 .agents/
+data/recommendation-model.json
+data/recommendation-model.json.*.tmp
