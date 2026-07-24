@@ -171,11 +171,9 @@ class FeatureExtractor{
     }
 
     this.categories=uniqueSorted(tours.map(tour=>getEntityKey(tour.category)));
-    this.locations=uniqueSorted(tours.flatMap(tour=>
-      Array.isArray(tour.locations)
-        ? tour.locations.map(getEntityKey)
-        : []
-    ));
+    // Tour.locations stores departure cities, not destinations. Using it here
+    // made unrelated tours look similar merely because they depart together.
+    this.locations=[];
     this.vehicles=uniqueSorted(tours.map(tour=>normalizeText(tour.vehicle)));
     this.priceRange=getRange(tours.map(getTourPrice));
     this.durationRange=getRange(tours.map(tour=>parseDuration(tour.time)));

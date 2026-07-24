@@ -205,7 +205,7 @@ block main
         const personalizedDetail={
           id:'personalized-detail',
           variant:'is-personalized',
-          endpoint:'/api/recommendation/personalized?limit=4',
+          endpoint:`/api/recommendation/personalized?limit=4&excludeTourId=${tour._id}`,
           source:'detail',
           eyebrow:'Có thể hợp gu của bạn',
           title:'Bạn có thể thích',

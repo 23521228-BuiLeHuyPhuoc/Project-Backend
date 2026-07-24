@@ -1,5 +1,8 @@
 const Tour=require('../../models/tour.model');
 const UserInteraction=require('../../models/user-interaction.model');
+const {
+  invalidateRecommendationCache
+}=require('../../services/recommendation/cache-manager');
 
 const interactionTypes=[
   'view',
@@ -61,6 +64,9 @@ module.exports.events=async(req,res)=>{
           upsert:true
         }
       })),{ordered:false});
+      if(userId){
+        invalidateRecommendationCache(req.app,{userId});
+      }
     }
 
     return res.status(201).json({

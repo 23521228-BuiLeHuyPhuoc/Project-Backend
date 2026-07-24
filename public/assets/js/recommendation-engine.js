@@ -9,7 +9,6 @@
     root.tourRecommendationEngine=engine;
 
     const initialize=()=>{
-      void engine.load();
       engine.bindSessionTracking(root.document);
       void engine.enhancePage(root.document);
     };
@@ -470,7 +469,7 @@
         documentRef,
         'span',
         'recommendation-match',
-        `${view.matchPercent}% phù hợp`
+        `Điểm gợi ý ${view.matchPercent}/100`
       ));
       card.appendChild(media);
 

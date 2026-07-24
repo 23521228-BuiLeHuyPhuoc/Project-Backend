@@ -1,6 +1,9 @@
 const crypto=require('crypto');
 const Tour=require('../../models/tour.model');
 const {createInteractionSafe}=require('../../helpers/user-interaction.helper');
+const {
+  invalidateRecommendationCache
+}=require('../../services/recommendation/cache-manager');
 
 const allowedSources=new Set([
   'home',
@@ -170,13 +173,16 @@ module.exports.trackInteractions=(req,res,next)=>{
         tourId=tour._id;
       }
 
-      await createInteractionSafe({
+      const interaction=await createInteractionSafe({
         ...actor,
         tourId:tourId || null,
         type:target.type,
         value:target.value,
         metadata
       });
+      if(interaction && actor.userId){
+        invalidateRecommendationCache(req.app,{userId:actor.userId});
+      }
     })().catch(error=>{
       console.error('Unable to track interaction:',error.message);
     });

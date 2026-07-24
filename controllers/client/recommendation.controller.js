@@ -140,12 +140,18 @@ module.exports.personalized=async(req,res)=>{
     }
     const userId=req.user ? req.user.id : null;
     const limit=normalizeLimit(req.query.limit,10);
+    const excludeTourId=mongoose.isValidObjectId(req.query.excludeTourId)
+      ? String(req.query.excludeTourId)
+      : '';
     const cached=await loadCachedRecommendations(req,res,{
       scope:'personalized',
-      keyParts:{userId:userId || 'anonymous',limit},
+      keyParts:{userId:userId || 'anonymous',limit,excludeTourId},
       tags:[userId ? `user:${userId}` : 'audience:anonymous'],
       loader:async()=>{
-        const recommendations=await engine.getRecommendations(userId,{limit});
+        const recommendations=await engine.getRecommendations(userId,{
+          limit,
+          excludeTourIds:excludeTourId ? [excludeTourId] : []
+        });
         const strategy=recommendations[0]
           && recommendations[0].weights
           && recommendations[0].weights.strategy

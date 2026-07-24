@@ -217,6 +217,19 @@ block main
         contextualRerank:false
       }
     +recommendation-section(topRatedHome)
+    if user
+      -
+        const personalizedHome={
+          id:'personalized-home',
+          variant:'is-personalized',
+          endpoint:'/api/recommendation/personalized?limit=8',
+          source:'home',
+          eyebrow:'Được chọn theo sở thích của bạn',
+          title:'Dành riêng cho bạn',
+          description:'Gợi ý kết hợp sở thích, lịch sử tương tác và xu hướng đang được yêu thích.',
+          icon:'fa-solid fa-sparkles'
+        }
+      +recommendation-section(personalizedHome)
                                     // Section 3
     .section-3
         .container
@@ -323,19 +336,6 @@ block main
                         src="assets/images/banner-5.png"
                         )
     // End Section 7
-    if user
-      -
-        const personalizedHome={
-          id:'personalized-home',
-          variant:'is-personalized',
-          endpoint:'/api/recommendation/personalized?limit=8',
-          source:'home',
-          eyebrow:'Được chọn theo sở thích của bạn',
-          title:'Dành riêng cho bạn',
-          description:'Gợi ý kết hợp sở thích, lịch sử tương tác và xu hướng đang được yêu thích.',
-          icon:'fa-solid fa-sparkles'
-        }
-      +recommendation-section(personalizedHome)
     // Section 8
     .section-8
         .container

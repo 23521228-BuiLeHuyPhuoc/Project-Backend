@@ -10,6 +10,9 @@ const Tour=require('../../models/tour.model');
 const User=require('../../models/user.model');
 const UserVoucher=require('../../models/user-voucher.model');
 const {cancelOrderAndRelease}=require('../../helpers/order.helper');
+const {
+  invalidateRecommendationCache
+}=require('../../services/recommendation/cache-manager');
 
 const budgetRanges={
   "under-2":{min:0,max:2000000},
@@ -215,6 +218,7 @@ module.exports.updateProfile=async(req,res)=>{
       locations:req.body.locations
     };
     await user.save();
+    invalidateRecommendationCache(req.app,{userId:user.id});
 
     const token=jwt.sign({
       id:user.id,

@@ -30,10 +30,19 @@ const interactionWeights={
   click_recommendation:2.5
 };
 
+const excludedInteractionTypes=new Set([
+  'purchase',
+  'click_recommendation'
+]);
+
 const tourTypeKeywords={
   beach:[
     'bien',
-    'dao',
+    'mui ne',
+    'phan thiet',
+    'ky co',
+    'phu yen',
+    'dao coral',
     'nha trang',
     'phu quoc',
     'vung tau',
@@ -141,6 +150,41 @@ const normalizeLimit=(value,fallback)=>{
   return Number.isInteger(number) && number>0
     ? Math.min(number,50)
     : fallback;
+};
+
+const clamp01=value=>Math.min(1,Math.max(0,Number(value) || 0));
+
+const normalizeLocationKey=value=>normalizeText(value)
+  .replace(/[^a-z0-9]+/g,'-')
+  .replace(/^-|-$/g,'');
+
+const getBudgetCompatibility=(price,budget={})=>{
+  const minimum=Math.max(0,Number(budget.min) || 0);
+  const maximum=Math.max(0,Number(budget.max) || 0);
+  const hasBudget=minimum>0 || maximum>0;
+  if(!hasBudget){
+    return {provided:false,match:false,score:0};
+  }
+
+  const amount=Math.max(0,Number(price) || 0);
+  const aboveMinimum=amount>=minimum;
+  const belowMaximum=maximum<=0 || amount<=maximum;
+  if(aboveMinimum && belowMaximum){
+    return {provided:true,match:true,score:1};
+  }
+
+  const distance=amount<minimum
+    ? minimum-amount
+    : amount-maximum;
+  const scale=Math.max(
+    1,
+    maximum>minimum ? maximum-minimum : maximum || minimum
+  );
+  return {
+    provided:true,
+    match:false,
+    score:clamp01(Math.exp(-distance/scale))
+  };
 };
 
 const weightedAverage=entries=>{
@@ -330,17 +374,67 @@ class ContentBasedRecommender{
 
   getTourLocationKeys(tour){
     const keys=new Set();
-    (Array.isArray(tour.locations) ? tour.locations : []).forEach(locationId=>{
-      const rawId=getId(locationId);
-      if(rawId){
-        keys.add(normalizeText(rawId));
-      }
-      const city=this.cityMap.get(rawId);
+    const tourText=this.getTourText(tour);
+    this.cityMap.forEach(city=>{
       if(city && city.name){
-        keys.add(normalizeText(city.name).replace(/[^a-z0-9]+/g,'-'));
+        const key=normalizeLocationKey(city.name);
+        if(key && tourText.includes(normalizeText(city.name))){
+          keys.add(key);
+        }
       }
     });
     return keys;
+  }
+
+  getPreferenceCompatibility(tour,userOrPreferences={}){
+    const preferences=userOrPreferences.preferences || userOrPreferences || {};
+    const tourTypes=Array.isArray(preferences.tourTypes)
+      ? preferences.tourTypes.map(normalizeText).filter(Boolean)
+      : [];
+    const preferredLocations=Array.isArray(preferences.locations)
+      ? preferences.locations.map(normalizeLocationKey).filter(Boolean)
+      : [];
+    const typeMatch=tourTypes.length>0
+      && [...this.getTourTypes(tour)].some(type=>tourTypes.includes(type));
+    const tourLocations=this.getTourLocationKeys(tour);
+    const tourText=this.getTourText(tour);
+    const locationMatch=preferredLocations.length>0
+      && preferredLocations.some(location=>
+        tourLocations.has(location)
+        || tourText.includes(normalizeText(location.replace(/-/g,' ')))
+      );
+    const budget=getBudgetCompatibility(
+      getTourPrice(tour),
+      preferences.budgetRange
+    );
+    const provided={
+      type:tourTypes.length>0,
+      location:preferredLocations.length>0,
+      budget:budget.provided
+    };
+    const scores=[];
+    if(provided.type){
+      scores.push(typeMatch ? 1 : 0);
+    }
+    if(provided.location){
+      scores.push(locationMatch ? 1 : 0);
+    }
+    if(provided.budget){
+      scores.push(budget.score);
+    }
+    return {
+      score:scores.length
+        ? scores.reduce((total,value)=>total+value,0)/scores.length
+        : 0,
+      priority:(budget.match ? 4 : 0)
+        +(locationMatch ? 2 : 0)
+        +(typeMatch ? 1 : 0),
+      provided,
+      typeMatch,
+      locationMatch,
+      budgetMatch:budget.match,
+      budgetScore:budget.score
+    };
   }
 
   buildPreferenceProfile(user){
@@ -353,9 +447,7 @@ class ContentBasedRecommender{
         .replace(/[^a-z0-9]+/g,'-')).filter(Boolean)
       : [];
     const budget=preferences.budgetRange || {};
-    const budgetMinimum=Number(budget.min) || 0;
-    const budgetMaximum=Number(budget.max) || 0;
-    const hasBudget=budgetMinimum>0 || budgetMaximum>0;
+    const hasBudget=Number(budget.min)>0 || Number(budget.max)>0;
 
     if(!tourTypes.length && !locations.length && !hasBudget){
       return null;
@@ -364,29 +456,15 @@ class ContentBasedRecommender{
     const entries=[];
     this.tours.forEach(tour=>{
       let score=0;
-      const types=this.getTourTypes(tour);
-      const typeMatches=tourTypes.filter(type=>types.has(type)).length;
-      score+=typeMatches*2;
-
-      if(locations.length){
-        const tourLocations=this.getTourLocationKeys(tour);
-        const tourText=this.getTourText(tour);
-        const matchesLocation=locations.some(location=>
-          tourLocations.has(location)
-          || tourText.includes(normalizeText(location.replace(/-/g,' ')))
-        );
-        if(matchesLocation){
-          score+=2;
-        }
+      const compatibility=this.getPreferenceCompatibility(tour,preferences);
+      if(compatibility.typeMatch){
+        score+=3;
       }
-
-      if(hasBudget){
-        const price=getTourPrice(tour);
-        const aboveMinimum=price>=budgetMinimum;
-        const belowMaximum=budgetMaximum<=0 || price<=budgetMaximum;
-        if(aboveMinimum && belowMaximum){
-          score+=1;
-        }
+      if(compatibility.locationMatch){
+        score+=4;
+      }
+      if(compatibility.budgetMatch){
+        score+=2;
       }
 
       if(score>0){
@@ -406,7 +484,7 @@ class ContentBasedRecommender{
         _id:userId,
         status:'active',
         deleted:false
-      }),'preferences'),
+      }),'preferences cart.tourId'),
       executeLean(this.models.UserInteraction.find({userId}),
         'tourId type value'),
       executeLean(this.models.Review.find({userId,deleted:false}),
@@ -420,12 +498,20 @@ class ContentBasedRecommender{
     const signalMap=new Map();
     const explicitRatings=new Map();
     const interactedTourIds=new Set();
+    const excludedTourIds=new Set();
+    const purchasedTourIds=new Set();
     (interactions || []).forEach(interaction=>{
       const tourId=getId(interaction.tourId);
       if(!tourId){
         return;
       }
       interactedTourIds.add(tourId);
+      if(excludedInteractionTypes.has(interaction.type)){
+        excludedTourIds.add(tourId);
+      }
+      if(interaction.type==='purchase'){
+        purchasedTourIds.add(tourId);
+      }
       if(interaction.type==='rating'){
         const ratingSignal=getRatingSignal(interaction.value);
         if(ratingSignal){
@@ -458,6 +544,23 @@ class ContentBasedRecommender{
       }
       interactedTourIds.add(tourId);
       addSignal(signalMap,tourId,'favorite',interactionWeights.favorite);
+    });
+    const retainedTourIds=new Set((favorites || [])
+      .map(favorite=>getId(favorite.tourId))
+      .filter(Boolean));
+    (user.cart || []).forEach(item=>{
+      const tourId=getId(item && item.tourId);
+      if(!tourId){
+        return;
+      }
+      retainedTourIds.add(tourId);
+      interactedTourIds.add(tourId);
+      addSignal(signalMap,tourId,'cart_add',interactionWeights.cart_add);
+    });
+    retainedTourIds.forEach(tourId=>{
+      if(!purchasedTourIds.has(tourId)){
+        excludedTourIds.delete(tourId);
+      }
     });
 
     const positiveBehaviorEntries=[];
@@ -516,6 +619,7 @@ class ContentBasedRecommender{
         ? negativeBehaviorProfile.vector
         : null,
       interactedTourIds,
+      excludedTourIds,
       behaviorWeight:positiveBehaviorProfile
         ? positiveBehaviorProfile.totalWeight
         : 0,
@@ -535,9 +639,10 @@ class ContentBasedRecommender{
       return [];
     }
     const limit=normalizeLimit(options.limit,10);
+    const excludedTourIds=profile.excludedTourIds || new Set();
 
     return this.candidateTours
-      .filter(tour=>!profile.interactedTourIds.has(getId(tour._id)))
+      .filter(tour=>!excludedTourIds.has(getId(tour._id)))
       .map(tour=>{
         const candidateVector=this.vectorMap.get(getId(tour._id));
         const positiveScore=profile.positiveVector
@@ -568,6 +673,7 @@ class ContentBasedRecommender{
 
 module.exports={
   ContentBasedRecommender,
+  getBudgetCompatibility,
   getInteractionWeight,
   getRatingSignal,
   isCandidateTour,

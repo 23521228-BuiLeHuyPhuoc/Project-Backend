@@ -2,6 +2,9 @@ const mongoose=require('mongoose');
 const moment=require('moment');
 const Tour=require('../../models/tour.model');
 const City=require('../../models/city.model');
+const {
+  invalidateRecommendationCache
+}=require('../../services/recommendation/cache-manager');
 const {getApplicableVoucher}=require('../../helpers/voucher.helper');
 
 const quantityFields=['quantityAdult','quantityChildren','quantityBaby'];
@@ -204,6 +207,7 @@ module.exports.addPost=async(req,res)=>{
       });
     }
     await req.user.save();
+    invalidateRecommendationCache(req.app,{userId:req.user.id});
 
     res.status(201).json({
       code:'success',
@@ -278,6 +282,7 @@ module.exports.updatePatch=async(req,res)=>{
     }
 
     await req.user.save();
+    invalidateRecommendationCache(req.app,{userId:req.user.id});
     res.json({code:'success',message:'Đã cập nhật giỏ hàng!'});
   }
   catch(error){
@@ -292,6 +297,7 @@ module.exports.deleteItem=async(req,res)=>{
     }
     req.user.cart.pull(req.params.itemId);
     await req.user.save();
+    invalidateRecommendationCache(req.app,{userId:req.user.id});
     res.json({
       code:'success',
       message:'Đã xóa tour khỏi giỏ hàng!',

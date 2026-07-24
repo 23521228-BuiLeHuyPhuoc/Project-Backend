@@ -28,6 +28,11 @@ const profileInteractionTypes=[
   'click_recommendation'
 ];
 
+const excludedRecommendationTypes=[
+  'purchase',
+  'click_recommendation'
+];
+
 const defaultPopularityWeights={
   ratingAvg:0.35,
   ratingCount:0.15,
@@ -37,11 +42,43 @@ const defaultPopularityWeights={
 };
 
 const hybridStrategies={
-  anonymous:{content:0.1,collaborative:0,popularity:0.9},
-  newWithPreferences:{content:0.6,collaborative:0.1,popularity:0.3},
-  newWithoutPreferences:{content:0.2,collaborative:0.1,popularity:0.7},
-  active:{content:0.4,collaborative:0.4,popularity:0.2},
-  established:{content:0.2,collaborative:0.7,popularity:0.1}
+  anonymous:{preference:0,content:0.05,collaborative:0,popularity:0.95},
+  newWithPreferences:{
+    preference:0.45,
+    content:0.4,
+    collaborative:0.05,
+    popularity:0.1
+  },
+  newWithoutPreferences:{
+    preference:0,
+    content:0.2,
+    collaborative:0.15,
+    popularity:0.65
+  },
+  activeWithPreferences:{
+    preference:0.35,
+    content:0.35,
+    collaborative:0.2,
+    popularity:0.1
+  },
+  activeWithoutPreferences:{
+    preference:0,
+    content:0.25,
+    collaborative:0.5,
+    popularity:0.25
+  },
+  establishedWithPreferences:{
+    preference:0.3,
+    content:0.3,
+    collaborative:0.3,
+    popularity:0.1
+  },
+  establishedWithoutPreferences:{
+    preference:0,
+    content:0.15,
+    collaborative:0.7,
+    popularity:0.15
+  }
 };
 
 const executeLean=(query,selection='')=>{
@@ -206,10 +243,26 @@ const selectHybridWeights=context=>{
   }
   const interactionCount=Math.max(0,Number(context.interactionCount) || 0);
   if(interactionCount>=20){
-    return {strategy:'established',...hybridStrategies.established};
+    return context.hasPreferences
+      ? {
+        strategy:'established_with_preferences',
+        ...hybridStrategies.establishedWithPreferences
+      }
+      : {
+        strategy:'established_without_preferences',
+        ...hybridStrategies.establishedWithoutPreferences
+      };
   }
   if(interactionCount>=5){
-    return {strategy:'active',...hybridStrategies.active};
+    return context.hasPreferences
+      ? {
+        strategy:'active_with_preferences',
+        ...hybridStrategies.activeWithPreferences
+      }
+      : {
+        strategy:'active_without_preferences',
+        ...hybridStrategies.activeWithoutPreferences
+      };
   }
   if(context.hasPreferences){
     return {
@@ -299,6 +352,18 @@ class PopularityRecommender{
 }
 
 const compareHybridRecommendations=(first,second)=>{
+  const retainedDifference=Number(second.retained
+    && second.retained.priority || 0)
+    -Number(first.retained && first.retained.priority || 0);
+  if(retainedDifference!==0){
+    return retainedDifference;
+  }
+  const preferenceDifference=Number(second.preference
+    && second.preference.priority || 0)
+    -Number(first.preference && first.preference.priority || 0);
+  if(preferenceDifference!==0){
+    return preferenceDifference;
+  }
   if(second.score!==first.score){
     return second.score-first.score;
   }
@@ -311,6 +376,19 @@ const compareHybridRecommendations=(first,second)=>{
     return ratingDifference;
   }
   return first.tourId.localeCompare(second.tourId);
+};
+
+const backfillRecommendations=(preferred,ranked,limit)=>{
+  const selected=[];
+  const selectedTourIds=new Set();
+  [...preferred,...ranked].forEach(item=>{
+    if(!item || selectedTourIds.has(item.tourId) || selected.length>=limit){
+      return;
+    }
+    selected.push(item);
+    selectedTourIds.add(item.tourId);
+  });
+  return selected;
 };
 
 class HybridRecommendationEngine{
@@ -348,7 +426,10 @@ class HybridRecommendationEngine{
         tourId:{$ne:null},
         type:{$in:profileInteractionTypes}
       }},
-      {$group:{_id:'$userId',count:{$sum:1}}}
+      {$group:{
+        _id:{userId:'$userId',tourId:'$tourId',type:'$type'}
+      }},
+      {$group:{_id:'$_id.userId',count:{$sum:1}}}
     ]));
     this.interactionCounts=countRecordsToMap(records);
     return this.interactionCounts;
@@ -401,28 +482,83 @@ class HybridRecommendationEngine{
         userId:null,
         authenticated:false,
         hasPreferences:false,
-        interactionCount:0
+        interactionCount:0,
+        preferences:null,
+        retainedTours:new Map()
       };
     }
-    const user=await executeLean(this.models.User.findOne({
-      _id:id,
-      status:'active',
-      deleted:false
-    }),'preferences');
+    const [user,favorites]=await Promise.all([
+      executeLean(this.models.User.findOne({
+        _id:id,
+        status:'active',
+        deleted:false
+      }),'preferences cart.tourId'),
+      executeLean(this.models.Favorite.find({userId:id}),'tourId')
+    ]);
     if(!user){
       return {
         userId:null,
         authenticated:false,
         hasPreferences:false,
-        interactionCount:0
+        interactionCount:0,
+        preferences:null,
+        retainedTours:new Map()
       };
     }
+    const retainedTours=new Map();
+    (favorites || []).forEach(item=>{
+      const tourId=getId(item.tourId);
+      if(tourId){
+        retainedTours.set(tourId,{
+          favorite:true,
+          cart:false,
+          priority:1
+        });
+      }
+    });
+    (user.cart || []).forEach(item=>{
+      const tourId=getId(item.tourId);
+      if(!tourId){
+        return;
+      }
+      retainedTours.set(tourId,{
+        favorite:Boolean(retainedTours.get(tourId)?.favorite),
+        cart:true,
+        priority:2
+      });
+    });
     return {
       userId:id,
       authenticated:true,
       hasPreferences:hasUserPreferences(user),
-      interactionCount:this.interactionCounts.get(id) || 0
+      interactionCount:this.interactionCounts.get(id) || 0,
+      preferences:user.preferences || null,
+      retainedTours
     };
+  }
+
+  async getLiveExcludedTourIds(userId,retainedTourIds=[]){
+    const id=getId(userId);
+    if(!id){
+      return new Set();
+    }
+    const interactions=await executeLean(this.models.UserInteraction.find({
+      userId:id,
+      tourId:{$ne:null},
+      type:{$in:excludedRecommendationTypes}
+    }),'tourId type');
+    const retainedIds=new Set([...retainedTourIds].map(getId).filter(Boolean));
+    const excludedTourIds=new Set();
+    (interactions || []).forEach(interaction=>{
+      const tourId=getId(interaction.tourId);
+      if(!tourId){
+        return;
+      }
+      if(interaction.type==='purchase' || !retainedIds.has(tourId)){
+        excludedTourIds.add(tourId);
+      }
+    });
+    return excludedTourIds;
   }
 
   async getWeightsForUser(userId){
@@ -436,7 +572,12 @@ class HybridRecommendationEngine{
     const weights=selectHybridWeights(context);
     const limit=normalizeLimit(options.limit,10);
     const candidateLimit=Math.min(50,Math.max(20,limit*4));
-    const [contentResults,collaborativeResults,popularityResults]=
+    const [
+      contentResults,
+      collaborativeResults,
+      popularityResults,
+      liveExcludedTourIds
+    ]=
       await Promise.all([
         context.authenticated
           ? this.content.getPersonalizedRecommendations(context.userId,{
@@ -448,7 +589,13 @@ class HybridRecommendationEngine{
             limit:candidateLimit
           })
           : [],
-        this.popularity.getRecommendations()
+        this.popularity.getRecommendations(),
+        context.authenticated
+          ? this.getLiveExcludedTourIds(
+            context.userId,
+            context.retainedTours.keys()
+          )
+          : new Set()
       ]);
 
     const contentScores=new Map(contentResults.map(item=>[
@@ -475,36 +622,67 @@ class HybridRecommendationEngine{
           candidateMap.set(item.tourId,item.tour);
         }
       });
-    const seenTourIds=context.authenticated
-      && typeof this.collaborative.getSeenTourIds==='function'
-      ? this.collaborative.getSeenTourIds(context.userId)
-      : new Set();
+    const seenTourIds=new Set(liveExcludedTourIds);
     const minimumScore=Number.isFinite(options.minimumScore)
       ? options.minimumScore
       : this.minimumScore;
+    const excludedTourIds=new Set((Array.isArray(options.excludeTourIds)
+      ? options.excludeTourIds
+      : [options.excludeTourIds])
+      .map(getId)
+      .filter(Boolean));
 
-    return [...candidateMap.entries()]
-      .filter(([tourId])=>!seenTourIds.has(tourId))
+    const rankedRecommendations=[...candidateMap.entries()]
+      .filter(([tourId])=>
+        !seenTourIds.has(tourId) && !excludedTourIds.has(tourId)
+      )
       .map(([tourId,tour])=>{
+        const preference=context.hasPreferences
+          && typeof this.content.getPreferenceCompatibility==='function'
+          ? this.content.getPreferenceCompatibility(tour,context.preferences)
+          : null;
         const components={
+          retained:context.retainedTours.has(tourId) ? 1 : 0,
+          preference:preference ? preference.score : 0,
           content:contentScores.get(tourId) || 0,
           collaborative:collaborativeScores.get(tourId) || 0,
           popularity:popularityScores.get(tourId) || 0
         };
-        const score=weights.content*components.content
+        const retained=context.retainedTours.get(tourId) || null;
+        const baseScore=weights.preference*components.preference
+          +weights.content*components.content
           +weights.collaborative*components.collaborative
           +weights.popularity*components.popularity;
+        const score=Math.min(
+          1,
+          baseScore+(retained ? retained.cart ? 0.2 : 0.12 : 0)
+        );
         return {
           tourId,
           score:Number(score.toFixed(6)),
           components,
+          preference,
+          retained,
           weights:{...weights},
           tour
         };
       })
       .filter(item=>item.score>=minimumScore)
-      .sort(compareHybridRecommendations)
-      .slice(0,limit);
+      .sort(compareHybridRecommendations);
+    const budgetRelevant=context.hasPreferences
+      ? rankedRecommendations.filter(item=>
+        item.retained
+        || !item.preference
+        || !item.preference.provided.budget
+        || item.preference.budgetMatch
+        || item.preference.budgetScore>=0.3
+      )
+      : rankedRecommendations;
+    return backfillRecommendations(
+      budgetRelevant,
+      rankedRecommendations,
+      limit
+    );
   }
 
   getMetadata(){
@@ -519,6 +697,7 @@ class HybridRecommendationEngine{
 }
 
 module.exports={
+  backfillRecommendations,
   HybridRecommendationEngine,
   PopularityRecommender,
   buildPopularityRecommendations,
