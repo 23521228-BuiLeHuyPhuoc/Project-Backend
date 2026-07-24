@@ -8,7 +8,7 @@ Website đặt tour du lịch gồm trang khách hàng và trang quản trị. H
 
 - Backend: Node.js, Express.js
 - Database: MongoDB, Mongoose
-- Frontend: Pug, CSS, JavaScript, Tailwind CSS, DaisyUI
+- Frontend: Pug, CSS, JavaScript, Tailwind CSS
 - Xác thực: JWT, bcrypt, Express Session
 - Dịch vụ: Cloudinary, Nodemailer, ZaloPay, VNPay
 - Gợi ý tour: Content-Based Filtering, Collaborative Filtering, TensorFlow.js
