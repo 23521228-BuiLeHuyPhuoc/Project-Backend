@@ -653,7 +653,7 @@
         container.setAttribute('aria-busy',state==='loading' ? 'true' : 'false');
       }
       if(status){
-        status.hidden=state!=='error';
+        status.hidden=state!=='error' && state!=='empty';
       }
       if(statusMessage && message){
         statusMessage.textContent=message;
@@ -753,7 +753,12 @@
           ? candidates
           : await this.rank(candidates);
         if(!ranked.length){
-          section.hidden=true;
+          container.replaceChildren();
+          this.setSectionState(
+            section,
+            'empty',
+            'Chưa có gợi ý phù hợp. Hãy tương tác thêm với các tour bạn quan tâm.'
+          );
           return [];
         }
         this.renderCandidates(container,ranked);

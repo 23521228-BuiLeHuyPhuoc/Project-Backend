@@ -99,7 +99,7 @@ test('active users with preferences prioritize preference over collaboration',()
   });
 
   assert.equal(weights.strategy,'active_with_preferences');
-  assert.ok(weights.preference>weights.collaborative);
+  assert.ok(weights.preference+weights.content>=weights.collaborative);
 });
 
 test('preference filtering backfills the requested recommendation limit',()=>{

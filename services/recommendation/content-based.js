@@ -30,9 +30,13 @@ const interactionWeights={
   click_recommendation:2.5
 };
 
+const negativeInteractionWeights={
+  recommendation_ignore:1
+};
+
 const excludedInteractionTypes=new Set([
   'purchase',
-  'click_recommendation'
+  'rating'
 ]);
 
 const tourTypeKeywords={
@@ -496,10 +500,10 @@ class ContentBasedRecommender{
     }
 
     const signalMap=new Map();
+    const negativeSignalMap=new Map();
     const explicitRatings=new Map();
     const interactedTourIds=new Set();
     const excludedTourIds=new Set();
-    const purchasedTourIds=new Set();
     (interactions || []).forEach(interaction=>{
       const tourId=getId(interaction.tourId);
       if(!tourId){
@@ -509,14 +513,20 @@ class ContentBasedRecommender{
       if(excludedInteractionTypes.has(interaction.type)){
         excludedTourIds.add(tourId);
       }
-      if(interaction.type==='purchase'){
-        purchasedTourIds.add(tourId);
-      }
       if(interaction.type==='rating'){
         const ratingSignal=getRatingSignal(interaction.value);
         if(ratingSignal){
           explicitRatings.set(tourId,ratingSignal);
         }
+        return;
+      }
+      if(negativeInteractionWeights[interaction.type]){
+        addSignal(
+          negativeSignalMap,
+          tourId,
+          interaction.type,
+          negativeInteractionWeights[interaction.type]
+        );
         return;
       }
       addSignal(
@@ -532,6 +542,7 @@ class ContentBasedRecommender{
         return;
       }
       interactedTourIds.add(tourId);
+      excludedTourIds.add(tourId);
       const ratingSignal=getRatingSignal(review.rating);
       if(ratingSignal){
         explicitRatings.set(tourId,ratingSignal);
@@ -545,28 +556,19 @@ class ContentBasedRecommender{
       interactedTourIds.add(tourId);
       addSignal(signalMap,tourId,'favorite',interactionWeights.favorite);
     });
-    const retainedTourIds=new Set((favorites || [])
-      .map(favorite=>getId(favorite.tourId))
-      .filter(Boolean));
     (user.cart || []).forEach(item=>{
       const tourId=getId(item && item.tourId);
       if(!tourId){
         return;
       }
-      retainedTourIds.add(tourId);
       interactedTourIds.add(tourId);
       addSignal(signalMap,tourId,'cart_add',interactionWeights.cart_add);
     });
-    retainedTourIds.forEach(tourId=>{
-      if(!purchasedTourIds.has(tourId)){
-        excludedTourIds.delete(tourId);
-      }
-    });
-
     const positiveBehaviorEntries=[];
     const negativeBehaviorEntries=[];
     const profileTourIds=new Set([
       ...signalMap.keys(),
+      ...negativeSignalMap.keys(),
       ...explicitRatings.keys()
     ]);
     profileTourIds.forEach(tourId=>{
@@ -589,9 +591,18 @@ class ContentBasedRecommender{
         }
         return;
       }
-      const signals=signalMap.get(tourId);
-      const weight=[...signals.values()].reduce((total,value)=>total+value,0);
-      positiveBehaviorEntries.push({vector,weight});
+      const positiveSignals=signalMap.get(tourId);
+      if(positiveSignals){
+        const weight=[...positiveSignals.values()]
+          .reduce((total,value)=>total+value,0);
+        positiveBehaviorEntries.push({vector,weight});
+      }
+      const negativeSignals=negativeSignalMap.get(tourId);
+      if(negativeSignals){
+        const weight=[...negativeSignals.values()]
+          .reduce((total,value)=>total+value,0);
+        negativeBehaviorEntries.push({vector,weight});
+      }
     });
     const positiveBehaviorProfile=weightedAverage(positiveBehaviorEntries);
     const negativeBehaviorProfile=weightedAverage(negativeBehaviorEntries);

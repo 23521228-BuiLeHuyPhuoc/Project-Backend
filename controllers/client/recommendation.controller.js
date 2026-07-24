@@ -327,7 +327,7 @@ module.exports.feedback=async(req,res)=>{
         deviceType
       }
     });
-    if(isClick && userId){
+    if(userId){
       invalidateRecommendationCache(req.app,{userId});
     }
     return res.status(201).json({

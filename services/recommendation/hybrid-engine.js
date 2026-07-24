@@ -25,12 +25,13 @@ const profileInteractionTypes=[
   'cart_add',
   'purchase',
   'rating',
-  'click_recommendation'
+  'click_recommendation',
+  'recommendation_ignore'
 ];
 
 const excludedRecommendationTypes=[
   'purchase',
-  'click_recommendation'
+  'rating'
 ];
 
 const defaultPopularityWeights={
@@ -42,42 +43,42 @@ const defaultPopularityWeights={
 };
 
 const hybridStrategies={
-  anonymous:{preference:0,content:0.05,collaborative:0,popularity:0.95},
+  anonymous:{preference:0,content:0.1,collaborative:0,popularity:0.9},
   newWithPreferences:{
-    preference:0.45,
-    content:0.4,
-    collaborative:0.05,
-    popularity:0.1
+    preference:0.3,
+    content:0.3,
+    collaborative:0.1,
+    popularity:0.3
   },
   newWithoutPreferences:{
     preference:0,
     content:0.2,
-    collaborative:0.15,
-    popularity:0.65
+    collaborative:0.1,
+    popularity:0.7
   },
   activeWithPreferences:{
-    preference:0.35,
-    content:0.35,
-    collaborative:0.2,
-    popularity:0.1
+    preference:0.2,
+    content:0.2,
+    collaborative:0.4,
+    popularity:0.2
   },
   activeWithoutPreferences:{
     preference:0,
-    content:0.25,
-    collaborative:0.5,
-    popularity:0.25
+    content:0.4,
+    collaborative:0.4,
+    popularity:0.2
   },
   establishedWithPreferences:{
-    preference:0.3,
-    content:0.3,
-    collaborative:0.3,
+    preference:0.1,
+    content:0.1,
+    collaborative:0.7,
     popularity:0.1
   },
   establishedWithoutPreferences:{
     preference:0,
-    content:0.15,
+    content:0.2,
     collaborative:0.7,
-    popularity:0.15
+    popularity:0.1
   }
 };
 
@@ -550,6 +551,9 @@ class HybridRecommendationEngine{
     const retainedIds=new Set([...retainedTourIds].map(getId).filter(Boolean));
     const excludedTourIds=new Set();
     (interactions || []).forEach(interaction=>{
+      if(!excludedRecommendationTypes.includes(interaction.type)){
+        return;
+      }
       const tourId=getId(interaction.tourId);
       if(!tourId){
         return;

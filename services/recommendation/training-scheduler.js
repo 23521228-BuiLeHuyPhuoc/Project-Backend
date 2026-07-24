@@ -16,7 +16,8 @@ const trainableInteractionTypes=[
   'cart_add',
   'purchase',
   'rating',
-  'click_recommendation'
+  'click_recommendation',
+  'recommendation_ignore'
 ];
 
 const normalizePositiveNumber=(value,fallback)=>{
