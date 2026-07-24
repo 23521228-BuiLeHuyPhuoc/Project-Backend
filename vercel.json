@@ -3,11 +3,7 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "views/**",
-        "public/**",
-        "data/recommendation-model.json"
-      ],
+      "includeFiles": "{views/**,public/**,data/recommendation-model.json}",
       "maxDuration": 60
     }
   },
