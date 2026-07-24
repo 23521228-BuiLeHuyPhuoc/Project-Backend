@@ -17,9 +17,17 @@ Website đặt tour du lịch gồm trang khách hàng và trang quản trị. H
 ## Production
 
 - Website: <https://project-backend-plum.vercel.app>
-- Đăng nhập: <https://project-backend-plum.vercel.app/auth/login>
+- Đăng nhập khách hàng: <https://project-backend-plum.vercel.app/auth/login>
+- Đăng nhập admin: <https://project-backend-plum.vercel.app/admin/account/login>
 
 ## Tài khoản demo
 
+### Khách hàng
+
 - Email: `demo@tourex.vn`
 - Mật khẩu: `TourEx@123`
+
+### Admin
+
+- Email: `admin@tourex.vn`
+- Mật khẩu: `TourExAdmin@123`
