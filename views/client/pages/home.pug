@@ -39,33 +39,16 @@ block main
                                 i.fa-solid.fa-location-dot
                                 | Địa Điểm Hot
                             .inner-suggest-list
-                                .inner-item
-                                    .inner-item-image
-                                        img(
-                                            alt="" 
-                                            src="/assets/images/product-1.jpg"
-                                            )
-                                    .inner-item-content
-                                        .inner-item-title Nhật Bản
-                                        .inner-item-desc 50 tours
-                                .inner-item
-                                    .inner-item-image
-                                        img(
-                                            alt="" 
-                                            src="/assets/images/product-2.jpg"
-                                            )
-                                    .inner-item-content
-                                        .inner-item-title Phú Quốc
-                                        .inner-item-desc 50 tours
-                                .inner-item
-                                    .inner-item-image
-                                        img(
-                                            alt="" 
-                                            src="/assets/images/product-3.jpg"
-                                            )
-                                    .inner-item-content
-                                        .inner-item-title Singapore
-                                        .inner-item-desc 50 tours
+                                each item in hotDestinations
+                                    .inner-item(data-search-value=item.searchValue)
+                                        .inner-item-image
+                                            img(
+                                                alt=item.name
+                                                src=item.avatar
+                                                )
+                                        .inner-item-content
+                                            .inner-item-title= item.name
+                                            .inner-item-desc #{item.ratingAvg.toFixed(1)} sao · #{item.ratingCount} đánh giá
                     .inner-box.inner-user
                         .inner-input-group
                             img.inner-icon(src="/assets/images/icon-user.svg")
@@ -291,7 +274,7 @@ block main
                 each item in tourListSection4
                   +product-item(item)
             .inner-button
-                a.button-outline(href="#") Xem tất cả
+                a.button-outline(href=section4CategoryUrl) Xem tất cả
     // End Section 4
     // Section 5
     .section-5(
@@ -321,7 +304,7 @@ block main
                 each item in tourListSection6
                   +product-item(item)
             .inner-button
-                a.button-outline(href="#") Xem tất cả
+                a.button-outline(href=section6CategoryUrl) Xem tất cả
     // End Section 6
     // Section 7
     .section-5(

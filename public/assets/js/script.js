@@ -44,7 +44,8 @@ if(boxAddressSection1) {
   const listItem = boxAddressSection1.querySelectorAll(".inner-suggest-list .inner-item");
   listItem.forEach(item => {
     item.addEventListener("mousedown", () => {
-      const title = item.querySelector(".inner-item-title").innerHTML.trim();
+      const title = item.dataset.searchValue
+        || item.querySelector(".inner-item-title").textContent.trim();
       if(title) {
         input.value = title;
       }
