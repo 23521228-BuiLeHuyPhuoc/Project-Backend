@@ -10,7 +10,6 @@
     "sync:tour-ratings": "node scripts/sync-tour-ratings.js"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "4.22.0",
     "axios": "^1.13.6",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
@@ -36,6 +35,7 @@
     "slugify": "^1.6.6"
   },
   "devDependencies": {
+    "@tensorflow/tfjs": "4.22.0",
     "@tailwindcss/cli": "^4.3.3",
     "daisyui": "^5.7.0",
     "tailwindcss": "^4.3.3"

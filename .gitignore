@@ -2,3 +2,5 @@ node_modules/
 .env
 .agents/
 data/recommendation-model.json.*.tmp
+.vercel/
+.env.local
