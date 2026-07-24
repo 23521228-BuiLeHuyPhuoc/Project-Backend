@@ -42,6 +42,13 @@ const setAccountFormMessage=(form,message,type="error")=>{
   element.hidden=false;
 };
 
+const featuredVoucher=document.querySelector(".account-voucher-card.is-featured");
+if(featuredVoucher){
+  window.requestAnimationFrame(()=>{
+    featuredVoucher.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+}
+
 document.querySelectorAll("[data-account-action]").forEach(button=>{
   button.addEventListener("click",async()=>{
     const confirmation=button.dataset.confirm;

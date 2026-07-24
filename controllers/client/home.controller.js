@@ -4,6 +4,7 @@ const moment=require('moment');
 const slugify=require('slugify');
 const FamilyHelper=require('../../helpers/category.helper');
 const newsList=require('../../data/news.data');
+const {getPromotionBanners}=require('../../data/promotion-vouchers.data');
 
 const getDestinationLabel=name=>{
   const text=String(name || '').trim();
@@ -25,6 +26,9 @@ const buildHotDestinations=tours=>{
     destinations.push({
       name,
       searchValue:name,
+      link:tour.slug
+        ? `/tour/detail/${tour.slug}`
+        : `/search?locationTo=${encodeURIComponent(name)}`,
       avatar:tour.avatar || '/assets/images/product-1.jpg',
       ratingAvg:Number(tour.ratingAvg || 0),
       ratingCount:Number(tour.ratingCount || 0)
@@ -95,7 +99,7 @@ module.exports.home=async(req, res) => {
         {departureDate:{$gte:moment().startOf('day').toDate()}}
       ]
     })
-      .select('name avatar ratingAvg ratingCount')
+      .select('name slug avatar ratingAvg ratingCount')
       .sort({ratingAvg:-1,ratingCount:-1,position:-1,_id:1})
       .limit(30)
       .lean();
@@ -111,6 +115,7 @@ module.exports.home=async(req, res) => {
     section6CategoryUrl:categorySection6
       ? `/category/${categorySection6.slug}`
       : '#',
+    promotionBanners:getPromotionBanners(),
     hotDestinations,
     newsList:newsList
   })

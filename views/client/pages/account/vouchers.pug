@@ -17,7 +17,10 @@ block main
             if wallet.length
               .account-voucher-grid
                 each item in wallet
-                  article.account-voucher-card(class=item.status === 'used' ? 'is-used' : '')
+                  article.account-voucher-card(
+                    class=[item.status === 'used' ? 'is-used' : '', item.isFeatured ? 'is-featured' : '']
+                    id=`voucher-${item.voucher.code}`
+                    )
                     .account-voucher-value
                       span Giảm
                       strong= item.voucher.valueLabel
@@ -41,7 +44,10 @@ block main
             if availableVouchers.length
               .account-voucher-grid
                 each voucher in availableVouchers
-                  article.account-voucher-card.account-voucher-available
+                  article.account-voucher-card.account-voucher-available(
+                    class=voucher.isFeatured ? 'is-featured' : ''
+                    id=`voucher-${voucher.code}`
+                    )
                     .account-voucher-value
                       span Giảm
                       strong= voucher.valueLabel

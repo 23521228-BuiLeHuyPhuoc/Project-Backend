@@ -89,7 +89,13 @@ block main
 
         if cartData.cart.length
           .inner-coupon
-            a.inner-coupon-wallet(href="/account/vouchers") Xem ví voucher
+            .inner-coupon-head
+              div
+                strong Mã giảm giá
+                span Chọn mã đã lưu hoặc nhập voucher của bạn
+              a.inner-coupon-wallet(href="/account/vouchers")
+                i.fa-solid.fa-ticket
+                | Xem ví voucher
             form#coupon-form(novalidate)
               input#voucher-code-input(
                 type="text"

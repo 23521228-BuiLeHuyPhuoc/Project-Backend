@@ -15,9 +15,15 @@ const app = express()
 const variableconfig=require('./config/variable');
 const port = Number(process.env.PORT) || 3000
 const cookieParser=require('cookie-parser');
+const tfjsPackage=require('@tensorflow/tfjs/package.json');
+const tfjsBrowserBundle=path.join(
+  path.dirname(require.resolve('@tensorflow/tfjs')),
+  'tf.min.js'
+);
 const recommendationScheduler=getRecommendationScheduler();
 app.locals.recommendationScheduler=recommendationScheduler;
 app.locals.recommendationCache=recommendationScheduler.getCacheManager();
+app.locals.tfjsVersion=tfjsPackage.version;
 const configuredSessionSecret=process.env.SESSION_SECRET || process.env.JWT_SECRET;
 const sessionSecret=configuredSessionSecret
   || (process.env.VERCEL==='1' ? crypto.randomBytes(32).toString('hex') : '');
@@ -48,6 +54,10 @@ app.set('views', path.join(__dirname, "views"));
 
 app.set('view engine','pug');
 
+app.get(`/assets/vendor/tfjs/${tfjsPackage.version}/tf.min.js`,(_req,res)=>{
+  res.set('Cache-Control','public, max-age=31536000, immutable');
+  return res.sendFile(tfjsBrowserBundle);
+});
 app.use(express.static(path.join(__dirname,'public')));
 
 app.locals.pathAdmin=variableconfig.pathAdmin;

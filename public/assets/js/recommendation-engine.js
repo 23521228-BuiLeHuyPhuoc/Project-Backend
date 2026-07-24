@@ -9,6 +9,7 @@
     root.tourRecommendationEngine=engine;
 
     const initialize=()=>{
+      void engine.load();
       engine.bindSessionTracking(root.document);
       void engine.enhancePage(root.document);
     };
@@ -266,7 +267,9 @@
       this.fetch=options.fetch || (typeof root.fetch==='function'
         ? root.fetch.bind(root)
         : null);
-      this.tf=options.tf || root.tf || null;
+      this.tf=Object.prototype.hasOwnProperty.call(options,'tf')
+        ? options.tf
+        : root.tf || null;
       this.storage=options.storage===undefined
         ? getSafeStorage()
         : options.storage;
@@ -281,10 +284,64 @@
       this.model=options.model || null;
       this.loaded=Boolean(this.model);
       this.loadPromise=null;
+      this.runtimeMode=this.model && this.tf
+        ? 'tensorflow'
+        : 'javascript-fallback';
+      this.lastRuntimeError=null;
+    }
+
+    getRuntimeStatus(){
+      let backend=null;
+      if(this.tf && typeof this.tf.getBackend==='function'){
+        try{
+          backend=this.tf.getBackend() || null;
+        }catch(error){
+          backend=null;
+        }
+      }
+      return {
+        mode:this.runtimeMode,
+        tensorflowAvailable:Boolean(
+          this.tf && typeof this.tf.loadLayersModel==='function'
+        ),
+        modelLoaded:Boolean(this.model),
+        backend,
+        error:this.lastRuntimeError
+      };
+    }
+
+    publishRuntimeStatus(){
+      const status=this.getRuntimeStatus();
+      if(root.document && root.document.documentElement){
+        root.document.documentElement.dataset.recommendationRuntime=status.mode;
+      }
+      if(root.document && typeof root.CustomEvent==='function'){
+        root.document.dispatchEvent(new root.CustomEvent(
+          'recommendations:runtime',
+          {detail:status}
+        ));
+      }
+      return status;
+    }
+
+    useFallback(error){
+      this.runtimeMode='javascript-fallback';
+      this.lastRuntimeError=error && error.message
+        ? error.message
+        : String(error || 'TensorFlow.js runtime is unavailable.');
+      if(root.document && root.console
+        && typeof root.console.warn==='function'){
+        root.console.warn(
+          'TensorFlow.js recommendation inference is unavailable; using the JavaScript scorer.',
+          error
+        );
+      }
+      this.publishRuntimeStatus();
     }
 
     async load(){
       if(this.loaded){
+        this.publishRuntimeStatus();
         return this;
       }
       if(this.loadPromise){
@@ -309,12 +366,21 @@
         }
         if(this.tf && typeof this.tf.loadLayersModel==='function'){
           try{
+            if(typeof this.tf.ready==='function'){
+              await this.tf.ready();
+            }
             this.model=await this.tf.loadLayersModel(this.modelUrl);
+            this.runtimeMode='tensorflow';
+            this.lastRuntimeError=null;
           }catch(error){
             this.model=null;
+            this.useFallback(error);
           }
+        }else{
+          this.useFallback(new Error('TensorFlow.js runtime is unavailable.'));
         }
         this.loaded=true;
+        this.publishRuntimeStatus();
         return this;
       })().finally(()=>{
         this.loadPromise=null;
@@ -376,9 +442,15 @@
           const prediction=this.model.predict(input);
           output=Array.isArray(prediction) ? prediction[0] : prediction;
           const values=await output.data();
+          if(values.length!==vectors.length){
+            throw new Error('TensorFlow.js returned an unexpected output shape.');
+          }
+          this.runtimeMode='tensorflow';
+          this.lastRuntimeError=null;
           return Array.from(values,clamp01);
         }catch(error){
-          // Fall through to the deterministic JavaScript scorer.
+          this.model=null;
+          this.useFallback(error);
         }finally{
           if(input && typeof input.dispose==='function'){
             input.dispose();

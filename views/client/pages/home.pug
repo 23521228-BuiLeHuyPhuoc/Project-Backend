@@ -40,7 +40,11 @@ block main
                                 | Địa Điểm Hot
                             .inner-suggest-list
                                 each item in hotDestinations
-                                    .inner-item(data-search-value=item.searchValue)
+                                    a.inner-item(
+                                        href=item.link
+                                        data-search-value=item.searchValue
+                                        aria-label=`Xem tour ${item.name}`
+                                    )
                                         .inner-item-image
                                             img(
                                                 alt=item.name
@@ -226,34 +230,21 @@ block main
                 data-aos="fade-up"
                 )
                 .swiper-wrapper
-                    .swiper-slide
-                        .inner-item
-                            a(href="#")
-                                img(
-                                    alt="" 
-                                    src="/assets/images/banner-1.png"
+                    each promotion in promotionBanners
+                        .swiper-slide
+                            .inner-item
+                                a(
+                                    href=promotion.href
+                                    aria-label=`${promotion.alt} - ${promotion.discountLabel}, mã ${promotion.code}`
+                                    title=`Lưu voucher ${promotion.code}`
                                     )
-                    .swiper-slide
-                        .inner-item
-                            a(href="#")
-                                img(
-                                    alt="" 
-                                    src="/assets/images/banner-2.png"
-                                    )
-                    .swiper-slide
-                        .inner-item
-                            a(href="#")
-                                img(
-                                    alt="" 
-                                    src="/assets/images/banner-3.png"
-                                    )
-                    .swiper-slide
-                        .inner-item
-                            a(href="#")
-                                img(
-                                    alt="" 
-                                    src="/assets/images/banner-3.png"
-                                    )
+                                    img(
+                                        alt=promotion.alt
+                                        src=promotion.image
+                                        )
+                                    span.inner-voucher-code
+                                        strong= promotion.discountLabel
+                                        |  · #{promotion.code}
                 .swiper-pagination
     // End Section 3   
     // Section 4

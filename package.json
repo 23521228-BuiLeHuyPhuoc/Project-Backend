@@ -6,9 +6,11 @@
   "scripts": {
     "start": "yarn nodemon --inspect index.js",
     "test": "node --test",
+    "seed:vouchers": "node scripts/seed-promotion-vouchers.js",
     "sync:tour-ratings": "node scripts/sync-tour-ratings.js"
   },
   "dependencies": {
+    "@tensorflow/tfjs": "4.22.0",
     "axios": "^1.13.6",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",

@@ -328,26 +328,63 @@ if(emailForm) {
 // Coupon Form
 const couponForm = document.querySelector("#coupon-form");
 if(couponForm) {
-  const validation = new JustValidate('#coupon-form');
+  const input=couponForm.querySelector('#voucher-code-input');
+  const button=couponForm.querySelector('button[type="submit"]');
+  const message=document.querySelector('[data-coupon-message]');
+  const discountElement=document.querySelector('[cart-discount]');
+  const totalElement=document.querySelector('[cart-total]');
+  const subTotalElement=document.querySelector('[cart-sub-total]');
+  const buttonLabel=button.textContent;
+  let appliedCode='';
 
-  validation
-    .addField('#voucher-code-input',[
-      {
-        rule:'required',
-        errorMessage:'Vui lòng nhập mã giảm giá!'
-      }
-    ])
-    .onSuccess(async(event) => {
-      const input=event.target.voucherCode;
-      const button=event.target.querySelector('button[type="submit"]');
-      const message=document.querySelector('[data-coupon-message]');
-      button.disabled=true;
+  const hideCouponMessage=()=>{
+    message.hidden=true;
+    message.textContent='';
+    message.classList.remove('is-error');
+  };
+
+  const showCouponMessage=(text,isError=false)=>{
+    message.textContent=text;
+    message.classList.toggle('is-error',isError);
+    message.hidden=false;
+  };
+
+  const resetCouponAmounts=()=>{
+    discountElement.textContent='0';
+    totalElement.textContent=subTotalElement.textContent;
+    appliedCode='';
+  };
+
+  input.addEventListener('input',()=>{
+    const currentCode=input.value.trim().toUpperCase();
+    if(!currentCode){
+      hideCouponMessage();
+      resetCouponAmounts();
+      return;
+    }
+    if(appliedCode && currentCode!==appliedCode){
+      hideCouponMessage();
+      resetCouponAmounts();
+    }
+  });
+
+  couponForm.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const voucherCode=input.value.trim().toUpperCase();
+    if(!voucherCode){
+      hideCouponMessage();
+      input.focus();
+      return;
+    }
+
+    button.disabled=true;
+    button.textContent='ĐANG ÁP DỤNG...';
 
       try{
         const response=await fetch('/cart/voucher',{
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({voucherCode:input.value})
+          body:JSON.stringify({voucherCode})
         });
         const data=await response.json();
         if(response.status===401 && data.redirect){
@@ -359,22 +396,20 @@ if(couponForm) {
         }
 
         input.value=data.voucherCode;
-        document.querySelector('[cart-discount]').textContent=Number(data.discount).toLocaleString('vi-VN');
-        document.querySelector('[cart-total]').textContent=Number(data.total).toLocaleString('vi-VN');
-        message.textContent=data.message;
-        message.classList.remove('is-error');
-        message.hidden=false;
+        appliedCode=String(data.voucherCode || '').toUpperCase();
+        discountElement.textContent=Number(data.discount).toLocaleString('vi-VN');
+        totalElement.textContent=Number(data.total).toLocaleString('vi-VN');
+        showCouponMessage(data.message);
       }
       catch(error){
-        message.textContent=error.message;
-        message.classList.add('is-error');
-        message.hidden=false;
+        resetCouponAmounts();
+        showCouponMessage(error.message,true);
       }
       finally{
         button.disabled=false;
+        button.textContent=buttonLabel;
       }
-    })
-  ;
+  });
 }
 // End Coupon Form
 

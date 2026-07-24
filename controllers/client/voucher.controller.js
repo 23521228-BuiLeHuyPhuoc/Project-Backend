@@ -14,8 +14,20 @@ const formatVoucher=voucher=>({
   endAtLabel:moment(voucher.endAt).format('DD/MM/YYYY')
 });
 
+const prioritizeFeaturedVoucher=(items,featuredCode,getCode)=>{
+  if(!featuredCode){
+    return items;
+  }
+  return [...items].sort((first,second)=>
+    Number(getCode(second)===featuredCode)-Number(getCode(first)===featuredCode)
+  );
+};
+
 module.exports.list=async(req,res)=>{
   const now=new Date();
+  const featuredVoucherCode=typeof req.query.code==='string'
+    ? req.query.code.trim().toUpperCase().slice(0,50)
+    : '';
   const [vouchers,wallet]=await Promise.all([
     Voucher.find({
       status:'active',
@@ -30,16 +42,31 @@ module.exports.list=async(req,res)=>{
   ]);
 
   const ownedIds=new Set(wallet.map(item=>String(item.voucherId && item.voucherId._id)));
+  const formattedWallet=wallet.filter(item=>item.voucherId).map(item=>({
+    ...item,
+    voucher:formatVoucher(item.voucherId),
+    isFeatured:item.voucherId.code===featuredVoucherCode
+  }));
+  const availableVouchers=vouchers
+    .filter(voucher=>!ownedIds.has(String(voucher._id)))
+    .map(voucher=>({
+      ...formatVoucher(voucher),
+      isFeatured:voucher.code===featuredVoucherCode
+    }));
+
   res.render('client/pages/account/vouchers',{
     pageTitle:'Ví voucher',
     activeAccountPage:'vouchers',
-    wallet:wallet.filter(item=>item.voucherId).map(item=>({
-      ...item,
-      voucher:formatVoucher(item.voucherId)
-    })),
-    availableVouchers:vouchers
-      .filter(voucher=>!ownedIds.has(String(voucher._id)))
-      .map(formatVoucher)
+    wallet:prioritizeFeaturedVoucher(
+      formattedWallet,
+      featuredVoucherCode,
+      item=>item.voucher.code
+    ),
+    availableVouchers:prioritizeFeaturedVoucher(
+      availableVouchers,
+      featuredVoucherCode,
+      voucher=>voucher.code
+    )
   });
 };
 

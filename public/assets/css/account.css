@@ -829,6 +829,29 @@
   filter: grayscale(0.7);
 }
 
+.account-voucher-card.is-featured {
+  scroll-margin-top: 110px;
+  border-color: #F2A51A;
+  box-shadow: 0 0 0 3px rgba(242, 165, 26, 0.18), 0 12px 28px rgba(86, 55, 14, 0.14);
+  animation: account-voucher-focus 0.75s ease-out both;
+}
+
+.account-voucher-card.is-featured::before,
+.account-voucher-card.is-featured::after {
+  border-color: #F2A51A;
+}
+
+@keyframes account-voucher-focus {
+  from { transform: translateY(8px); }
+  to { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-voucher-card.is-featured {
+    animation: none;
+  }
+}
+
 .account-voucher-value {
   display: flex;
   flex-direction: column;
