@@ -5,7 +5,7 @@ mixin recommendation-section(config)
     data-recommendation-section
     data-recommendation-endpoint=config.endpoint
     data-recommendation-source=config.source
-    data-contextual-rerank=config.contextualRerank === true ? 'true' : 'false'
+    data-contextual-rerank=config.contextualRerank === false ? 'false' : 'true'
     aria-labelledby=`${config.id}-title`
   )
     .container
